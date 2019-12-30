@@ -37,11 +37,12 @@ CONFIGVARS := $(shell cat $(BUILD_DIR)/arepoconfig.h)
 RESULT     := $(shell SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) ./git_version.sh)
 
 # Default
+MPICH_INCL =
 MPICH_LIB  = -lmpich
 GMP_LIB    = -lgmp
 GSL_LIB    = -lgsl -lgslcblas
 MATH_LIB   = -lm -lstdc++
-HWLOC_LIB = -lhwloc
+HWLOC_LIB  = -lhwloc
 
 
 # e.g. Mac OS using MacPorts modules for openmpi, fftw, gsl, hdf5 and hwloc
@@ -59,10 +60,33 @@ HWLOC_LIB = -L/opt/local/lib -lhwloc
 # libraries that are included on demand, depending on Config.sh options
 FFTW_INCL = -I/opt/local/include -I/usr/local/include
 FFTW_LIBS = -L/opt/local/lib -I/usr/local/lib
-HDF5_INCL = -I/opt/local/include -DH5_USE_16_API 
+HDF5_INCL = -I/opt/local/include -DH5_USE_16_API
 HDF5_LIB  = -L/opt/local/lib  -lhdf5 -lz
 HWLOC_INCL= -I/opt/local/include
 endif
+# end of Darwin
+
+# Ubuntu Linux
+ifeq ($(SYSTYPE),"Ubuntu")
+# compiler and its optimization options
+OPTIMIZE  =  -std=c11 -ggdb -O3 -Wall -Wno-format-security -Wno-unknown-pragmas -Wno-unused-function
+
+# overwrite default:
+MPICH_INCL= -I/usr/lib/x86_64-linux-gnu/openmpi/include/
+MPICH_LIB = -L/usr/lib/x86_64-linux-gnu/openmpi/lib/ -lmpi
+GSL_INCL  =
+GSL_LIB   = -lgsl -lgslcblas
+HWLOC_LIB = -lhwloc
+
+# libraries that are included on demand, depending on Config.sh options
+FFTW_INCL =
+FFTW_LIBS =
+HDF5_INCL = -I/usr/include/hdf5/serial/ -DH5_USE_16_API
+HDF5_LIB  = -L/usr/lib/x86_64-linux-gnu/hdf5/serial/ -lhdf5 -lz
+HWLOC_INCL=
+endif
+# end of Ubuntu
+
 
 # insert the library paths for your system here, similar to SYSTYPE "Darwin" above
 
@@ -197,7 +221,7 @@ INCL += debug_md5/Md5.h \
         time_integration/timestep.h \
         utils/dtypes.h \
         utils/generic_comm_helpers2.h \
-        utils/timer.h 
+        utils/timer.h
 
 ifeq (TWODIMS,$(findstring TWODIMS,$(CONFIGVARS)))
 OBJS    += mesh/voronoi/voronoi_2d.o
@@ -224,7 +248,7 @@ ifeq (COOLING,$(findstring COOLING,$(CONFIGVARS)))
 OBJS    += cooling/cooling.o
 INCL    += cooling/cooling_vars.h \
            cooling/cooling_proto.h
-SUBDIRS += cooling 
+SUBDIRS += cooling
 endif
 
 ifeq (FOF,$(findstring FOF,$(CONFIGVARS)))
@@ -271,20 +295,20 @@ endif
 FFTW_LIB =
 ifeq (PMGRID, $(findstring PMGRID, $(CONFIGVARS)))
 ifeq (DOUBLEPRECISION_FFTW,$(findstring DOUBLEPRECISION_FFTW,$(CONFIGVARS)))  # test for double precision libraries
-FFTW_LIB = $(FFTW_LIBS) -lfftw3 
+FFTW_LIB = $(FFTW_LIBS) -lfftw3
 else
-FFTW_LIB = $(FFTW_LIBS) -lfftw3f 
+FFTW_LIB = $(FFTW_LIBS) -lfftw3f
 endif
 endif
 
 ifneq (HAVE_HDF5,$(findstring HAVE_HDF5,$(CONFIGVARS)))
-HDF5_INCL = 
-HDF5_LIB = 
+HDF5_INCL =
+HDF5_LIB =
 endif
 
 ifneq (IMPOSE_PINNING,$(findstring IMPOSE_PINNING,$(CONFIGVARS)))
-HWLOC_INCL = 
-HWLOC_LIB = 
+HWLOC_INCL =
+HWLOC_LIB =
 endif
 
 
@@ -292,7 +316,7 @@ endif
 #combine compiler options#
 ##########################
 
-CFLAGS = $(OPTIMIZE) $(HDF5_INCL) $(GSL_INCL) $(FFTW_INCL) $(HWLOC_INCL) -I$(BUILD_DIR)
+CFLAGS = $(OPTIMIZE) $(MPICH_INCL) $(HDF5_INCL) $(GSL_INCL) $(FFTW_INCL) $(HWLOC_INCL) -I$(BUILD_DIR)
 
 LIBS = $(GMP_LIB) $(MATH_LIB) $(MPICH_LIB) $(HDF5_LIB) $(GSL_LIB) $(FFTW_LIB) $(HWLOC_LIB)
 
@@ -320,7 +344,7 @@ RESULT := $(shell mkdir -p $(SUBDIRS)  )
 #build rules#
 #############
 
-all: check build 
+all: check build
 
 build: $(EXEC)
 
@@ -356,7 +380,7 @@ check: $(CONFIG_CHECK)
 
 check_docs: $(DOCS_CHECK)
 
-$(CONFIG_CHECK): $(TO_CHECK) $(CONFIG) check.py 
+$(CONFIG_CHECK): $(TO_CHECK) $(CONFIG) check.py
 	@$(PYTHON) check.py 2 $(CONFIG) $(CONFIG_CHECK) defines_extra $(TO_CHECK)
 
 $(BUILD_DIR)/%.o.check: $(SRC_DIR)/%.c Template-Config.sh defines_extra check.py
@@ -388,4 +412,3 @@ $(BUILD_DIR)/Makefile.check: Makefile Template-Config.sh defines_extra check.py
 
 $(BUILD_DIR)/Config.check: Template-Config.sh check.py
 	@$(PYTHON) check.py 4 Template-Config.sh $@
-
