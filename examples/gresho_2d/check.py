@@ -45,6 +45,8 @@ DeltaMaxAllowed = 0.03 * (FloatType(CellsPerDimension) / 40.0)**-1.4
 
 """ loop over all output files """
 i_file = 0
+status = 0
+error_data = []
 while True:
     """ try to read in snapshot """
     directory = simulation_directory+"/output/"
@@ -112,6 +114,8 @@ while True:
     ## internal energy
     abs_delta_utherm = np.abs(Uthermal - Uthermal_ref)
     L1_utherm = np.average(abs_delta_utherm, weights = Volume)
+    
+    error_data.append(np.array([L1_dens, L1_vel, L1_utherm], dtype=FloatType))
 
     """ printing results """
     print("Gresho_2d: L1 error of " + filename +":")
@@ -177,9 +181,11 @@ while True:
     
     """ criteria for failing the test """
     if L1_dens > DeltaMaxAllowed or L1_vel > DeltaMaxAllowed or L1_utherm > DeltaMaxAllowed:
-        sys.exit(-1)
+        status = 1
     i_file += 1
-    
+
+np.savetxt(simulation_directory+"/error_%03d.txt"%CellsPerDimension, np.array(error_data, dtype=FloatType))
+
 print("normal exit")
 """ normal exit """
-sys.exit(0)
+sys.exit(status)

@@ -1,7 +1,7 @@
 """ @package ./examples/Gresho_2d/create.py
 Code that creates 2d Gresho vortex initial conditions
 
-created by Rainer Weinberger, last modified 21.02.2019 -- comments welcome
+created by Rainer Weinberger, last modified 20.03.2020 -- comments welcome
 """
 
 #### load libraries
@@ -19,7 +19,10 @@ FloatType = np.float64  # double precision: np.float64, for single use np.float3
 IntType = np.int32
 
 Boxsize = FloatType(1.0)
-CellsPerDimension = IntType(40)
+if len(sys.argv) > 3:
+    CellsPerDimension = IntType(sys.argv[3])
+else:
+    CellsPerDimension = IntType(40)
 
 ## parameters
 density_0 = 1.0

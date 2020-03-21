@@ -1,7 +1,7 @@
 """ @package ./examples/Yee_2d/check.py
 Code that checks results of 2d Yee vortex problem
 
-created by Rainer Weinberger, last modified 07.01.2018 -- comments welcome
+created by Rainer Weinberger, last modified 20.03.2020 -- comments welcome
 """
 
 #### load libraries
