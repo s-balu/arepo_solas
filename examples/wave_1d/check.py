@@ -49,6 +49,8 @@ uthermal_0 = pressure_0 / density_0 / gamma_minus_one
     solution equals the initial conditions
 """
 i_file = 0
+status = 0
+error_data = []
 while True:
     """ try to read in snapshot """
     directory = simulation_directory+"/output/"
@@ -96,9 +98,12 @@ while True:
     print("\t specific internal energy: %g" % L1_utherm)
     print("\t tolerance: %g for %d cells" % (DeltaMaxAllowed, NumberOfCells) )
     
+    error_data.append(np.array([L1_dens, L1_vel, L1_utherm], dtype=FloatType))
+    
+    
     """ criteria for failing the test """
     if L1_dens > DeltaMaxAllowed or L1_vel > DeltaMaxAllowed or L1_utherm > DeltaMaxAllowed:
-        sys.exit(1)
+        status = 1
     
     if makeplots and i_file > 0:
       if not os.path.exists( simulation_directory+"/plots" ):
@@ -134,6 +139,7 @@ while True:
       f.savefig( simulation_directory+"plots/velocity.pdf" )
     
     i_file += 1
+np.savetxt(simulation_directory+"/error_%d.txt"%NumberOfCells, np.array(error_data))
 
 """ normal exit """
-sys.exit(0) 
+sys.exit(status) 
