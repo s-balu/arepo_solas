@@ -1,7 +1,7 @@
 """ @package ./examples/current_sheet_2d/check.py
 Code that checks results of 2d current sheet problem
 
-created by Rainer Weinberger, last modified 13.03.2019
+created by Rainer Weinberger, last modified 03.07.2020
 """
 
 """ load libraries """
@@ -34,16 +34,6 @@ Boxsize = FloatType(data["Header"].attrs["BoxSize"])
 NumberOfCells = np.int32(data["Header"].attrs["NumPart_Total"][0]) 
 CellsPerDimension = np.sqrt(NumberOfCells) ## 2d sim
 
-## parameters for initial state
-density_0 = 1.0
-velocity_radial_0 = -1.0    ## radial inflow velocity
-pressure_0 = 1.0e-4
-gamma = 5./3.  ## note: this has to be consistent with the parameter settings for Arepo!
-utherm_0 = pressure_0 / ( gamma - 1.0 ) / density_0
-
-## maximum L1 error after one propagation; based on tests
-DeltaMaxAllowed = 0.1 * (FloatType(CellsPerDimension) / 150.0)**-1
-
 Time = []
 MagneticEnergy = []
 
@@ -61,19 +51,25 @@ while True:
     """ get simulation data """
     
     B = np.array(data["PartType0"]["MagneticField"], dtype = FloatType)
+    Mass = np.array(data["PartType0"]["Masses"], dtype = FloatType)
+    Density = np.array(data["PartType0"]["Density"], dtype = FloatType)
+    Volume = Mass/Density
     
     B2 = B[:,0]*B[:,0] + \
         B[:,1]*B[:,1] + \
         B[:,2]*B[:,2]
         
     Time.append( FloatType(data["Header"].attrs["Time"]) )
-    MagneticEnergy.append( np.sum(B2) / 8.0 / np.pi )
+    MagneticEnergy.append( np.sum(B2 * Volume) / 8.0 / np.pi )
     
     i_file += 1
     
 
 Time = np.array(Time)
 MagneticEnergy = np.array(MagneticEnergy)
+
+data= np.array([Time, MagneticEnergy]).T
+np.savetxt(simulation_directory+'/magnetic_energy_vs_time.txt', data)
 
 if makeplots:
     if not os.path.exists( simulation_directory+"/plots" ):
@@ -115,7 +111,7 @@ if makeplots:
         plt.close(fig)
 
 ## if everything is ok
-if np.min(MagneticEnergy/MagneticEnergy[0]) > 0.92:
+if np.min(MagneticEnergy/MagneticEnergy[0]) > 0.7:
     sys.exit(0)
 else:
     sys.exit(1)

@@ -124,7 +124,7 @@ def PlotSimulationData(Pos, W, gamma, i_snap, simulation_directory):
         ax[i_plot].set_xlim([0.5,0.9])
       
     ## set labels
-    ax[3].set_xlabel(r"pos")  
+    ax[3].set_xlabel(r"position")  
     ax[0].set_ylabel(r"density")
     ax[1].set_ylabel(r"velocity")
     ax[2].set_ylabel(r"spec. int. energy")
@@ -139,7 +139,7 @@ def PlotSimulationData(Pos, W, gamma, i_snap, simulation_directory):
     return 0
 
 simulation_directory = str(sys.argv[1])
-print("wave_1d: checking simulation output in directory " + simulation_directory) 
+print("interacting_blastwaves_1d: checking simulation output in directory " + simulation_directory) 
 
 ##parameters
 Dtype = np.float64  # double precision: np.float64, for single use np.float32

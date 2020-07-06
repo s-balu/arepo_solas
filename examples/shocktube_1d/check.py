@@ -93,10 +93,10 @@ def CheckTotalVariation(Pos, W, W_L, W_R, gamma, position_0, time):
     MaxRatioAllowed = 1.01
     if np.any( TotalVariationSim / TotalVariationExact > MaxRatioAllowed):
         print("CheckTotalVariation: ERROR: TotalVariation Sim/Exact: %g %g %g, tolerance: %g" % (TotalVariationSim[0] / TotalVariationExact[0], TotalVariationSim[1] / TotalVariationExact[1], TotalVariationSim[2] / TotalVariationExact[2], MaxRatioAllowed) )
-        return 1
+        return 1, TotalVariationSim / TotalVariationExact
     else:
         print("CheckTotalVariation: TotalVariation Sim/Exact fine: %g %g %g, tolerance: %g" % (TotalVariationSim[0] / TotalVariationExact[0], TotalVariationSim[1] / TotalVariationExact[1], TotalVariationSim[2] / TotalVariationExact[2], MaxRatioAllowed) )
-        return 0 
+        return 0, TotalVariationSim / TotalVariationExact
 
 
 def CheckWidthOfDiscontinuities(Pos, W, W_L, W_R, gamma, position_0, time):
@@ -116,6 +116,7 @@ def CheckWidthOfDiscontinuities(Pos, W, W_L, W_R, gamma, position_0, time):
     """
     xx, W_exact, PosOfCharacteristics = RiemannProblem(Pos, position_0, W_L, W_R, gamma, time)
     
+    jump_per_cell_list = np.zeros(5)
     for i, pos_char in enumerate(PosOfCharacteristics):
         ReturnFlag = 0
         ## PosOfCharacteristics will give different values in index 0 and 1 (3 and 4) 
@@ -139,6 +140,7 @@ def CheckWidthOfDiscontinuities(Pos, W, W_L, W_R, gamma, position_0, time):
         
         i_low = np.full(3, i_sorted[0], dtype=np.int32)
         i_high = np.full(3, i_sorted[0], dtype=np.int32)
+        max_jump_per_cell  = np.zeros(3, dtype=np.float64)
         
         ## check by how many cells 5th to 95th percentile of jump are sampled
         for j in np.arange(3):
@@ -146,21 +148,30 @@ def CheckWidthOfDiscontinuities(Pos, W, W_L, W_R, gamma, position_0, time):
                 i_low[j] -= 1
             while W[i_low[j],j] > percentile_05[j] and W[i_low[j],j] < percentile_95[j]:
                 i_high[j] += 1
-                
+        
+            # max fractional change between two cells
+            jump_cells = np.arange(np.min((i_low[j], i_high[j])), np.max((i_low[j], i_high[j]))+2)
+            dW = W[jump_cells, j]-W[jump_cells-1, j]
+            max_jump_per_cell[j] = np.max( dW / jump[j])
+        
         ## sufficient for exact Riemann solver
         MaxNumerOfCells = 4
-                
+        
+        
         if(i == 2):
             print("CheckWidthOfDiscontinuities: density jump at contact discontinuity resolved by %d cells (5th to 95th precentile), tolerance: %d" \
                   % (i_high[0]-i_low[0], MaxNumerOfCells) )
+            print("Contact density jump %g percent per cell"%(max_jump_per_cell[0]*100))
         else:
             print("CheckWidthOfDiscontinuities: density, velocity and pressure jump at shock resolved by %d, %d and %d cells (5th to 95th precentile), tolerance: %d" \
                   % (i_high[0]-i_low[0], i_high[1]-i_low[1], i_high[2]-i_low[2], MaxNumerOfCells) )
+            print("Shock jump %g %g %g percent per cell"%(max_jump_per_cell[0]*100, max_jump_per_cell[1]*100, max_jump_per_cell[2]*100))
         if np.any(i_high-i_low > MaxNumerOfCells):
             print("CheckWidthOfDiscontinuities: ERROR: discontinuity too wide!")
             ReturnFlag += 1
-    
-    return ReturnFlag
+        jump_per_cell_list[i] = max_jump_per_cell[0] #only record density jump
+    return ReturnFlag, jump_per_cell_list
+
 
 def PlotSimulationData(Pos, W, W_L, W_R, gamma, position_0, time, simulation_directory):
     """
@@ -235,7 +246,7 @@ def PlotSimulationData(Pos, W, W_L, W_R, gamma, position_0, time, simulation_dir
     return 0
 
 simulation_directory = str(sys.argv[1])
-print("wave_1d: checking simulation output in directory " + simulation_directory) 
+print("shocktube_1d: checking simulation output in directory " + simulation_directory) 
 
 Dtype = np.float64  # double precision: np.float64, for single use np.float32
 ## open initial conditiions to get parameters
@@ -264,6 +275,11 @@ position_0 = 0.5 * (IC_position[i_0[0]-1,0]+IC_position[i_0[0],0]) ## discontinu
 """ loop over all output files """
 i_file = -1
 ReturnFlag = 0
+
+time_arr = np.empty(shape=(0,1), dtype=np.float64)
+jump_arr = np.empty(shape=(0,5), dtype=np.float64) # 5 characteristics
+tv_arr = np.empty(shape=(0,3), dtype=np.float64)
+
 while True:
     i_file += 1
     
@@ -301,16 +317,27 @@ while True:
         print('ERROR: exceeding tolerance!')
         sys.exit(ReturnFlag)
         
-    ReturnFlag += CheckTotalVariation(position[:,0], W, W_L, W_R, gamma, position_0, time)
+    flag, tv = CheckTotalVariation(position[:,0], W, W_L, W_R, gamma, position_0, time)
+    ReturnFlag += flag
     if ReturnFlag > 0 and forceExitOnError:
         print('ERROR: exceeding tolerance!')
         sys.exit(ReturnFlag)
     
-    ReturnFlag += CheckWidthOfDiscontinuities(position[:,0], W, W_L, W_R, gamma, position_0, time)
+    flag, jump_per_cell_list = CheckWidthOfDiscontinuities(position[:,0], W, W_L, W_R, gamma, position_0, time)
+    ReturnFlag += flag
     if ReturnFlag > 0 and forceExitOnError:
         print('ERROR: exceeding tolerance!')
         sys.exit(ReturnFlag)
         
+    time_arr = np.concatenate((time_arr, np.array([time], ndmin=2).T), axis=0)
+    jump_arr = np.concatenate((jump_arr, np.array(jump_per_cell_list, ndmin=2)), axis=0)
+    tv_arr = np.concatenate((tv_arr, np.array(tv, ndmin=2)), axis=0)
+
+jump_arr = np.array(jump_arr, dtype=np.float64)
+tv_arr = np.array(tv_arr, dtype=np.float64)
+data = np.array([time_arr[:,0], jump_arr[:,2], jump_arr[:,3], tv_arr[:,0], tv_arr[:,1], tv_arr[:,2]])
+np.savetxt(simulation_directory+'/jumps_total_variation.txt', data.T)
+
 if ReturnFlag == 0:
     print("check.py: success!")
 else:

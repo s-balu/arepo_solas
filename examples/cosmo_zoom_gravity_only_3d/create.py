@@ -44,9 +44,9 @@ if os.path.exists( "{0}/../../../music".format(sys.path[0]) ):
   call(['cp','-r',"{0}/../../../music".format(sys.path[0]),simulation_directory+'/music'])
 else:
   print('CREATE: did not fine dir {0}/../../music, trying to clone from bitbucket.'.format(sys.path[0]))
-  status = call(['hg', 'clone', 'https://bitbucket.org/ohahn/music', simulation_directory+'/music'])
+  status = call(['git', 'clone', 'https://bitbucket.org/ohahn/music', simulation_directory+'/music'])
   if status != 0:
-      print('CREATE: ERROR: hg clone failed!')
+      print('CREATE: ERROR: git clone failed!')
       sys.exit(status)
 cwd = os.getcwd()
 os.chdir(simulation_directory+'/music/')

@@ -351,7 +351,7 @@ build: $(EXEC)
 $(EXEC): $(OBJS)
 	$(LINKER) $(OPTIMIZE) $(OBJS) $(LIBS) -o $(EXEC)
 
-lib$(LIBRARY).a: $(filter-out $(BUILD_DIR)/main.o,$(OBJS))
+lib$(LIBRARY).a: $(filter-out $(BUILD_DIR)/main/main.o,$(OBJS))
 	$(AR) -rcs lib$(LIBRARY).a $(OBJS)
 
 clean:

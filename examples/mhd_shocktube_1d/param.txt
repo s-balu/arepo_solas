@@ -37,7 +37,7 @@ TimeLimitCPU                          90000
 TimeBetStatistics                     0.005
 TimeBegin                             0.0
 TimeMax                               0.4
-TimeBetSnapshot                       0.2
+TimeBetSnapshot                       0.4
 
 UnitVelocity_in_cm_per_s              1.0
 UnitLength_in_cm                      1.0

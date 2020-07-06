@@ -2,7 +2,7 @@
 Code that creates 1d mhd shocktube initial conditions
 
 
-created by Rainer Weinberger, last modified 12.03.2019 -- comments welcome
+created by Rainer Weinberger, last modified 03.07.2020 -- comments welcome
 """
 
 """ load libraries """
@@ -19,20 +19,20 @@ FilePath = simulation_directory + '/IC.hdf5'
 FloatType = np.float64  # double precision: np.float64, for single use np.float32
 IntType = np.int32
 Boxsize = FloatType(2.5) # quadratic box
-NumberOfCells = IntType(400)
+NumberOfCells = IntType(300)
 
-alpha = np.pi
+alpha = 3.0
 
 ## parameters
 density_L = FloatType(1.0)
 velocity_L = FloatType(0.0)
 pressure_L = FloatType(1.0)
-b_L = np.array([1.0, 1.0, 0.0], dtype=FloatType)
+b_L = np.array([1.0, 1.0, 0.0], dtype=FloatType) * np.sqrt(4.0 * np.pi)
 
 density_R = FloatType(0.2)
 velocity_R = FloatType(0.0)
 pressure_R = FloatType(0.2)
-b_R = np.array([1.0, np.cos(alpha), np.sin(alpha)], dtype=FloatType)
+b_R = np.array([1.0, np.cos(alpha), np.sin(alpha)], dtype=FloatType) * np.sqrt(4.0 * np.pi)
 
 gamma = FloatType(5.0/3.0)
 gamma_minus_one = FloatType(gamma - 1.0)
@@ -66,7 +66,7 @@ Mass[i_right] = density_R*dx
 Velocity[i_right,0] = velocity_R
 Uthermal[i_right] = pressure_R/density_R/gamma_minus_one
 for dim in np.arange(3):
-    Bfield[:,dim] = b_R[dim]
+    Bfield[i_right,dim] = b_R[dim]
 
 
 """ write *.hdf5 file; minimum number of fields required by Arepo """

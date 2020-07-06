@@ -102,6 +102,7 @@ while True:
         ax.plot(Radius[i_sorted], Density_ref[i_sorted], 'k', label="Analytic solution")
         ax.plot(Radius, Density, 'b.', rasterized=True, ms=0.2)
         ax.set_ylabel(r"Density")
+        ax.set_xlim( 0.0, 0.9 )
         ax.set_ylim( 0, 20 )
       
         ax  = plt.axes( [0.65,0.70,0.20,0.25] )
@@ -114,6 +115,7 @@ while True:
         ax = plt.axes( [0.08,0.38,0.52,0.25] )
         ax.plot(Radius, vRad, 'b.', rasterized=True, ms=0.2)
         ax.set_ylabel(r"Radial velocity")
+        ax.set_xlim( 0.0, 0.9 )
         ax.set_ylim( -1.1, 1.1 )
         
         ax  = plt.axes( [0.65,0.38,0.20,0.25] )
@@ -127,6 +129,7 @@ while True:
         ax.plot(Radius, Uthermal, 'b.', rasterized=True, ms=0.2)
         ax.set_xlabel(r"Radius")
         ax.set_ylabel(r"Spec. internal energy")
+        ax.set_xlim( 0.0, 0.9 )
         ax.set_ylim( -0.05, 0.8 )
         
         ax  = plt.axes( [0.65,0.07,0.20,0.25] )

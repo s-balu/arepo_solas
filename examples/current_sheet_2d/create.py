@@ -3,7 +3,7 @@ Code that creates 2d current sheet initial conditions
 
 literature reference: Gardiner and Stone (2005), JCoPh.205..509G
 
-created by Rainer Weinberger, last modified 13.03.2019 -- comments welcome
+created by Rainer Weinberger, last modified 03.07.2020 -- comments welcome
 """
 
 """ load libraries """
@@ -31,7 +31,7 @@ vpert = 0.1
 pressure_0 = 0.1
 gamma = FloatType(5.0/3.0)
 gamma_minus_one = FloatType(gamma - 1.0)
-b0 = FloatType(1.0)
+b0 = FloatType(np.sqrt(4.0 * np.pi))
 
 
 """ set up grid """
