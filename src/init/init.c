@@ -171,8 +171,6 @@ int init(void)
     {
       P[i].Pos[1] = 0.0;
       P[i].Pos[2] = 0.0;
-      P[i].Vel[1] = 0.0;
-      P[i].Vel[2] = 0.0;
     }
 #endif /* #ifdef ONEDIMS */
 
@@ -180,7 +178,6 @@ int init(void)
   for(i = 0; i < NumPart; i++)
     {
       P[i].Pos[2] = 0;
-      P[i].Vel[2] = 0;
     }
 #endif /* #ifdef TWODIMS */
 
