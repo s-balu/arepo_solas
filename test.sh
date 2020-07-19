@@ -19,7 +19,7 @@ TESTS+="shocktube_1d "
 TESTS+="interacting_blastwaves_1d "
 TESTS+="mhd_shocktube_1d "
 TESTS+="polytrope_1d_spherical "
-TESTS+="alfwen_wave_1d "
+TESTS+="alfven_wave_1d "
 
 ## available 2d examples
 TESTS+="gresho_2d "
