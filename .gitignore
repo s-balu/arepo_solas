@@ -20,8 +20,8 @@ Arepo.dSYM
 *.pyc
 
 # param, Config, Makefile.systype
-param.txt
-Config.sh
+/param.txt
+/Config.sh
 Makefile.systype
 run.sh
 
