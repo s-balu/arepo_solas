@@ -74,12 +74,13 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "../main/allvars.h"
+#include "../main/proto.h"
+
+/* needs to be included after allvars.h */
 #ifdef OUTPUT_XDMF
 #include <libgen.h> /* for basename() function */
 #endif /* #ifdef OUTPUT_XDMF */
-
-#include "../main/allvars.h"
-#include "../main/proto.h"
 
 #include "../fof/fof.h"
 #include "../gitversion/version.h"
