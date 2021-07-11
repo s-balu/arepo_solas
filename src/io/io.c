@@ -2008,7 +2008,7 @@ static void write_xdmf(char *fname)
                                 {
                                   fprintf(f, "   <Attribute Name=\"%s\" AttributeType=\"Vector\" Center=\"Node\">\n", buf2);
                                   fprintf(f,
-                                          "    <DataItem Dimensions=\"%d\ 3\" NumberType=\"Float\" Precision=\"%d\" Format=\"HDF\">\n",
+                                          "    <DataItem Dimensions=\"%d 3\" NumberType=\"Float\" Precision=\"%d\" Format=\"HDF\">\n",
                                           header.npart[type], prec);
                                 }
 
