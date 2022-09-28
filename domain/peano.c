@@ -270,6 +270,14 @@ void reorder_gas(int *Id)
               SphP[dest] = SphPsource;
               Id[dest]   = idsource;
 
+/*new*/
+
+#ifdef BLACKHOLES
+              
+#endif
+
+/*new*/
+
               if(dest == i)
                 break;
 

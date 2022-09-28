@@ -489,6 +489,22 @@ void read_ic(const char *fname, int readTypes)
         SphP[i].Volume = P[i].Mass / SphP[i].Density;
     }
 
+/*new*/
+
+#ifdef BLACKHOLES
+  int j =0;
+  for(int i = 0, i<= NumPart; i++)
+    {
+      if(P[i].Type == 5)
+        {
+          P[i].BhID = j;
+          BhP[j].PID = i;
+          j++;
+        }
+    }
+#endif
+
+/*new*/
 
 
 
