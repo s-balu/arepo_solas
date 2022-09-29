@@ -625,15 +625,12 @@ void fill_write_buffer(void *buffer, enum iofields blocknr, int *startindex, int
                     break;
                   case A_PS:
 
-/*new*/
-
 #ifdef BLACKHOLES
                   case A_BH:
                     particle = pindex;
                     break;
 #endif
 
-/*new*/
 
                     terminate("Not good, trying to read into PS[]?\n");
                     break;
@@ -695,15 +692,12 @@ void fill_write_buffer(void *buffer, enum iofields blocknr, int *startindex, int
                     array_pos = PS + pindex;
                     break;
 
-/*new*/
 
 #ifdef BLACKHOLES
                   case A_BH:
                     array_pos = BhP + pindex;
                     break;
 #endif
-
-/*new*/
 
                   default:
                     terminate("ERROR in fill_write_buffer: Array not found!\n");

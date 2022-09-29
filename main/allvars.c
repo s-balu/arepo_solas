@@ -131,13 +131,9 @@ int NumPart; /*!< number of particles on the LOCAL processor */
 int NumGas;  /*!< number of gas particles on the LOCAL processor  */
 
 
-/*new*/
-
 #ifdef BLACKHOLES
 int NumBh;
 #endif
-
-/*new*/
 
 
 
@@ -242,14 +238,12 @@ struct subfind_data *PS;
 struct sph_particle_data *SphP, /*!< holds SPH particle data on local processor */
     *DomainSphBuf;              /*!< buffer for SPH particle data in domain decomposition */
 
-/*new*/
 
 #ifdef BLACKHOLES
 struct bh_particle_data *BhP,
     *DomainBhBuf;
 #endif 
 
-/*new*/
 
 #ifdef EXACT_GRAVITY_FOR_PARTICLE_TYPE
 struct special_particle_data *PartSpecialListGlobal;
