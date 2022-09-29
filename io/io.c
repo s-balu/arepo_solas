@@ -182,12 +182,12 @@ void init_field(enum iofields field, const char *label, const char *datasetname,
     {
       IO_Fields[N_IO_Fields].offset = (size_t)pointer_to_field - (size_t)PS;
     }
-
+#ifdef BLACKHOLES
   else if(array == A_BH)
     {
       IO_Fields[N_IO_Fields].offset = (size_t)pointer_to_field - (size_t)BhP;
     }
-
+#endif
   IO_Fields[N_IO_Fields].io_func = io_func;
 
   // validate types
@@ -623,15 +623,12 @@ void fill_write_buffer(void *buffer, enum iofields blocknr, int *startindex, int
                   case A_P:
                     particle = pindex;
                     break;
-                  case A_PS:
-
 #ifdef BLACKHOLES
                   case A_BH:
                     particle = pindex;
                     break;
 #endif
-
-
+                  case A_PS:
                     terminate("Not good, trying to read into PS[]?\n");
                     break;
                   default:
@@ -691,14 +688,11 @@ void fill_write_buffer(void *buffer, enum iofields blocknr, int *startindex, int
                   case A_PS:
                     array_pos = PS + pindex;
                     break;
-
-
 #ifdef BLACKHOLES
                   case A_BH:
                     array_pos = BhP + pindex;
                     break;
 #endif
-
                   default:
                     terminate("ERROR in fill_write_buffer: Array not found!\n");
                     break;
