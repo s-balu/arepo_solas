@@ -312,7 +312,10 @@ void reorder_particles(int *Id)
 
               P[dest]  = Psource;
               Id[dest] = idsource;
-
+#ifdef BLACKHOLES
+              if(P[dest].Type==5)
+                BhP[P[dest].BhID].PID = dest;
+#endif
               if(dest == i)
                 break;
 

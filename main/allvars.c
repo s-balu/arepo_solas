@@ -129,13 +129,9 @@ double EgyInjection;
 
 int NumPart; /*!< number of particles on the LOCAL processor */
 int NumGas;  /*!< number of gas particles on the LOCAL processor  */
-
-
 #ifdef BLACKHOLES
 int NumBh;
 #endif
-
-
 
 gsl_rng *random_generator;     /*!< a random number generator  */
 gsl_rng *random_generator_aux; /*!< an auxialiary random number generator for use if one doesn't want to influence the main code's

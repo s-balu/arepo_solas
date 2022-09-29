@@ -709,9 +709,6 @@ extern int FlagNyt;
 
 extern int NumPart; /*!< number of particles on the LOCAL processor */
 extern int NumGas;  /*!< number of gas particles on the LOCAL processor  */
-
-
-
 #ifdef BLACKHOLES
 extern int NumBh;
 #endif
@@ -884,26 +881,17 @@ extern struct global_data_all_processes
 {
   long long TotNumPart; /*!<  total particle numbers (global value) */
   long long TotNumGas;  /*!<  total gas particle number (global value) */
-
-
-
 #ifdef BLACKHOLES
   long long TotNumBh;
 #endif
-
-
 
   int MaxPart;    /*!< This gives the maxmimum number of particles that can be stored on one
                      processor. */
   int MaxPartSph; /*!< This gives the maxmimum number of SPH particles that can be stored on one
                      processor. */
-
-  
 #ifdef BLACKHOLES
   int MaxBh;
 #endif
-
-
 
 #if defined(COOLING)
   char TreecoolFile[MAXLEN_PATH];
@@ -1467,8 +1455,6 @@ extern struct sph_particle_data
 } * SphP,          /*!< holds SPH particle data on local processor */
     *DomainSphBuf; /*!< buffer for SPH particle data in domain decomposition */
 
-
-
 #ifdef BLACKHOLES
 extern struct bh_particle_data
 {
@@ -1479,11 +1465,8 @@ MyIDType PID;
 }  * BhP,          
     *DomainBhBuf; 
 
-#define BPP(i) = BhP[P(i).BhID]
-
+#define BPP(i) BhP[P[i].BhID]
 #endif 
-
-
 
 #ifdef EXACT_GRAVITY_FOR_PARTICLE_TYPE
 extern struct special_particle_data
@@ -1770,16 +1753,10 @@ enum iofields
   IO_SOFTENING,
   IO_TASK,
   IO_TIMEBIN_HYDRO,
-
-
-
 #ifdef BLACKHOLES
   IO_BHTEMPERATURE,
   IO_BHDENSITY,
 #endif  
-
-
-
   IO_LASTENTRY /* This should be kept - it signals the end of the list */
 };
 
@@ -1788,15 +1765,9 @@ enum arrays
   A_NONE,
   A_SPHP,
   A_P,
-
-
-
 #ifdef BLACKHOLES
   A_BH,
 #endif
-
-
-  
   A_PS
 
 };
