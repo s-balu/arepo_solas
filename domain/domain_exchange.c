@@ -109,6 +109,10 @@ void domain_exchange(void)
   int i, n, no, target;
   struct particle_data *partBuf;
   struct sph_particle_data *sphBuf;
+  #ifdef BLACKHOLES
+  struct bh_particle_data *bhBuf;
+  int *count_bh, *offset_bh, *count_recv_bh, *offset_recv_bh;
+  #endif
 
   peanokey *keyBuf;
 
@@ -157,7 +161,10 @@ void domain_exchange(void)
 
   partBuf = (struct particle_data *)mymalloc_movable(&partBuf, "partBuf", count_togo * sizeof(struct particle_data));
   sphBuf  = (struct sph_particle_data *)mymalloc_movable(&sphBuf, "sphBuf", count_togo_sph * sizeof(struct sph_particle_data));
-
+#ifdef BLACKHOLES
+  bhBuf  = (struct bh_particle_data *)myalloc_movable(&bhBuf, "bhBuf", count_togo_bh * sizeof(struct bh_particle_data));
+#endif
+  
   keyBuf = (peanokey *)mymalloc_movable(&keyBuf, "keyBuf", count_togo * sizeof(peanokey));
 
   for(i = 0; i < NTask; i++)
@@ -204,7 +211,10 @@ void domain_exchange(void)
             {
               P[n]          = P[NumGas - 1];
               P[NumGas - 1] = P[NumPart - 1];
-
+#ifdef BLACKHOLES
+              if(P[NumPart-1].Type==5)
+                BhP[P[NumPart-1].BhID].PID = NumGas - 1;
+#endif
               Key[n]          = Key[NumGas - 1];
               Key[NumGas - 1] = Key[NumPart - 1];
 
@@ -215,6 +225,10 @@ void domain_exchange(void)
           else
             {
               P[n]   = P[NumPart - 1];
+#ifdef BLACKHOLES
+              if(P[NumPart-1].Type == 5)
+                BhP[P[NumPart-1].BhID].PID = n;
+#endif
               Key[n] = Key[NumPart - 1];
             }
 
