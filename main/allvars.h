@@ -1213,19 +1213,12 @@ extern struct global_data_all_processes
   double CoreRadius;
 #endif /* #ifdef ONEDIMS_SPHERICAL */
 
-
-
   double GlobalDisplacementVector[3];
-
-
 
 #ifdef BLACKHOLES
   int BlackHoleParameter;
 #endif
-
-
-
-} All;
+include } All;
 
 /*****************************************************************************
  ** particle data ************************************************************
@@ -1293,14 +1286,9 @@ extern struct particle_data
   signed char TimeBinGrav;
   signed char TimeBinHydro;
 
-
-
 #ifdef BLACKHOLES
   MyIDType BhID;
 #endif
-
-
-
 } * P,              /*!< holds particle data on local processor */
     *DomainPartBuf; /*!< buffer for particle data used in domain decomposition */
 
@@ -1462,7 +1450,7 @@ double Density;
 double Temperature;
 MyIDType PID;
 
-}  * BhP,          
+}  *BhP,          
     *DomainBhBuf; 
 
 #define BPP(i) BhP[P[i].BhID]

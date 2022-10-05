@@ -188,6 +188,7 @@ void init_field(enum iofields field, const char *label, const char *datasetname,
       IO_Fields[N_IO_Fields].offset = (size_t)pointer_to_field - (size_t)BhP;
     }
 #endif
+  
   IO_Fields[N_IO_Fields].io_func = io_func;
 
   // validate types

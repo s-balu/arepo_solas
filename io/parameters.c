@@ -506,7 +506,6 @@ void read_parameter_file(char *fname)
       id[nt++] = REAL;
 #endif /* #ifdef ONEDIMS_SPHERICAL */
 
-
 #ifdef BLACKHOLES
       strcpy(tag[nt], "BlackHoleParameter");
       addr[nt] = &All.BlackHoleParameter;

@@ -764,15 +764,11 @@ void init_io_fields()
 #endif /* #if defined(REFINEMENT_HIGH_RES_GAS) */
 
 #ifdef BLACKHOLES
-
   init_field(IO_BHTEMPERATURE, "BHT ", "BlackHoleTemperature", MEM_DOUBLE, FILE_MY_IO_FLOAT, FILE_MY_IO_FLOAT, 1, A_BH, &BhP[0].Temperature, 0,
              BHS_ONLY);
   init_units(IO_BHTEMPERATURE, 0., 0., 0., 0., 0., 0);
   
   init_field(IO_BHDENSITY, "BHD ", "BlackHoleDensity", MEM_DOUBLE, FILE_MY_IO_FLOAT, FILE_MY_IO_FLOAT, 1, A_BH, &BhP[0].Density, 0, BHS_ONLY);
   init_units(IO_BHDENSITY, 0., 0., 0., 0., 0., 0);
-
 #endif
-
-
 }

@@ -234,7 +234,6 @@ struct subfind_data *PS;
 struct sph_particle_data *SphP, /*!< holds SPH particle data on local processor */
     *DomainSphBuf;              /*!< buffer for SPH particle data in domain decomposition */
 
-
 #ifdef BLACKHOLES
 struct bh_particle_data *BhP,
     *DomainBhBuf;

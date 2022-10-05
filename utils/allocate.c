@@ -91,12 +91,10 @@ void allocate_memory(void)
   mpi_printf("ALLOCATE: initial allocation for MaxPartSph = %d\n", All.MaxPartSph);
   SphP = (struct sph_particle_data *)mymalloc_movable(&SphP, "SphP", All.MaxPartSph * sizeof(struct sph_particle_data));
 
-  
-
-  #ifdef BLACKHOLES
+#ifdef BLACKHOLES
   mpi_printf("ALLOCATE: initial allocation for MaxBh = %d\n", All.MaxBh);
   BhP=(struct bh_particle_data *)mymalloc_movable(&BhP, "BhP", All.MaxBh*sizeof(struct bh_particle_data));
-  #endif
+#endif
 
   
 
@@ -111,14 +109,9 @@ void allocate_memory(void)
   /* set to zero */
   memset(P, 0, All.MaxPart * sizeof(struct particle_data));
   memset(SphP, 0, All.MaxPartSph * sizeof(struct sph_particle_data));
-  
-
-
-  #ifdef BLACKHOLES
+#ifdef BLACKHOLES
   memset(BhP, 0, All.MaxBh * sizeof(struct bh_particle_data));
-  #endif 
-
-  
+#endif   
 }
 
 /*! \brief Reallocates memory for particle data.
@@ -148,7 +141,6 @@ void reallocate_memory_maxpartsph(void)
   SphP = (struct sph_particle_data *)myrealloc_movable(SphP, All.MaxPartSph * sizeof(struct sph_particle_data));
   timebins_reallocate(&TimeBinsHydro);
 }
-
 
 #ifdef BLACKHOLES
 void reallocate_memory_maxbh(void)

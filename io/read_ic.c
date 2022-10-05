@@ -147,7 +147,6 @@ void read_ic(const char *fname, int readTypes)
     {
       NumPart = 0;
       NumGas  = 0;
-
 #ifdef BLACKHOLES
       NumBh  = 0;
 #endif
@@ -224,7 +223,6 @@ void read_ic(const char *fname, int readTypes)
           int max_load, max_sphload, max_bhload;
           MPI_Allreduce(&NumPart, &max_load, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
           MPI_Allreduce(&NumGas, &max_sphload, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
-
 #ifdef BLACKHOLES
           MPI_Allreduce(&NumBh, &max_bhload, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
 #endif
@@ -236,7 +234,6 @@ void read_ic(const char *fname, int readTypes)
 
           All.MaxPart    = max_load / (1.0 - 2 * ALLOC_TOLERANCE);
           All.MaxPartSph = max_sphload / (1.0 - 2 * ALLOC_TOLERANCE);
-
 #ifdef BLACKHOLES
           All.MaxBh = max_bhload / (1.0-2*ALLOC_TOLERANCE);
 #endif
@@ -621,13 +618,10 @@ void empty_read_buffer(enum iofields blocknr, int offset, int pc, int type)
               case A_P:
                 particle = offset + n;
                 break;
-
 #ifdef BLACKHOLES
               case A_BH:
                 break;
 #endif
-
-
               case A_PS:
                 terminate("Not good, trying to read into PS[]?\n");
                 break;
@@ -677,13 +671,11 @@ void empty_read_buffer(enum iofields blocknr, int offset, int pc, int type)
               case A_P:
                 array_pos = P + offset + n;
                 break;
-
 #ifdef BLACKHOLES
               case A_BH:
                 array_pos = BhP + offset + n;
                 break;
 #endif
-
               case A_PS:
                 terminate("Not good, trying to read into PS[]?\n");
                 break;
@@ -906,7 +898,6 @@ void share_particle_number_in_file(const char *fname, int filenr, int readTask, 
           All.TotNumPart += header.npartTotal[type];
           All.TotNumPart += (((long long)header.npartTotalHighWord[type]) << 32);
         }
-
 #ifdef BLACKHOLES
       All.TotNumBh += header.npartTotal[5] + (((long long)header.npartTotalHighWord[5]) << 32);
 #endif
@@ -978,12 +969,10 @@ void share_particle_number_in_file(const char *fname, int filenr, int readTask, 
 
       if(type == 0)
         NumGas += n_for_this_task;
-
 #ifdef BLACKHOLES
       if(type==5)
         NumBh += n_for_this_task;
 #endif
-
     }
 
   if(ThisTask == readTask)
@@ -1443,15 +1432,11 @@ void read_file(const char *fname, int filenr, int readTask, int lastTask, int re
 
       if(type == 0)
         NumGas += n_for_this_task;
-
 #ifdef BLACKHOLES
       if(type == 5)
         NumBh += n_for_this_task;
-    }
 #endif
-
-
-
+    }
 
   if(ThisTask == readTask)
     {

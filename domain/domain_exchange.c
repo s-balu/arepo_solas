@@ -109,10 +109,10 @@ void domain_exchange(void)
   int i, n, no, target;
   struct particle_data *partBuf;
   struct sph_particle_data *sphBuf;
-  #ifdef BLACKHOLES
-  struct bh_particle_data *bhBuf;
+#ifdef BLACKHOLES
   int *count_bh, *offset_bh, *count_recv_bh, *offset_recv_bh;
-  #endif
+  struct bh_particle_data *bhBuf;
+ #endif
 
   peanokey *keyBuf;
 
