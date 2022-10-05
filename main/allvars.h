@@ -1218,7 +1218,7 @@ extern struct global_data_all_processes
 #ifdef BLACKHOLES
   int BlackHoleParameter;
 #endif
-include } All;
+} All;
 
 /*****************************************************************************
  ** particle data ************************************************************
