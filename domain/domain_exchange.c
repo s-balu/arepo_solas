@@ -173,6 +173,12 @@ void domain_exchange(void)
       offset_sph[i] = offset_sph[i - 1] + toGoSph[i - 1];
       decrease[i]   = toGoSph[i - 1];
     }
+#ifdef BLACKHOLES
+  for(i = 1, offset_bh[0] = 0; i < NTask; i++)
+    {
+      offset_bh[i] = offset_bh[i - 1] + toGoBh[i - 1];
+    }
+#endif
 
   prec_offset = offset_sph[NTask - 1] + toGoSph[NTask - 1];
 
