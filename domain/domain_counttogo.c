@@ -57,6 +57,9 @@ int domain_countToGo(void)
     {
       toGo[n]    = 0;
       toGoSph[n] = 0;
+#ifdef BLACKHOLES
+      toGoBh[n]  = 0;
+#endif
     }
 
   for(int n = 0; n < NumPart; n++)

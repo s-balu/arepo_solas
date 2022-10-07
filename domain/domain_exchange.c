@@ -327,11 +327,18 @@ void domain_exchange(void)
     {
       count_recv_sph[i] = toGetSph[i];
       count_recv[i]     = toGet[i] - toGetSph[i];
+#ifdef BLACKHOLES
+      count_recv_bh[i]  = toGetBh[i];
+#endif
     }
 
   int prec_count;
   for(i = 1, offset_recv_sph[0] = NumGas; i < NTask; i++)
     offset_recv_sph[i] = offset_recv_sph[i - 1] + count_recv_sph[i - 1];
+#ifdef BLACKHOLES
+  for(i = 1, offset_recv_bh[0] = NumBh; i < NTask; i++)
+    offset_recv_bh[i] = offset_recv_bh[i - 1] + count_recv_bh[i - 1];
+#endif
   prec_count = NumGas + count_get_sph;
 
   offset_recv[0] = NumPart - NumGas + prec_count;
