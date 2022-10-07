@@ -74,11 +74,17 @@ int domain_countToGo(void)
 
           if(P[n].Type == 0)
             toGoSph[DomainTask[no]] += 1;
+#ifdef BLACKHOLES
+          if(P[n].Type == 5)
+            toGoBh[DomainTask[no]] += 1;
+#endif
         }
     }
 
   MPI_Alltoall(toGo, 1, MPI_INT, toGet, 1, MPI_INT, MPI_COMM_WORLD);
   MPI_Alltoall(toGoSph, 1, MPI_INT, toGetSph, 1, MPI_INT, MPI_COMM_WORLD);
-
+#ifdef BLACKHOLES
+  MPI_Alltoall(toGoBh, 1, MPI_INT, toGetBh, 1, MPI_INT, MPI_COMM_WORLD);
+#endif
   return 0;
 }

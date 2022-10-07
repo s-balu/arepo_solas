@@ -245,10 +245,14 @@ void domain_exchange(void)
               count_sph[target]++;
             }
 #ifdef BLACKHOLES
-          if(P[n].Type == 5)
+          else if(P[n].Type == 5)
             {
               bhBuf[offset_bh[target] + count_bh[target]] = BhP[P[n].BhID];
-              count_bh[target]++;  
+              partBuf[offset[target] + count[target]] = P[n];
+              keyBuf[offset[target] + count[target]]  = Key[n];
+              
+              count_bh[target]++;
+              count[target]++;  
             }
 #endif
           else
@@ -282,6 +286,8 @@ void domain_exchange(void)
               P[n] = P[NumPart-1];
               if(P[NumPart-1].Type == 5)
                 BhP[P[NumPart-1].BhID].PID = n;
+
+              Key[n] = Key[NumPart - 1];
               
               NumBh--;
             }
