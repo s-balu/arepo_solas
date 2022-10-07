@@ -92,12 +92,11 @@ void allocate_memory(void)
   SphP = (struct sph_particle_data *)mymalloc_movable(&SphP, "SphP", All.MaxPartSph * sizeof(struct sph_particle_data));
 
 #ifdef BLACKHOLES
-  mpi_printf("ALLOCATE: initial allocation for MaxBh = %d\n", All.MaxBh);
-  BhP=(struct bh_particle_data *)mymalloc_movable(&BhP, "BhP", All.MaxBh*sizeof(struct bh_particle_data));
+  mpi_printf("ALLOCATE: initial allocation for MaxPartBh = %d\n", All.MaxPartBh);
+  BhP=(struct bh_particle_data *)mymalloc_movable(&BhP, "BhP", All.MaxPartBh*sizeof(struct bh_particle_data));
 #endif
 
   
-
 #ifdef EXACT_GRAVITY_FOR_PARTICLE_TYPE
   PartSpecialListGlobal = (struct special_particle_data *)mymalloc_movable(&PartSpecialListGlobal, "PartSpecialListGlobal",
                                                                            All.MaxPartSpecial * sizeof(struct special_particle_data));
@@ -110,7 +109,7 @@ void allocate_memory(void)
   memset(P, 0, All.MaxPart * sizeof(struct particle_data));
   memset(SphP, 0, All.MaxPartSph * sizeof(struct sph_particle_data));
 #ifdef BLACKHOLES
-  memset(BhP, 0, All.MaxBh * sizeof(struct bh_particle_data));
+  memset(BhP, 0, All.MaxPartBh * sizeof(struct bh_particle_data));
 #endif   
 }
 
@@ -143,11 +142,11 @@ void reallocate_memory_maxpartsph(void)
 }
 
 #ifdef BLACKHOLES
-void reallocate_memory_maxbh(void)
+void reallocate_memory_maxpartbh(void)
 {
-  mpi_printf("ALLOCATE: Changing to MaxBh= %d\n", All.MaxBh);
+  mpi_printf("ALLOCATE: Changing to MaxPartBh= %d\n", All.MaxPartBh);
 
-  BhP = (struct bh_particle_data *)myrealloc_movable(BhP, All.MaxBh * sizeof(struct bh_particle_data));
+  BhP = (struct bh_particle_data *)myrealloc_movable(BhP, All.MaxPartBh * sizeof(struct bh_particle_data));
 }
 #endif
 

@@ -890,7 +890,7 @@ extern struct global_data_all_processes
   int MaxPartSph; /*!< This gives the maxmimum number of SPH particles that can be stored on one
                      processor. */
 #ifdef BLACKHOLES
-  int MaxBh;
+  int MaxPartBh;
 #endif
 
 #if defined(COOLING)

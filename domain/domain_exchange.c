@@ -92,6 +92,29 @@ void domain_resize_storage(int count_get, int count_get_sph, int option_flag)
     }
 }
 
+#ifdef BLACKHOLES
+void domain_resize_storage_bh(int count_get_bh, int option_flag)
+{
+  int bhload        = NumBh + count_get_bh;
+  int loc_data_bh   = bhload;
+  int res_bh;
+
+  MPI_Allreduce(loc_data_bh, res_bh, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+
+  int max_bhload    = res_bh;
+
+  if(max_bhload > (1.0 - ALLOC_TOLERANCE) * All.MaxPartBh || max_load < (1.0 - 3 * ALLOC_TOLERANCE) * All.MaxPartBh)
+    {
+      All.MaxPartBh = max_bhload / (1.0 - 2 * ALLOC_TOLERANCE);
+      reallocate_memory_maxpartbh();
+/*
+      if(option_flag == 1)
+        Key = (peanokey *)myrealloc_movable(Key, sizeof(peanokey) * All.MaxPart);
+*/
+    }
+}
+#endif
+
 /*! \brief Exchanges particles and cells according to new domain decomposition.
  *
  *  Communicates particles and cells to their new task. P and SphP arrays are
@@ -110,9 +133,11 @@ void domain_exchange(void)
   struct particle_data *partBuf;
   struct sph_particle_data *sphBuf;
 #ifdef BLACKHOLES
-  int *count_bh, *offset_bh, *count_recv_bh, *offset_recv_bh;
+  int count_togo_bh = 0, count_get_bh = 0;
+  int *count_bh, *offset_bh;
+  int *count_recv_bh, *offset_recv_bh;
   struct bh_particle_data *bhBuf;
- #endif
+#endif
 
   peanokey *keyBuf;
 
@@ -131,6 +156,12 @@ void domain_exchange(void)
   count_recv_sph  = (int *)mymalloc_movable(&count_recv_sph, "count_recv_sph", NTask * sizeof(int));
   offset_recv     = (int *)mymalloc_movable(&offset_recv, "offset_recv", NTask * sizeof(int));
   offset_recv_sph = (int *)mymalloc_movable(&offset_recv_sph, "offset_recv_sph", NTask * sizeof(int));
+#ifdef BLACKHOLES
+  count_bh        = (int *)mymalloc_movable(&count_bh, "count_bh", NTask * sizeof(int));
+  offset_bh       = (int *)mymalloc_movable(&offset_bh, "offset_bh", NTask * sizeof(int));
+  count_recv_bh   = (int *)mymalloc_movable(&count_recv_bh, "count_recv_bh", NTask * sizeof(int));
+  offset_recv_bh  = (int *)mymalloc_movable(&offset_recv_bh, "offset_recv_bh", NTask * sizeof(int));
+#endif
 
   int prec_offset;
   int *decrease;
@@ -157,6 +188,10 @@ void domain_exchange(void)
       count_togo_sph += toGoSph[i];
       count_get += toGet[i];
       count_get_sph += toGetSph[i];
+#ifdef BLACKHOLES
+      count_togo_bh += toGoBh[i];
+      count_get_bh += toGetBh[i];
+#endif
     }
 
   partBuf = (struct particle_data *)mymalloc_movable(&partBuf, "partBuf", count_togo * sizeof(struct particle_data));
@@ -170,6 +205,9 @@ void domain_exchange(void)
   for(i = 0; i < NTask; i++)
     {
       count[i] = count_sph[i] = 0;
+#ifdef BLACKHOLES
+      count_bh[i] = 0;
+#endif
     }
 
   for(n = 0; n < NumPart; n++)
@@ -200,6 +238,13 @@ void domain_exchange(void)
               sphBuf[offset_sph[target] + count_sph[target]]  = SphP[n];
               count_sph[target]++;
             }
+#ifdef BLACKHOLES
+          if(P[n].Type == 5)
+            {
+              bhBuf[offset_bh[target] + count_bh[target]] = BhP[P[n].BhID];
+              count_bh[target]++;  
+            }
+#endif
           else
             {
               partBuf[offset[target] + count[target]] = P[n];
@@ -222,6 +267,19 @@ void domain_exchange(void)
 
               NumGas--;
             }
+#ifdef BLACKHOLES
+          if(P[n].Type == 5)
+            {
+              BhP[P[n].BhID] = BhP[NumBh-1];
+              P[BhP[NumBh-1].PID].BhID = P[n].BhID; 
+
+              P[n] = P[NumPart-1];
+              if(P[NumPart-1].Type == 5)
+                BhP[P[NumPart-1].BhID].PID = n;
+              
+              NumBh--;
+            }
+#endif
           else
             {
               P[n]   = P[NumPart - 1];
@@ -240,6 +298,9 @@ void domain_exchange(void)
 
   /**** now resize the storage for the P[] and SphP[] arrays if needed ****/
   domain_resize_storage(count_get, count_get_sph, 1);
+#ifdef BLACKHOLES
+  domain_resize_storage_bh(count_get_bh, 1);
+#endif
 
   /*****  space has been created, now can do the actual exchange *****/
   int count_totget = count_get_sph;
