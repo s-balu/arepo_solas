@@ -370,6 +370,22 @@ void domain_exchange(void)
                            Key + offset_recv_sph[target], count_recv_sph[target] * sizeof(peanokey), MPI_BYTE, target, TAG_KEY_SPH,
                            MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             }
+#ifdef BLACKHOLES
+if(count_bh[target] > 0 || count_recv_bh[target] > 0)
+            {
+              MPI_Sendrecv(partBuf + offset_sph[target], count_sph[target] * sizeof(struct particle_data), MPI_BYTE, target,
+                           TAG_PDATA_SPH, P + offset_recv_sph[target], count_recv_sph[target] * sizeof(struct particle_data), MPI_BYTE,
+                           target, TAG_PDATA_SPH, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+              MPI_Sendrecv(bhBuf + offset_bh[target], count_bh[target] * sizeof(struct bh_particle_data), MPI_BYTE, target,
+                           TAG_BHDATA, BhP + offset_recv_bh[target], count_recv_bh[target] * sizeof(struct bh_particle_data),
+                           MPI_BYTE, target, TAG_BHDATA, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+              MPI_Sendrecv(keyBuf + offset_sph[target], count_sph[target] * sizeof(peanokey), MPI_BYTE, target, TAG_KEY_SPH,
+                           Key + offset_recv_sph[target], count_recv_sph[target] * sizeof(peanokey), MPI_BYTE, target, TAG_KEY_SPH,
+                           MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            }
+#endif
 
           if(count[target] > 0 || count_recv[target] > 0)
             {
