@@ -373,20 +373,11 @@ void domain_exchange(void)
 #ifdef BLACKHOLES
 if(count_bh[target] > 0 || count_recv_bh[target] > 0)
             {
-              MPI_Sendrecv(partBuf + offset_sph[target], count_sph[target] * sizeof(struct particle_data), MPI_BYTE, target,
-                           TAG_PDATA_SPH, P + offset_recv_sph[target], count_recv_sph[target] * sizeof(struct particle_data), MPI_BYTE,
-                           target, TAG_PDATA_SPH, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
               MPI_Sendrecv(bhBuf + offset_bh[target], count_bh[target] * sizeof(struct bh_particle_data), MPI_BYTE, target,
                            TAG_BHDATA, BhP + offset_recv_bh[target], count_recv_bh[target] * sizeof(struct bh_particle_data),
                            MPI_BYTE, target, TAG_BHDATA, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-              MPI_Sendrecv(keyBuf + offset_sph[target], count_sph[target] * sizeof(peanokey), MPI_BYTE, target, TAG_KEY_SPH,
-                           Key + offset_recv_sph[target], count_recv_sph[target] * sizeof(peanokey), MPI_BYTE, target, TAG_KEY_SPH,
-                           MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             }
 #endif
-
           if(count[target] > 0 || count_recv[target] > 0)
             {
               MPI_Sendrecv(partBuf + offset[target], count[target] * sizeof(struct particle_data), MPI_BYTE, target, TAG_PDATA,
@@ -423,7 +414,13 @@ if(count_bh[target] > 0 || count_recv_bh[target] > 0)
               MPI_Irecv(Key + offset_recv_sph[target], count_recv_sph[target] * sizeof(peanokey), MPI_BYTE, target, TAG_KEY_SPH,
                         MPI_COMM_WORLD, &requests[n_requests++]);
             }
-
+#ifdef BLACKHOLES
+          if(count_recv_bh[target] > 0)
+            {
+              MPI_Irecv(BhP + offset_recv_bh[target], count_recv_bh[target] * sizeof(struct bh_particle_data), MPI_BYTE, target,
+                        TAG_BHDATA, MPI_COMM_WORLD, &requests[n_requests++]);
+            }
+#endif
           if(count_recv[target] > 0)
             {
               MPI_Irecv(P + offset_recv[target], count_recv[target] * sizeof(struct particle_data), MPI_BYTE, target, TAG_PDATA,
@@ -456,7 +453,13 @@ if(count_bh[target] > 0 || count_recv_bh[target] > 0)
               MPI_Isend(keyBuf + offset_sph[target], count_sph[target] * sizeof(peanokey), MPI_BYTE, target, TAG_KEY_SPH,
                         MPI_COMM_WORLD, &requests[n_requests++]);
             }
-
+#ifdef BLACKHOLES
+          if(count_bh[target] > 0)
+            {
+              MPI_Isend(bhBuf + offset_bh[target], count_bh[target] * sizeof(struct bh_particle_data), MPI_BYTE, target,
+                        TAG_BHDATA, MPI_COMM_WORLD, &requests[n_requests++]);
+            }
+#endif
           if(count[target] > 0)
             {
               MPI_Isend(partBuf + offset[target], count[target] * sizeof(struct particle_data), MPI_BYTE, target, TAG_PDATA,
@@ -482,6 +485,11 @@ if(count_bh[target] > 0 || count_recv_bh[target] > 0)
 
   myMPI_Alltoallv(keyBuf, count_sph, offset_sph, Key, count_recv_sph, offset_recv_sph, sizeof(peanokey), 0, MPI_COMM_WORLD);
 
+#ifdef BLACKHOLES
+ myMPI_Alltoallv(bhBuf, count_bh, offset_bh, BhP, count_recv_bh, offset_recv_bh, sizeof(struct bh_particle_data), 0,
+                  MPI_COMM_WORLD);
+#endif
+
   myMPI_Alltoallv(partBuf, count, offset, P, count_recv, offset_recv, sizeof(struct particle_data), 0, MPI_COMM_WORLD);
 
   myMPI_Alltoallv(keyBuf, count, offset, Key, count_recv, offset_recv, sizeof(peanokey), 0, MPI_COMM_WORLD);
@@ -491,6 +499,9 @@ if(count_bh[target] > 0 || count_recv_bh[target] > 0)
 
   NumPart += count_get;
   NumGas += count_get_sph;
+#ifdef BLACKHOLES
+  NumBh += count_get_bh;
+#endif
 
   myfree(keyBuf);
   myfree(sphBuf);
@@ -503,6 +514,13 @@ if(count_bh[target] > 0 || count_recv_bh[target] > 0)
   myfree(offset);
   myfree(count_sph);
   myfree(count);
+#ifdef BLACKHOLES
+  myfree(bhBuf);
+  myfree(offset_recv_bh);
+  myfree(count_recv_bh);
+  myfree(offset_bh);
+  myfree(count_bh);
+#endif
 
   double t1 = second();
   mpi_printf("DOMAIN: exchange of %lld particles done. (took %g sec)\n", sumtogo, timediff(t0, t1));
