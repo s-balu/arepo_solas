@@ -93,7 +93,7 @@ void domain_resize_storage(int count_get, int count_get_sph, int option_flag)
 }
 
 #ifdef BLACKHOLES
-void domain_resize_storage_bh(int count_get_bh, int option_flag)
+void domain_resize_storage_bh(int count_get_bh)
 {
   int bhload        = NumBh + count_get_bh;
   int loc_data_bh   = bhload;
@@ -107,10 +107,6 @@ void domain_resize_storage_bh(int count_get_bh, int option_flag)
     {
       All.MaxPartBh = max_bhload / (1.0 - 2 * ALLOC_TOLERANCE);
       reallocate_memory_maxpartbh();
-/*
-      if(option_flag == 1)
-        Key = (peanokey *)myrealloc_movable(Key, sizeof(peanokey) * All.MaxPart);
-*/
     }
 }
 #endif
@@ -311,7 +307,7 @@ void domain_exchange(void)
   /**** now resize the storage for the P[] and SphP[] arrays if needed ****/
   domain_resize_storage(count_get, count_get_sph, 1);
 #ifdef BLACKHOLES
-  domain_resize_storage_bh(count_get_bh, 1);
+  domain_resize_storage_bh(count_get_bh);
 #endif
 
   /*****  space has been created, now can do the actual exchange *****/
