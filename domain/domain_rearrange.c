@@ -101,6 +101,10 @@ void domain_rearrange_particle_sequence(void)
 
             P[NumGas - 1]   = P[NumPart - 1];
             Key[NumGas - 1] = Key[NumPart - 1];
+#ifdef BLACKHOLES
+            if (P[NumGas - 1].Type == 5)
+              BhP[P[NumGas - 1].BhID].PID = NumGas - 1;
+#endif
 
             NumGas--;
             count_gaselim++;
