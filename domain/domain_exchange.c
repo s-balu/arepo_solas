@@ -493,11 +493,21 @@ if(count_bh[target] > 0 || count_recv_bh[target] > 0)
 #endif /* #ifndef USE_MPIALLTOALLV_IN_DOMAINDECOMP #else */
        /* close block of myMPI_Alltoallv communications */
 
-  NumPart += count_get;
-  NumGas += count_get_sph;
 #ifdef BLACKHOLES
+  for(int i = NumPart + count_get_sph, j=NumBh; i < Numpart + count_get; i++)
+    { 
+      if(P[i].Type == 5)
+        P[i].BhID = j;  
+        BhP[j].PID = i;
+        j++;
+    }
+  
   NumBh += count_get_bh;
 #endif
+
+  NumPart += count_get;
+  NumGas += count_get_sph;
+
 
   myfree(keyBuf);
   myfree(sphBuf);
