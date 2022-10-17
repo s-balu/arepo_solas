@@ -110,6 +110,10 @@ void domain_allocate_lists(void)
  */
 void domain_free_lists(void)
 {
+#ifdef BLACKHOLES
+  myfree(toGetBh);
+  myfree(toGoBh);
+#endif
   myfree(DomainLeaveNode);
   myfree(list_worksph);
   myfree(list_work);
@@ -121,8 +125,4 @@ void domain_free_lists(void)
   myfree(toGet);
   myfree(toGoSph);
   myfree(toGo);
-#ifdef BLACKHOLES
-  myfree(toGetBh);
-  myfree(toGoBh);
-#endif
 }

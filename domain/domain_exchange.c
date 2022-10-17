@@ -511,7 +511,13 @@ if(count_bh[target] > 0 || count_recv_bh[target] > 0)
   NumPart += count_get;
   NumGas += count_get_sph;
 
-
+#ifdef BLACKHOLES
+  myfree(bhBuf);
+  myfree(offset_recv_bh);
+  myfree(count_recv_bh);
+  myfree(offset_bh);
+  myfree(count_bh);
+#endif
   myfree(keyBuf);
   myfree(sphBuf);
   myfree(partBuf);
@@ -523,13 +529,6 @@ if(count_bh[target] > 0 || count_recv_bh[target] > 0)
   myfree(offset);
   myfree(count_sph);
   myfree(count);
-#ifdef BLACKHOLES
-  myfree(bhBuf);
-  myfree(offset_recv_bh);
-  myfree(count_recv_bh);
-  myfree(offset_bh);
-  myfree(count_bh);
-#endif
 
   double t1 = second();
   mpi_printf("DOMAIN: exchange of %lld particles done. (took %g sec)\n", sumtogo, timediff(t0, t1));
