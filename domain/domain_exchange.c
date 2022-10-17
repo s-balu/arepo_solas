@@ -512,6 +512,7 @@ if(count_bh[target] > 0 || count_recv_bh[target] > 0)
   NumPart += count_get;
   NumGas += count_get_sph;
 
+  myfree(keyBuf);
 #ifdef BLACKHOLES
   myfree(bhBuf);
   myfree(offset_recv_bh);
@@ -519,7 +520,6 @@ if(count_bh[target] > 0 || count_recv_bh[target] > 0)
   myfree(offset_bh);
   myfree(count_bh);
 #endif
-  myfree(keyBuf);
   myfree(sphBuf);
   myfree(partBuf);
   myfree(offset_recv_sph);
