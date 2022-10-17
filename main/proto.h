@@ -524,6 +524,9 @@ void mpi_distribute_items_to_tasks(void *data, int task_offset, int *n_items, in
 void tile_ics(void);
 void reallocate_memory_maxpart(void);
 void reallocate_memory_maxpartsph(void);
+#ifdef BLACKHOLES
+void reallocate_memory_maxpartbh(void);
+#endif
 
 void share_particle_number_in_file(const char *fname, int filenr, int readTask, int lastTask, int readTypes);
 int dump_memory_table_buffer(char *p);

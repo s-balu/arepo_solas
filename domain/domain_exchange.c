@@ -95,15 +95,15 @@ void domain_resize_storage(int count_get, int count_get_sph, int option_flag)
 #ifdef BLACKHOLES
 void domain_resize_storage_bh(int count_get_bh)
 {
-  int bhload        = NumBh + count_get_bh;
-  int loc_data_bh   = bhload;
-  int res_bh;
+  int bhload          = NumBh + count_get_bh;
+  int loc_data_bh[1]  = {bhload};
+  int res_bh[1];
 
   MPI_Allreduce(loc_data_bh, res_bh, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
 
-  int max_bhload    = res_bh;
+  int max_bhload    = res_bh[0];
 
-  if(max_bhload > (1.0 - ALLOC_TOLERANCE) * All.MaxPartBh || max_load < (1.0 - 3 * ALLOC_TOLERANCE) * All.MaxPartBh)
+  if(max_bhload > (1.0 - ALLOC_TOLERANCE) * All.MaxPartBh || max_bhload < (1.0 - 3 * ALLOC_TOLERANCE) * All.MaxPartBh)
     {
       All.MaxPartBh = max_bhload / (1.0 - 2 * ALLOC_TOLERANCE);
       reallocate_memory_maxpartbh();
@@ -199,7 +199,7 @@ void domain_exchange(void)
   partBuf = (struct particle_data *)mymalloc_movable(&partBuf, "partBuf", count_togo * sizeof(struct particle_data));
   sphBuf  = (struct sph_particle_data *)mymalloc_movable(&sphBuf, "sphBuf", count_togo_sph * sizeof(struct sph_particle_data));
 #ifdef BLACKHOLES
-  bhBuf  = (struct bh_particle_data *)myalloc_movable(&bhBuf, "bhBuf", count_togo_bh * sizeof(struct bh_particle_data));
+  bhBuf  = (struct bh_particle_data *)mymalloc_movable(&bhBuf, "bhBuf", count_togo_bh * sizeof(struct bh_particle_data));
 #endif
   
   keyBuf = (peanokey *)mymalloc_movable(&keyBuf, "keyBuf", count_togo * sizeof(peanokey));
@@ -494,12 +494,15 @@ if(count_bh[target] > 0 || count_recv_bh[target] > 0)
        /* close block of myMPI_Alltoallv communications */
 
 #ifdef BLACKHOLES
-  for(int i = NumPart + count_get_sph, j=NumBh; i < Numpart + count_get; i++)
+  for(int i = NumPart + count_get_sph, j=NumBh; i < NumPart + count_get; i++)
     { 
       if(P[i].Type == 5)
-        P[i].BhID = j;  
-        BhP[j].PID = i;
-        j++;
+        {
+          P[i].BhID = j;  
+          BhP[j].PID = i;
+          j++;
+        }
+          
     }
   
   NumBh += count_get_bh;
