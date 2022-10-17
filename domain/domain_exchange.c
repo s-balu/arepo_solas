@@ -305,10 +305,11 @@ void domain_exchange(void)
     }     /* n < NumPart */
 
   /**** now resize the storage for the P[] and SphP[] arrays if needed ****/
-  domain_resize_storage(count_get, count_get_sph, 1);
 #ifdef BLACKHOLES
   domain_resize_storage_bh(count_get_bh);
 #endif
+  domain_resize_storage(count_get, count_get_sph, 1);
+
 
   /*****  space has been created, now can do the actual exchange *****/
   int count_totget = count_get_sph;
