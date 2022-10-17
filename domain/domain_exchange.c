@@ -515,13 +515,15 @@ if(count_bh[target] > 0 || count_recv_bh[target] > 0)
   myfree(keyBuf);
 #ifdef BLACKHOLES
   myfree(bhBuf);
+#endif
+  myfree(sphBuf);
+  myfree(partBuf);
+#ifdef BLACKHOLES
   myfree(offset_recv_bh);
   myfree(count_recv_bh);
   myfree(offset_bh);
   myfree(count_bh);
 #endif
-  myfree(sphBuf);
-  myfree(partBuf);
   myfree(offset_recv_sph);
   myfree(offset_recv);
   myfree(count_recv_sph);
