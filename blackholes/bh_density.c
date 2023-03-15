@@ -96,7 +96,7 @@ static void particle2in(data_in *in, int i, int firstnode)
   in->Pos[0] = P[i].Pos[0];
   in->Pos[1] = P[i].Pos[1];
   in->Pos[2] = P[i].Pos[2];
-  in->Hsml   = SphP[i].Hsml;
+  in->Hsml   = BhP[i].Hsml;
 #ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES
   in->ID = P[i].ID;
 #endif /* #ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES */
@@ -136,9 +136,9 @@ static void out2particle(data_out *out, int i, int mode)
   if(mode == MODE_LOCAL_PARTICLES) /* initial store */
     {
       NumNgb[i] = out->Ngb;
-      if(P[i].Type == 0)
+      if(P[i].Type == 5)
         {
-          SphP[i].Density       = out->Rho;
+          BhP[i].Density       = out->Rho;
           DhsmlDensityFactor[i] = out->DhsmlDensity;
 #ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES
           MinDist[i] = out->MinDist;
@@ -148,9 +148,9 @@ static void out2particle(data_out *out, int i, int mode)
   else /* combine */
     {
       NumNgb[i] += out->Ngb;
-      if(P[i].Type == 0)
+      if(P[i].Type == 5)
         {
-          SphP[i].Density += out->Rho;
+          BhP[i].Density += out->Rho;
           DhsmlDensityFactor[i] += out->DhsmlDensity;
 #ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES
           if(MinDist[i] > out->MinDist)
@@ -290,11 +290,11 @@ void density(void)
 
           if(density_isactive(i))
             {
-              if(P[i].Type == 0)
+              if(P[i].Type == 5)
                 {
-                  if(SphP[i].Density > 0)
+                  if(BhP[i].Density > 0)
                     {
-                      DhsmlDensityFactor[i] *= SphP[i].Hsml / (NUMDIMS * SphP[i].Density);
+                      DhsmlDensityFactor[i] *= BhP[i].Hsml / (NUMDIMS * BhP[i].Density);
                       if(DhsmlDensityFactor[i] > -0.9) /* note: this would be -1 if only a single particle at zero lag is found */
                         DhsmlDensityFactor[i] = 1 / (1 + DhsmlDensityFactor[i]);
                       else
@@ -317,28 +317,28 @@ void density(void)
                       }
 
                   if(NumNgb[i] < (desnumngb - All.MaxNumNgbDeviation))
-                    Left[i] = dmax(SphP[i].Hsml, Left[i]);
+                    Left[i] = dmax(BhP[i].Hsml, Left[i]);
                   else
                     {
                       if(Right[i] != 0)
                         {
-                          if(SphP[i].Hsml < Right[i])
-                            Right[i] = SphP[i].Hsml;
+                          if(BhP[i].Hsml < Right[i])
+                            Right[i] = BhP[i].Hsml;
                         }
                       else
-                        Right[i] = SphP[i].Hsml;
+                        Right[i] = BhP[i].Hsml;
                     }
 
                   if(iter >= MAXITER - 10)
                     {
                       printf("i=%d task=%d ID=%d Hsml=%g Left=%g Right=%g Ngbs=%g Right-Left=%g\n   pos=(%g|%g|%g)\n", i, ThisTask,
-                             (int)P[i].ID, SphP[i].Hsml, Left[i], Right[i], (float)NumNgb[i], Right[i] - Left[i], P[i].Pos[0],
+                             (int)P[i].ID, BhP[i].Hsml, Left[i], Right[i], (float)NumNgb[i], Right[i] - Left[i], P[i].Pos[0],
                              P[i].Pos[1], P[i].Pos[2]);
                       myflush(stdout);
                     }
 
                   if(Right[i] > 0 && Left[i] > 0)
-                    SphP[i].Hsml = pow(0.5 * (pow(Left[i], 3) + pow(Right[i], 3)), 1.0 / 3);
+                    BhP[i].Hsml = pow(0.5 * (pow(Left[i], 3) + pow(Right[i], 3)), 1.0 / 3);
                   else
                     {
                       if(Right[i] == 0 && Left[i] == 0)
@@ -346,12 +346,12 @@ void density(void)
 
                       if(Right[i] == 0 && Left[i] > 0)
                         {
-                          SphP[i].Hsml *= 1.26;
+                          BhP[i].Hsml *= 1.26;
                         }
 
                       if(Right[i] > 0 && Left[i] == 0)
                         {
-                          SphP[i].Hsml /= 1.26;
+                          BhP[i].Hsml /= 1.26;
                         }
                     }
                 }
@@ -385,14 +385,14 @@ void density(void)
   int count2    = 0;
   int countall2 = 0;
 
-  for(i = 0; i < NumGas; i++)
+  for(i = 0; i < NumBh; i++)
     {
       /*
        * If the distance to the border of a particle is too small,
        * then the ghost particle will be too close to this particle.
        * Therefore we shift the particle in this case into the direction of the box center.
        */
-      if(distance_to_border(i) < 0.5 * 0.001 * SphP[i].Hsml)
+      if(distance_to_border(i) < 0.5 * 0.001 * BhP[i].Hsml)
         {
           count2++;
 
@@ -409,9 +409,9 @@ void density(void)
           dir[1] /= n;
           dir[2] /= n;
 
-          P[i].Pos[0] += 0.05 * SphP[i].Hsml * dir[0];
-          P[i].Pos[1] += 0.05 * SphP[i].Hsml * dir[1];
-          P[i].Pos[2] += 0.05 * SphP[i].Hsml * dir[2];
+          P[i].Pos[0] += 0.05 * BhP[i].Hsml * dir[0];
+          P[i].Pos[1] += 0.05 * BhP[i].Hsml * dir[1];
+          P[i].Pos[2] += 0.05 * BhP[i].Hsml * dir[2];
         }
     }
 
@@ -421,25 +421,25 @@ void density(void)
 
   int count = 0, countall;
 
-  for(i = 0; i < NumGas; i++)
-    if(MinDist[i] < 0.001 * SphP[i].Hsml)
+  for(i = 0; i < NumBh; i++)
+    if(MinDist[i] < 0.001 * BhP[i].Hsml)
       count++;
 
   MPI_Allreduce(&count, &countall, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 
   if(countall)
     {
-      mpi_printf("\nFOUND %d SPH particles with an extremely close neighbor. Fixing this. \n\n", countall);
+      mpi_printf("\nFOUND %d BhP particles with an extremely close neighbor. Fixing this. \n\n", countall);
 
-      for(i = 0; i < NumGas; i++)
-        if(MinDist[i] < 0.001 * SphP[i].Hsml)
+      for(i = 0; i < NumBh; i++)
+        if(MinDist[i] < 0.001 * BhP[i].Hsml)
           {
             double theta = acos(2 * get_random_number() - 1);
             double phi   = 2 * M_PI * get_random_number();
 
-            P[i].Pos[0] += 0.1 * SphP[i].Hsml * sin(theta) * cos(phi);
-            P[i].Pos[1] += 0.1 * SphP[i].Hsml * sin(theta) * sin(phi);
-            P[i].Pos[2] += 0.1 * SphP[i].Hsml * cos(theta);
+            P[i].Pos[0] += 0.1 * BhP[i].Hsml * sin(theta) * cos(phi);
+            P[i].Pos[1] += 0.1 * BhP[i].Hsml * sin(theta) * sin(phi);
+            P[i].Pos[2] += 0.1 * BhP[i].Hsml * cos(theta);
           }
     }
 #endif /* #ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES */
@@ -628,7 +628,7 @@ int density_isactive(int n)
   if(P[n].TimeBinHydro < 0)
     return 0;
 
-  if(P[n].Type == 0)
+  if(P[n].Type == 5)
     return 1;
 
   return 0;

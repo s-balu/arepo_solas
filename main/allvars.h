@@ -1448,6 +1448,7 @@ extern struct bh_particle_data
 {
 double Density;
 double Temperature;
+MySingle Hsml;
 MyIDType PID;
 
 }  *BhP,          
