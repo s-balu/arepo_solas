@@ -60,6 +60,7 @@
 
 
 static int bh_density_evaluate(int target, int mode, int threadid);
+static int bh_density_isactive(int n);
 
 static MyFloat *BhNumNgb, *BhDhsmlDensityFactor;
 
@@ -229,7 +230,7 @@ static MyFloat *BhNumNgb, *BhDhsmlDensityFactor;
 void bh_density(void)
 {
   MyFloat *Left, *Right;
-  int idx, i, npleft, iter = 0;
+  int idx, npleft, iter = 0;
   long long ntot;
   double desnumngb, t0, t1;
 
@@ -290,8 +291,8 @@ void bh_density(void)
                   if(BhP[i].Density > 0)
                     {
                       DhsmlDensityFactor[i] *= BhP[i].Hsml / (NUMDIMS * BhP[i].Density);
-                      if(DhsmlDensityFactor[i] > -0.9) /* note: this would be -1 if only a single particle at zero lag is found */
-/*                        DhsmlDensityFactor[i] = 1 / (1 + DhsmlDensityFactor[i]);
+                      if(DhsmlDensityFactor[i] > -0.9)  note: this would be -1 if only a single particle at zero lag is found 
+                        DhsmlDensityFactor[i] = 1 / (1 + DhsmlDensityFactor[i]);
                       else
                         DhsmlDensityFactor[i] = 1;
                     }
@@ -562,11 +563,10 @@ static int bh_density_evaluate(int target, int mode, int threadid)
  */
 int bh_density_isactive(int n)
 {
-  if(BhP[n].mark < 0)
+  if(NumBh==0)
+    return 0;
+  if(BhP[n].mark <= 0)
     return 0;
 
-/*  if(P[n].Type == 5)
-    return 1;
-*/
   return 1;
 }
