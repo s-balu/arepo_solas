@@ -1335,7 +1335,7 @@ void ngb_treeallocate(void)
 {
   if(Ngb_MaxPart == 0)
     {
-      Ngb_MaxPart  = All.MaxPartSph;
+      Ngb_MaxPart  = All.MaxPart;
       Ngb_MaxNodes = (int)(All.NgbTreeAllocFactor * (All.MaxPartSph + BASENUMBER)) + NTopnodes;
     }
 

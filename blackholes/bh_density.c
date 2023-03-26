@@ -58,12 +58,10 @@
 
 #include "../domain/domain.h"
 
-static int density_evaluate(int target, int mode, int threadid);
 
-static MyFloat *NumNgb, *DhsmlDensityFactor;
-#ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES
-static MyFloat *MinDist;
-#endif /* #ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES */
+static int bh_density_evaluate(int target, int mode, int threadid);
+
+static MyFloat *BhNumNgb, *BhDhsmlDensityFactor;
 
 /*! \brief Local data structure for collecting particle/cell data that is sent
  *         to other processors if needed. Type called data_in and static
@@ -73,10 +71,6 @@ typedef struct
 {
   MyDouble Pos[3];
   MyFloat Hsml;
-#ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES
-  MyIDType ID;
-#endif /* #ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES */
-
   int Firstnode;
 } data_in;
 
@@ -93,13 +87,10 @@ static data_in *DataIn, *DataGet;
  */
 static void particle2in(data_in *in, int i, int firstnode)
 {
-  in->Pos[0] = P[i].Pos[0];
-  in->Pos[1] = P[i].Pos[1];
-  in->Pos[2] = P[i].Pos[2];
+  in->Pos[0] = P[BhP[i].PID].Pos[0];
+  in->Pos[1] = P[BhP[i].PID].Pos[1];
+  in->Pos[2] = P[BhP[i].PID].Pos[2];
   in->Hsml   = BhP[i].Hsml;
-#ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES
-  in->ID = P[i].ID;
-#endif /* #ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES */
 
   in->Firstnode = firstnode;
 }
@@ -113,9 +104,6 @@ typedef struct
   MyFloat Rho;
   MyFloat DhsmlDensity;
   MyFloat Ngb;
-#ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES
-  MyFloat MinDist;
-#endif /* #ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES */
 } data_out;
 
 static data_out *DataResult, *DataOut;
@@ -135,28 +123,25 @@ static void out2particle(data_out *out, int i, int mode)
 {
   if(mode == MODE_LOCAL_PARTICLES) /* initial store */
     {
-      NumNgb[i] = out->Ngb;
-      if(P[i].Type == 5)
+      BhNumNgb[i] = out->Ngb;
+/*      if(P[i].Type == 5)
         {
-          BhP[i].Density       = out->Rho;
-          DhsmlDensityFactor[i] = out->DhsmlDensity;
-#ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES
-          MinDist[i] = out->MinDist;
-#endif /* #ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES */
-        }
+*/
+      BhP[i].Density       = out->Rho;
+      BhDhsmlDensityFactor[i] = out->DhsmlDensity;
+/*        }
+*/
     }
   else /* combine */
     {
-      NumNgb[i] += out->Ngb;
-      if(P[i].Type == 5)
+      BhNumNgb[i] += out->Ngb;
+/*      if(P[i].Type == 5)
         {
-          BhP[i].Density += out->Rho;
-          DhsmlDensityFactor[i] += out->DhsmlDensity;
-#ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES
-          if(MinDist[i] > out->MinDist)
-            MinDist[i] = out->MinDist;
-#endif /* #ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES */
-        }
+*/
+      BhP[i].Density += out->Rho;
+      BhDhsmlDensityFactor[i] += out->DhsmlDensity;
+/*        }
+*/
     }
 }
 
@@ -185,15 +170,19 @@ static void kernel_local(void)
 
         idx = NextParticle++;
 
-        if(idx >= TimeBinsHydro.NActiveParticles)
-          break;
+       /*if(idx >= TimeBinsHydro.NActiveParticles)
+         break;
 
         int i = TimeBinsHydro.ActiveParticleList[idx];
         if(i < 0)
           continue;
 
-        if(density_isactive(i))
-          density_evaluate(i, MODE_LOCAL_PARTICLES, threadid);
+        if(density_isactive(i))*/
+        
+        if(idx >= NumBh)
+          break;
+        if(bh_density_isactive(idx))
+          bh_density_evaluate(idx, MODE_LOCAL_PARTICLES, threadid);
       }
   }
 }
@@ -218,15 +207,12 @@ static void kernel_imported(void)
         if(i >= Nimport)
           break;
 
-        density_evaluate(i, MODE_IMPORTED_PARTICLES, threadid);
+        bh_density_evaluate(i, MODE_IMPORTED_PARTICLES, threadid);
       }
   }
 }
 
-static MyFloat *NumNgb, *DhsmlDensityFactor;
-#ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES
-static MyFloat *MinDist;
-#endif /* #ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES */
+static MyFloat *BhNumNgb, *BhDhsmlDensityFactor;
 
 /*! \brief Main function of SPH density calculation.
  *
@@ -240,7 +226,7 @@ static MyFloat *MinDist;
  *
  *  \return void
  */
-void density(void)
+void bh_density(void)
 {
   MyFloat *Left, *Right;
   int idx, i, npleft, iter = 0;
@@ -249,16 +235,12 @@ void density(void)
 
   CPU_Step[CPU_MISC] += measure_time();
 
-  NumNgb             = (MyFloat *)mymalloc("NumNgb", NumPart * sizeof(MyFloat));
-  DhsmlDensityFactor = (MyFloat *)mymalloc("DhsmlDensityFactor", NumPart * sizeof(MyFloat));
-  Left               = (MyFloat *)mymalloc("Left", NumPart * sizeof(MyFloat));
-  Right              = (MyFloat *)mymalloc("Right", NumPart * sizeof(MyFloat));
+  BhNumNgb             = (MyFloat *)mymalloc("BhNumNgb", NumBh * sizeof(MyFloat));
+  BhDhsmlDensityFactor = (MyFloat *)mymalloc("BhDhsmlDensityFactor", NumBh * sizeof(MyFloat));
+  Left               = (MyFloat *)mymalloc("Left", NumBh * sizeof(MyFloat));
+  Right              = (MyFloat *)mymalloc("Right", NumBh * sizeof(MyFloat));
 
-#ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES
-  MinDist = (MyFloat *)mymalloc("MinDist", NumPart * sizeof(MyFloat));
-#endif /* #ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES */
-
-  for(idx = 0; idx < TimeBinsHydro.NActiveParticles; idx++)
+/*  for(idx = 0; idx < TimeBinsHydro.NActiveParticles; idx++)
     {
       i = TimeBinsHydro.ActiveParticleList[idx];
       if(i < 0)
@@ -269,6 +251,19 @@ void density(void)
           Left[i] = Right[i] = 0;
         }
     }
+*/
+
+  for(idx=0; idx<NumBh; idx++)
+  {
+      BhP[idx].mark=1;
+  }
+  for(idx=0; idx<NumBh; idx++)
+  {
+      if(bh_density_isactive(idx))
+      {
+          Left[idx] = Right[idx] = 0;
+      } 
+  }
 
   generic_set_MaxNexport();
 
@@ -279,10 +274,10 @@ void density(void)
     {
       t0 = second();
 
-      generic_comm_pattern(TimeBinsHydro.NActiveParticles, kernel_local, kernel_imported);
+      generic_comm_pattern(NumBh, kernel_local, kernel_imported);
 
       /* do final operations on results */
-      for(idx = 0, npleft = 0; idx < TimeBinsHydro.NActiveParticles; idx++)
+/*      for(idx = 0, npleft = 0; idx < TimeBinsHydro.NActiveParticles; idx++)
         {
           i = TimeBinsHydro.ActiveParticleList[idx];
           if(i < 0)
@@ -296,68 +291,86 @@ void density(void)
                     {
                       DhsmlDensityFactor[i] *= BhP[i].Hsml / (NUMDIMS * BhP[i].Density);
                       if(DhsmlDensityFactor[i] > -0.9) /* note: this would be -1 if only a single particle at zero lag is found */
-                        DhsmlDensityFactor[i] = 1 / (1 + DhsmlDensityFactor[i]);
+/*                        DhsmlDensityFactor[i] = 1 / (1 + DhsmlDensityFactor[i]);
                       else
                         DhsmlDensityFactor[i] = 1;
                     }
                 }
+*/
 
-              if(NumNgb[i] < (desnumngb - All.MaxNumNgbDeviation) || NumNgb[i] > (desnumngb + All.MaxNumNgbDeviation))
+      for(idx=0, npleft=0; idx<NumBh; idx++)
+        {
+          if(bh_density_isactive(idx))
+            {
+          
+              if(BhP[idx].Density > 0)
                 {
-                  /* need to redo this particle */
-                  npleft++;
-
-                  if(Left[i] > 0 && Right[i] > 0)
-                    if((Right[i] - Left[i]) < 1.0e-3 * Left[i])
-                      {
-                        /* this one should be ok */
-                        npleft--;
-                        P[i].TimeBinHydro = -P[i].TimeBinHydro - 1; /* Mark as inactive */
-                        continue;
-                      }
-
-                  if(NumNgb[i] < (desnumngb - All.MaxNumNgbDeviation))
-                    Left[i] = dmax(BhP[i].Hsml, Left[i]);
+                  BhDhsmlDensityFactor[idx] *= BhP[idx].Hsml / (NUMDIMS * BhP[idx].Density);
+                  if(BhDhsmlDensityFactor[idx] > -0.9) /* note: this would be -1 if only a single particle at zero lag is found */
+                      BhDhsmlDensityFactor[idx] = 1 / (1 + BhDhsmlDensityFactor[idx]);
                   else
-                    {
-                      if(Right[i] != 0)
-                        {
-                          if(BhP[i].Hsml < Right[i])
-                            Right[i] = BhP[i].Hsml;
-                        }
-                      else
-                        Right[i] = BhP[i].Hsml;
-                    }
-
-                  if(iter >= MAXITER - 10)
-                    {
-                      printf("i=%d task=%d ID=%d Hsml=%g Left=%g Right=%g Ngbs=%g Right-Left=%g\n   pos=(%g|%g|%g)\n", i, ThisTask,
-                             (int)P[i].ID, BhP[i].Hsml, Left[i], Right[i], (float)NumNgb[i], Right[i] - Left[i], P[i].Pos[0],
-                             P[i].Pos[1], P[i].Pos[2]);
-                      myflush(stdout);
-                    }
-
-                  if(Right[i] > 0 && Left[i] > 0)
-                    BhP[i].Hsml = pow(0.5 * (pow(Left[i], 3) + pow(Right[i], 3)), 1.0 / 3);
-                  else
-                    {
-                      if(Right[i] == 0 && Left[i] == 0)
-                        terminate("should not occur");
-
-                      if(Right[i] == 0 && Left[i] > 0)
-                        {
-                          BhP[i].Hsml *= 1.26;
-                        }
-
-                      if(Right[i] > 0 && Left[i] == 0)
-                        {
-                          BhP[i].Hsml /= 1.26;
-                        }
-                    }
+                      BhDhsmlDensityFactor[idx] = 1;
                 }
-              else
-                P[i].TimeBinHydro = -P[i].TimeBinHydro - 1; /* Mark as inactive */
-            }
+            } 
+        
+
+          if(BhNumNgb[idx] < (desnumngb - All.MaxNumNgbDeviation) || BhNumNgb[idx] > (desnumngb + All.MaxNumNgbDeviation))
+          {
+                  /* need to redo this particle */
+            npleft++;
+
+            if(Left[idx] > 0 && Right[idx] > 0)
+              {
+                if((Right[idx] - Left[idx]) < 1.0e-3 * Left[idx])
+                  {
+                        /* this one should be ok */
+                    npleft--;
+                    BhP[idx].mark = -1 - BhP[idx].mark; /* Mark as inactive */
+                    continue;
+                }
+              } 
+
+            if(BhNumNgb[idx] < (desnumngb - All.MaxNumNgbDeviation))
+              Left[idx] = dmax(BhP[idx].Hsml, Left[idx]);
+            else
+              {
+                if(Right[idx] != 0)
+                  {
+                    if(BhP[idx].Hsml < Right[idx])
+                        Right[idx] = BhP[idx].Hsml;
+                  }
+                    else
+                        Right[idx] = BhP[idx].Hsml;
+              }
+
+            if(iter >= MAXITER - 10)
+              {
+                printf("i=%d task=%d ID=%d Hsml=%g Left=%g Right=%g Ngbs=%g Right-Left=%g\n   pos=(%g|%g|%g)\n", idx, ThisTask,
+                    (int)BhP[idx].PID, BhP[idx].Hsml, Left[idx], Right[idx], (float)BhNumNgb[idx], Right[idx] - Left[idx], P[BhP[idx].PID].Pos[0],
+                    P[BhP[idx].PID].Pos[1], P[BhP[idx].PID].Pos[2]);
+                myflush(stdout);
+              }
+
+            if(Right[idx] > 0 && Left[idx] > 0)
+                BhP[idx].Hsml = pow(0.5 * (pow(Left[idx], 3) + pow(Right[idx], 3)), 1.0 / 3);
+            else
+              {
+                if(Right[idx] == 0 && Left[idx] == 0)
+                    terminate("should not occur");
+
+                if(Right[idx] == 0 && Left[idx] > 0)
+                  {
+                    BhP[idx].Hsml *= 1.26;
+                  }
+
+                if(Right[idx] > 0 && Left[idx] == 0)
+                  {
+                    BhP[idx].Hsml /= 1.26;
+                  }
+              }
+          }
+        else
+            BhP[idx].mark = -1 - BhP[idx].mark; /* Mark as inactive */
         }
 
       sumup_large_ints(1, &npleft, &ntot);
@@ -378,82 +391,14 @@ void density(void)
     }
   while(ntot > 0);
 
-#ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES
 
-#if defined(REFLECTIVE_X) && defined(REFLECTIVE_Y) && defined(REFLECTIVE_Z)
-
-  int count2    = 0;
-  int countall2 = 0;
-
-  for(i = 0; i < NumBh; i++)
-    {
-      /*
-       * If the distance to the border of a particle is too small,
-       * then the ghost particle will be too close to this particle.
-       * Therefore we shift the particle in this case into the direction of the box center.
-       */
-      if(distance_to_border(i) < 0.5 * 0.001 * BhP[i].Hsml)
-        {
-          count2++;
-
-          double dir[3];
-
-          dir[0] = boxSize_X * 0.5 - P[i].Pos[0];
-          dir[1] = boxSize_Y * 0.5 - P[i].Pos[1];
-          dir[2] = boxSize_Z * 0.5 - P[i].Pos[2];
-
-          double n = sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
-          // note: it's not possible that the operand of sqrt is zero here.
-
-          dir[0] /= n;
-          dir[1] /= n;
-          dir[2] /= n;
-
-          P[i].Pos[0] += 0.05 * BhP[i].Hsml * dir[0];
-          P[i].Pos[1] += 0.05 * BhP[i].Hsml * dir[1];
-          P[i].Pos[2] += 0.05 * BhP[i].Hsml * dir[2];
-        }
-    }
-
-  MPI_Allreduce(&count2, &countall2, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-  mpi_printf("\nFOUND %d particles extremely close to the reflective boundary. Fixing this. \n\n", countall2);
-#endif /* #if defined(REFLECTIVE_X) && defined(REFLECTIVE_Y) && defined(REFLECTIVE_Z) */
-
-  int count = 0, countall;
-
-  for(i = 0; i < NumBh; i++)
-    if(MinDist[i] < 0.001 * BhP[i].Hsml)
-      count++;
-
-  MPI_Allreduce(&count, &countall, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-
-  if(countall)
-    {
-      mpi_printf("\nFOUND %d BhP particles with an extremely close neighbor. Fixing this. \n\n", countall);
-
-      for(i = 0; i < NumBh; i++)
-        if(MinDist[i] < 0.001 * BhP[i].Hsml)
-          {
-            double theta = acos(2 * get_random_number() - 1);
-            double phi   = 2 * M_PI * get_random_number();
-
-            P[i].Pos[0] += 0.1 * BhP[i].Hsml * sin(theta) * cos(phi);
-            P[i].Pos[1] += 0.1 * BhP[i].Hsml * sin(theta) * sin(phi);
-            P[i].Pos[2] += 0.1 * BhP[i].Hsml * cos(theta);
-          }
-    }
-#endif /* #ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES */
-
-#ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES
-  myfree(MinDist);
-#endif /* #ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES */
   myfree(Right);
   myfree(Left);
-  myfree(DhsmlDensityFactor);
-  myfree(NumNgb);
+  myfree(BhDhsmlDensityFactor);
+  myfree(BhNumNgb);
 
   /* mark as active again */
-  for(idx = 0; idx < TimeBinsHydro.NActiveParticles; idx++)
+/*  for(idx = 0; idx < TimeBinsHydro.NActiveParticles; idx++)
     {
       i = TimeBinsHydro.ActiveParticleList[idx];
       if(i < 0)
@@ -462,7 +407,14 @@ void density(void)
       if(P[i].TimeBinHydro < 0)
         P[i].TimeBinHydro = -P[i].TimeBinHydro - 1;
     }
-
+*/
+    for(idx=0; idx<NumBh; idx++)
+    {
+        if(BhP[idx].mark < 0)
+        {
+            BhP[idx].mark = 1;
+        }
+    }
   /* collect some timing information */
   CPU_Step[CPU_INIT] += measure_time();
 }
@@ -479,7 +431,7 @@ void density(void)
  *
  *  \return 0
  */
-static int density_evaluate(int target, int mode, int threadid)
+static int bh_density_evaluate(int target, int mode, int threadid)
 {
   int j, n;
   int numngb, numnodes, *firstnode;
@@ -491,10 +443,6 @@ static int density_evaluate(int target, int mode, int threadid)
   MyFloat dhsmlrho;
   MyDouble *pos;
 
-#ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES
-  MyFloat mindist = MAX_REAL_NUMBER;
-  MyIDType ID;
-#endif /* #ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES */
   data_in local, *target_data;
   data_out out;
 
@@ -515,9 +463,6 @@ static int density_evaluate(int target, int mode, int threadid)
 
   pos = target_data->Pos;
   h   = target_data->Hsml;
-#ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES
-  ID = target_data->ID;
-#endif /* #ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES */
 
   h2   = h * h;
   hinv = 1.0 / h;
@@ -590,20 +535,12 @@ static int density_evaluate(int target, int mode, int threadid)
           weighted_numngb += FLT(NORM_COEFF * wk / hinv3); /* 4.0/3 * PI = 4.188790204786 */
 
           dhsmlrho += FLT(-mass_j * (NUMDIMS * hinv * wk + u * dwk));
-
-#ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES
-          if(ID != P[j].ID && mindist > r)
-            mindist = r;
-#endif /* #ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES */
         }
     }
 
   out.Rho          = rho;
   out.Ngb          = weighted_numngb;
   out.DhsmlDensity = dhsmlrho;
-#ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES
-  out.MinDist = mindist;
-#endif /* #ifdef FIX_SPH_PARTICLES_AT_IDENTICAL_COORDINATES */
 
   /* Now collect the result at the right place */
   if(mode == MODE_LOCAL_PARTICLES)
@@ -623,13 +560,13 @@ static int density_evaluate(int target, int mode, int threadid)
  *
  *  \return 1: cell active; 0: cell not active or not a cell.
  */
-int density_isactive(int n)
+int bh_density_isactive(int n)
 {
-  if(P[n].TimeBinHydro < 0)
+  if(BhP[n].mark < 0)
     return 0;
 
-  if(P[n].Type == 5)
+/*  if(P[n].Type == 5)
     return 1;
-
-  return 0;
+*/
+  return 1;
 }

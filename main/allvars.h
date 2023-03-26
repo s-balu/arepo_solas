@@ -1450,7 +1450,7 @@ double Density;
 double Temperature;
 MySingle Hsml;
 MyIDType PID;
-
+int mark;
 }  *BhP,          
     *DomainBhBuf; 
 
