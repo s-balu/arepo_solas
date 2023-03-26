@@ -281,7 +281,7 @@ void domain_exchange(void)
 
               P[n] = P[NumPart-1];
               if(P[NumPart-1].Type == 5)
-                BPP(NumPart-1).BhID].PID = n;
+                BPP(NumPart-1).PID = n;
 
               Key[n] = Key[NumPart - 1];
               
