@@ -317,7 +317,12 @@ void domain_exchange(void)
   if(count_totget)
     {
       memmove(P + NumGas + count_totget, P + NumGas, (NumPart - NumGas) * sizeof(struct particle_data));
-      memmove(Key + NumGas + count_totget, Key + NumGas, (NumPart - NumGas) * sizeof(peanokey));
+      memmove(Key + NumGas + count_totget, Key + NumGas, (NumPart - NumGas) * sizeof(peanokey))
+
+#ifdef BLACKHOLES
+      for(i=0; i<NumBh; i++)
+        BhP[i].PID+=count_totget;
+#endif  
     }
 
   for(i = 0; i < NTask; i++)
