@@ -88,9 +88,9 @@ static data_in *DataIn, *DataGet;
  */
 static void particle2in(data_in *in, int i, int firstnode)
 {
-  in->Pos[0] = P[BhP[i].PID].Pos[0];
-  in->Pos[1] = P[BhP[i].PID].Pos[1];
-  in->Pos[2] = P[BhP[i].PID].Pos[2];
+  in->Pos[0] = PPB(i).Pos[0];
+  in->Pos[1] = PPB(i).Pos[1];
+  in->Pos[2] = PPB(i).Pos[2];
   in->Hsml   = BhP[i].Hsml;
 
   in->Firstnode = firstnode;
