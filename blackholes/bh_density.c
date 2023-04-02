@@ -125,24 +125,14 @@ static void out2particle(data_out *out, int i, int mode)
   if(mode == MODE_LOCAL_PARTICLES) /* initial store */
     {
       BhNumNgb[i] = out->Ngb;
-/*      if(P[i].Type == 5)
-        {
-*/
       BhP[i].Density       = out->Rho;
       BhDhsmlDensityFactor[i] = out->DhsmlDensity;
-/*        }
-*/
     }
   else /* combine */
     {
       BhNumNgb[i] += out->Ngb;
-/*      if(P[i].Type == 5)
-        {
-*/
       BhP[i].Density += out->Rho;
       BhDhsmlDensityFactor[i] += out->DhsmlDensity;
-/*        }
-*/
     }
 }
 
@@ -170,15 +160,6 @@ static void kernel_local(void)
           break;
 
         idx = NextParticle++;
-
-       /*if(idx >= TimeBinsHydro.NActiveParticles)
-         break;
-
-        int i = TimeBinsHydro.ActiveParticleList[idx];
-        if(i < 0)
-          continue;
-
-        if(density_isactive(i))*/
         
         if(idx >= NumBh)
           break;
@@ -213,8 +194,6 @@ static void kernel_imported(void)
   }
 }
 
-static MyFloat *BhNumNgb, *BhDhsmlDensityFactor;
-
 /*! \brief Main function of SPH density calculation.
  *
  *  This function computes the local density for each active SPH particle and
@@ -241,18 +220,6 @@ void bh_density(void)
   Left               = (MyFloat *)mymalloc("Left", NumBh * sizeof(MyFloat));
   Right              = (MyFloat *)mymalloc("Right", NumBh * sizeof(MyFloat));
 
-/*  for(idx = 0; idx < TimeBinsHydro.NActiveParticles; idx++)
-    {
-      i = TimeBinsHydro.ActiveParticleList[idx];
-      if(i < 0)
-        continue;
-
-      if(density_isactive(i))
-        {
-          Left[i] = Right[i] = 0;
-        }
-    }
-*/
 
   for(idx=0; idx<NumBh; idx++)
   {
@@ -276,28 +243,6 @@ void bh_density(void)
       t0 = second();
 
       generic_comm_pattern(NumBh, kernel_local, kernel_imported);
-
-      /* do final operations on results */
-/*      for(idx = 0, npleft = 0; idx < TimeBinsHydro.NActiveParticles; idx++)
-        {
-          i = TimeBinsHydro.ActiveParticleList[idx];
-          if(i < 0)
-            continue;
-
-          if(density_isactive(i))
-            {
-              if(P[i].Type == 5)
-                {
-                  if(BhP[i].Density > 0)
-                    {
-                      DhsmlDensityFactor[i] *= BhP[i].Hsml / (NUMDIMS * BhP[i].Density);
-                      if(DhsmlDensityFactor[i] > -0.9)  note: this would be -1 if only a single particle at zero lag is found 
-                        DhsmlDensityFactor[i] = 1 / (1 + DhsmlDensityFactor[i]);
-                      else
-                        DhsmlDensityFactor[i] = 1;
-                    }
-                }
-*/
 
       for(idx=0, npleft=0; idx<NumBh; idx++)
         {
@@ -399,16 +344,6 @@ void bh_density(void)
   myfree(BhNumNgb);
 
   /* mark as active again */
-/*  for(idx = 0; idx < TimeBinsHydro.NActiveParticles; idx++)
-    {
-      i = TimeBinsHydro.ActiveParticleList[idx];
-      if(i < 0)
-        continue;
-
-      if(P[i].TimeBinHydro < 0)
-        P[i].TimeBinHydro = -P[i].TimeBinHydro - 1;
-    }
-*/
     for(idx=0; idx<NumBh; idx++)
     {
         if(BhP[idx].mark < 0)
