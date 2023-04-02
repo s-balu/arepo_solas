@@ -380,16 +380,9 @@ int init(void)
       endrun();
     }
 
-#ifndef BLACKHOLES
   /* will build tree */
   ngb_treeallocate();
   ngb_treebuild(NumGas);
-#endif
-
-#ifdef BLACKHOLES
-  ngb_treeallocate();
-  ngb_treebuild(NumPart);
-#endif
 
   if(RestartFlag == 3)
     {
@@ -687,7 +680,7 @@ void setup_smoothinglengths(void)
       TimeBinsGravity.NActiveParticles++;
     }
 #endif /* #ifdef HIERARCHICAL_GRAVITY */
-#ifndef BLACKHOLES
+
   construct_forcetree(1, 1, 0, 0); /* build force tree with gas particles only */
 
   for(i = 0; i < NumGas; i++)
@@ -716,39 +709,7 @@ void setup_smoothinglengths(void)
       P[i].Type = 0;
 #endif /* #ifdef NO_GAS_SELFGRAVITY */
     }
-#endif
-#ifdef BLACKHOLES
-  construct_forcetree(0, 1, 0, 0); /* build force tree with all particles*/ 
 
-  for(i = 0; i < NumPart; i++)
-    {
-      no = Father[i];
-
-      if(no < 0)
-        terminate("i=%d no=%d\n", i, no);
-
-      while(10 * All.DesNumNgb * P[i].Mass > Nodes[no].u.d.mass)
-        {
-          p = Nodes[no].u.d.father;
-
-          if(p < 0)
-            break;
-
-          no = p;
-        }
-#ifndef TWODIMS
-      SphP[i].Hsml = pow(3.0 / (4 * M_PI) * All.DesNumNgb * P[i].Mass / Nodes[no].u.d.mass, 1.0 / 3) * Nodes[no].len;
-      BPP(i).Hsml = pow(3.0 / (4 * M_PI) * All.DesNumNgb * P[i].Mass / Nodes[no].u.d.mass, 1.0 / 3) * Nodes[no].len;
-#else  /* #ifndef TWODIMS */
-      SphP[i].Hsml = pow(1.0 / (M_PI)*All.DesNumNgb * P[i].Mass / Nodes[no].u.d.mass, 1.0 / 2) * Nodes[no].len;
-      BPP(i).Hsml = pow(1.0 / (M_PI)*All.DesNumNgb * P[i].Mass / Nodes[no].u.d.mass, 1.0 / 2) * Nodes[no].len;
-#endif 
-#ifdef NO_GAS_SELFGRAVITY
-      /* Reset the original particle type */
-      P[i].Type = 0;
-#endif /* #ifdef NO_GAS_SELFGRAVITY */
-    }
-#endif
   myfree(Father);
   myfree(Nextnode);
 
