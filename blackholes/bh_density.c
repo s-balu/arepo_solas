@@ -268,7 +268,7 @@ void bh_density(void)
 
   generic_set_MaxNexport();
 
-  desnumngb = All.DesNumNgb;
+  desnumngb = All.BhDesNumNgb;
 
   /* we will repeat the whole thing for those particles where we didn't find enough neighbours */
   do
@@ -315,7 +315,7 @@ void bh_density(void)
             } 
         
 
-          if(BhNumNgb[idx] < (desnumngb - All.MaxNumNgbDeviation) || BhNumNgb[idx] > (desnumngb + All.MaxNumNgbDeviation))
+          if(BhNumNgb[idx] < (desnumngb - All.BhMaxNumNgbDeviation) || BhNumNgb[idx] > (desnumngb + All.BhMaxNumNgbDeviation))
           {
                   /* need to redo this particle */
             npleft++;
@@ -331,7 +331,7 @@ void bh_density(void)
                 }
               } 
 
-            if(BhNumNgb[idx] < (desnumngb - All.MaxNumNgbDeviation))
+            if(BhNumNgb[idx] < (desnumngb - All.BhMaxNumNgbDeviation))
               Left[idx] = dmax(BhP[idx].Hsml, Left[idx]);
             else
               {
