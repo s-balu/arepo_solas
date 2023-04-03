@@ -1447,9 +1447,10 @@ extern struct sph_particle_data
 #ifdef BLACKHOLES
 extern struct bh_particle_data
 {
-double Density;
-double Temperature;
-MySingle Hsml;
+MyFloat Density;
+MyDouble NgbMass;
+MyDouble EnergyFeed;
+MyFloat Hsml;
 MyIDType PID;
 int mark;
 }  *BhP,          
