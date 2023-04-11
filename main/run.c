@@ -418,7 +418,7 @@ void calculate_non_standard_physics_end_of_step(void)
     }
   MPI_Reduce(&All.EnergyExchange, &All.EnergyExchangeTot, 2, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   MPI_Barrier(MPI_COMM_WORLD); // synchronize all tasks
-  mpi_printf("Energy given by BH = %f, Energy taken up by gas particles = %f/n", All.EnergyExchangeTot[0], All.EnergyExchangeTot[1]);
+  mpi_printf("Energy given by BH = %f, Energy taken up by gas particles = %f \n", All.EnergyExchangeTot[0], All.EnergyExchangeTot[1]);
 #endif 
 #ifdef COOLING
 #ifdef USE_SFR
