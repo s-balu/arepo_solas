@@ -257,7 +257,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   for(n = 0; n < nfound; n++)
     {
       j = Thread[threadid].Ngblist[n];
-      SphP[j].BhFeed = feed/ngbmass*P[j].Mass;
+      SphP[j].BhFeed += feed/ngbmass*P[j].Mass;
     }
    
   /* Now collect the result at the right place 

@@ -402,9 +402,10 @@ void calculate_non_standard_physics_end_of_step(void)
       if(i < 0)
         continue;
       SphP[i].Energy += SphP[i].BhFeed;
+      SphP[i].BhFeed = 0;
     }
   update_primitive_variables();
-#endif BLACKHOLES
+#endif 
 #ifdef COOLING
 #ifdef USE_SFR
   cooling_and_starformation();

@@ -562,6 +562,11 @@ int init(void)
 
   free_mesh();
 
+#ifdef BLACKHOLES
+  for(i=0; i<NumGas; i++)
+    SphP[i].BhFeed = 0;
+#endif
+
   return -1;  // return -1 means we ran to completion, i.e. not an endrun code
 }
 
