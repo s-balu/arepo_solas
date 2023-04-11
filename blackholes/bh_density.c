@@ -422,6 +422,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
     {
       j = Thread[threadid].Ngblist[n];
 
+/*compute the bh-ngb-mass*/
       mass += P[j].Mass;
 
       dx = pos[0] - P[j].Pos[0];

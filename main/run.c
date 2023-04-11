@@ -402,6 +402,9 @@ void calculate_non_standard_physics_end_of_step(void)
       if(i < 0)
         continue;
       SphP[i].Energy += SphP[i].BhFeed;
+      for (int j=0; j<NumBh; j++)
+        BhP[j].EnergyTake += SphP[i].BhFeed;
+      
       SphP[i].BhFeed = 0;
     }
   update_primitive_variables();
