@@ -1221,6 +1221,7 @@ extern struct global_data_all_processes
   
   /*for parameter file*/
   double FeedbackTime;
+  int FeedbackFlag;
   int BhDesNumNgb;
   int BhMaxNumNgbDeviation;
 #endif

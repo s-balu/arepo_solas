@@ -564,6 +564,7 @@ int init(void)
 
 /*initialize bh_feedback variables*/
 #ifdef BLACKHOLES
+  All.FeedbackFlag = 1;
   All.EnergyTake = All.EnergyGive = 0;
 
   for(i=0; i<NumGas; i++)
