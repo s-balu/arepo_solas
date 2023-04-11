@@ -406,16 +406,19 @@ void calculate_non_standard_physics_end_of_step(void)
               if(i < 0)
               continue;
               SphP[i].Energy += SphP[i].BhFeed;
-              All.EnergyTake += SphP[i].BhFeed;
+              All.EnergyExchange[1] += SphP[i].BhFeed;
               SphP[i].BhFeed = 0;
             }
           update_primitive_variables();
 #ifdef SEDOV_BLAST
           All.FeedbackFlag = -1;
+          MPI_Bcast(&All.FeedbackFlag, 1, MPI_INT, ThisTask, MPI_COMM_WORLD);
 #endif      
         }
     }
-  mpi_printf("Time = %f, Energy given by BH = %f, Energy taken up by gas particles = %f", All.Time, All.EnergyGive, All.EnergyTake);
+  MPI_Reduce(&All.EnergyExchange, &All.EnergyExchangeTot, 2, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+  MPI_Barrier(MPI_COMM_WORLD); // synchronize all tasks
+  mpi_printf("Energy given by BH = %f, Energy taken up by gas particles = %f/n", All.EnergyExchangeTot[0], All.EnergyExchangeTot[1]);
 #endif 
 #ifdef COOLING
 #ifdef USE_SFR

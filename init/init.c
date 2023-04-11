@@ -565,7 +565,8 @@ int init(void)
 /*initialize bh_feedback variables*/
 #ifdef BLACKHOLES
   All.FeedbackFlag = 1;
-  All.EnergyTake = All.EnergyGive = 0;
+  All.EnergyExchange[0] = All.EnergyExchange[1] = 0;
+  All.EnergyExchangeTot = (double*) malloc(2 * sizeof(double));
 
   for(i=0; i<NumGas; i++)
     SphP[i].BhFeed = 0;
