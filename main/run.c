@@ -413,7 +413,7 @@ void calculate_non_standard_physics_end_of_step(void)
   }
 #endif
 #ifndef SEDOV_BLAST
-  while(All.Time >= All.FeedbackTime)
+  if(All.Time >= All.FeedbackTime)
   {
     for(int idx = 0; idx < TimeBinsHydro.NActiveParticles; idx++)
       {
