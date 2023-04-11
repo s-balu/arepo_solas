@@ -1216,6 +1216,10 @@ extern struct global_data_all_processes
   double GlobalDisplacementVector[3];
 
 #ifdef BLACKHOLES
+  double EnergyGive;
+  double EnergyTake;
+  
+  /*for parameter file*/
   double FeedbackTime;
   int BhDesNumNgb;
   int BhMaxNumNgbDeviation;
@@ -1455,8 +1459,6 @@ extern struct bh_particle_data
 MyFloat Density;
 MyDouble NgbMass;
 MyDouble EnergyFeed;
-MyDouble EnergyGive;
-MyDouble EnergyTake;
 MyFloat Hsml;
 MyIDType PID;
 int mark;
@@ -1758,8 +1760,6 @@ enum iofields
   IO_BHID,
   IO_BHHSML,
   IO_BHEF,
-  IO_BHEG,
-  IO_BHET,
 #endif  
   IO_LASTENTRY /* This should be kept - it signals the end of the list */
 };

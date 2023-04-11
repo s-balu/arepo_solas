@@ -406,9 +406,7 @@ void calculate_non_standard_physics_end_of_step(void)
         if(i < 0)
           continue;
         SphP[i].Energy += SphP[i].BhFeed;
-        for (int j=0; j<NumBh; j++)
-          BhP[j].EnergyTake += SphP[i].BhFeed;
-      
+        All.EnergyTake += SphP[i].BhFeed;
         SphP[i].BhFeed = 0;
       }
     update_primitive_variables();
@@ -423,13 +421,12 @@ void calculate_non_standard_physics_end_of_step(void)
         if(i < 0)
           continue;
         SphP[i].Energy += SphP[i].BhFeed;
-        for (int j=0; j<NumBh; j++)
-          BhP[j].EnergyTake += SphP[i].BhFeed;
-      
+        All.EnergyTake += SphP[i].BhFeed;
         SphP[i].BhFeed = 0;
       }
     update_primitive_variables();
   }
+  mpi_printf("Energy given by BH = %f, Energy taken up by gas particles = %f", All.EnergyGive, All.EnergyTake);
 #endif
 #endif 
 #ifdef COOLING
