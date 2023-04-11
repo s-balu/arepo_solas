@@ -395,8 +395,15 @@ void calculate_non_standard_physics_prior_mesh_construction(void)
 void calculate_non_standard_physics_end_of_step(void)
 {
 #ifdef BLACKHOLES
-  bh_feedback();
   bh_ngb_feedback();
+  for(int idx = 0; idx < TimeBinsHydro.NActiveParticles; idx++)
+    {
+      int i = TimeBinsHydro.ActiveParticleList[idx];
+      if(i < 0)
+        continue;
+      SphP[i].Energy += SphP[i].BhFeed;
+    }
+  update_primitive_variables();
 #endif BLACKHOLES
 #ifdef COOLING
 #ifdef USE_SFR

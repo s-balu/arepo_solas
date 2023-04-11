@@ -102,6 +102,7 @@ static void particle2in(data_in *in, int i, int firstnode)
  */
 typedef struct
 {
+  MyDouble Mass;
   MyFloat Rho;
   MyFloat DhsmlDensity;
   MyFloat Ngb;
@@ -124,14 +125,16 @@ static void out2particle(data_out *out, int i, int mode)
 {
   if(mode == MODE_LOCAL_PARTICLES) /* initial store */
     {
-      BhNumNgb[i] = out->Ngb;
-      BhP[i].Density       = out->Rho;
+      BhP[i].NgbMass          = out->Mass;
+      BhNumNgb[i]             = out->Ngb;
+      BhP[i].Density          = out->Rho;
       BhDhsmlDensityFactor[i] = out->DhsmlDensity;
     }
   else /* combine */
     {
-      BhNumNgb[i] += out->Ngb;
-      BhP[i].Density += out->Rho;
+      BhP[i].NgbMass          += out->Mass;
+      BhNumNgb[i]             += out->Ngb;
+      BhP[i].Density          += out->Rho;
       BhDhsmlDensityFactor[i] += out->DhsmlDensity;
     }
 }
@@ -378,6 +381,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   MyFloat weighted_numngb;
   MyFloat dhsmlrho;
   MyDouble *pos;
+  MyDouble mass;
 
   data_in local, *target_data;
   data_out out;
@@ -417,6 +421,8 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   for(n = 0; n < nfound; n++)
     {
       j = Thread[threadid].Ngblist[n];
+
+      mass += P[j].Mass;
 
       dx = pos[0] - P[j].Pos[0];
       dy = pos[1] - P[j].Pos[1];
@@ -474,6 +480,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
         }
     }
 
+  out.Mass         = mass;
   out.Rho          = rho;
   out.Ngb          = weighted_numngb;
   out.DhsmlDensity = dhsmlrho;
