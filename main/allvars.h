@@ -1216,6 +1216,7 @@ extern struct global_data_all_processes
   double GlobalDisplacementVector[3];
 
 #ifdef BLACKHOLES
+  double FeedbackTime;
   int BhDesNumNgb;
   int BhMaxNumNgbDeviation;
 #endif

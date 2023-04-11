@@ -396,18 +396,41 @@ void calculate_non_standard_physics_end_of_step(void)
 {
 #ifdef BLACKHOLES
   bh_ngb_feedback();
-  for(int idx = 0; idx < TimeBinsHydro.NActiveParticles; idx++)
-    {
-      int i = TimeBinsHydro.ActiveParticleList[idx];
-      if(i < 0)
-        continue;
-      SphP[i].Energy += SphP[i].BhFeed;
-      for (int j=0; j<NumBh; j++)
-        BhP[j].EnergyTake += SphP[i].BhFeed;
+  
+#ifdef SEDOV_BLAST
+  if(All.Time == All.FeedbackTime)
+  {
+    for(int idx = 0; idx < TimeBinsHydro.NActiveParticles; idx++)
+      {
+        int i = TimeBinsHydro.ActiveParticleList[idx];
+        if(i < 0)
+          continue;
+        SphP[i].Energy += SphP[i].BhFeed;
+        for (int j=0; j<NumBh; j++)
+          BhP[j].EnergyTake += SphP[i].BhFeed;
       
-      SphP[i].BhFeed = 0;
-    }
-  update_primitive_variables();
+        SphP[i].BhFeed = 0;
+      }
+    update_primitive_variables();
+  }
+#endif
+#ifndef SEDOV_BLAST
+  while(All.Time >= All.FeedbackTime)
+  {
+    for(int idx = 0; idx < TimeBinsHydro.NActiveParticles; idx++)
+      {
+        int i = TimeBinsHydro.ActiveParticleList[idx];
+        if(i < 0)
+          continue;
+        SphP[i].Energy += SphP[i].BhFeed;
+        for (int j=0; j<NumBh; j++)
+          BhP[j].EnergyTake += SphP[i].BhFeed;
+      
+        SphP[i].BhFeed = 0;
+      }
+    update_primitive_variables();
+  }
+#endif
 #endif 
 #ifdef COOLING
 #ifdef USE_SFR

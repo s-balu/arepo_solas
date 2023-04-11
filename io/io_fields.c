@@ -777,11 +777,11 @@ void init_io_fields()
   init_units(IO_BHEF, 0., 0., 0., 1., 2., All.UnitEnergy_in_cgs);
   init_snapshot_type(IO_BHEF, SN_MINI);
 
-  init_field(IO_BHEG, "BHEG", "BlackholeEnergyGive", MEM_MY_FLOAT, FILE_NONE, FILE_MY_IO_FLOAT, 1, A_BH, &BhP[0].EnergyGive, 0, BHS_ONLY);
+  init_field(IO_BHEG, "BHEG", "BlackholeEnergyGive", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, FILE_MY_IO_FLOAT, 1, A_BH, &BhP[0].EnergyGive, 0, BHS_ONLY);
   init_units(IO_BHEG, 0., 0., 0., 1., 2., All.UnitEnergy_in_cgs);
   init_snapshot_type(IO_BHEG, SN_MINI);
 
-  init_field(IO_BHET, "BHET", "BlackholeEnergyTake", MEM_MY_FLOAT, FILE_NONE, FILE_MY_IO_FLOAT, 1, A_BH, &BhP[0].EnergyTake, 0, BHS_ONLY);
+  init_field(IO_BHET, "BHET", "BlackholeEnergyTake", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, FILE_MY_IO_FLOAT, 1, A_BH, &BhP[0].EnergyTake, 0, BHS_ONLY);
   init_units(IO_BHET, 0., 0., 0., 1., 2., All.UnitEnergy_in_cgs);
   init_snapshot_type(IO_BHET, SN_MINI);
 

@@ -563,6 +563,12 @@ int init(void)
   free_mesh();
 
 #ifdef BLACKHOLES
+/*  for(i=0; i<NumBh; i++) ->  this is not needed as io fields get initialized to 0 by default
+    {
+      BhP[i].EnergyGive = 0;
+      BhP[i].EnergyTake = 0;
+    }
+*/
   for(i=0; i<NumGas; i++)
     SphP[i].BhFeed = 0;
 #endif

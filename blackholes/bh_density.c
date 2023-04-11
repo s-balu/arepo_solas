@@ -415,6 +415,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 
   numngb = 0;
   rho = weighted_numngb = dhsmlrho = 0;
+  mass = 0;
 
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
 
