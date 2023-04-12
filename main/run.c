@@ -412,7 +412,6 @@ void calculate_non_standard_physics_end_of_step(void)
           update_primitive_variables();
 #ifdef SEDOV_BLAST
           All.FeedbackFlag = -1;
-          MPI_Bcast(&All.FeedbackFlag, 1, MPI_INT, ThisTask, MPI_COMM_WORLD);
 #endif      
         }
     }
