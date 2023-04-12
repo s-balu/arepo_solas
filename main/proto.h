@@ -54,6 +54,10 @@
 #include "../cooling/cooling_proto.h"
 #endif /* #if defined(COOLING) */
 
+#if defined(BLACKHOLES)
+#include "../blackholes/bh_proto.h"
+#endif 
+
 void sfr_init();
 void sfr_create_star_particles(void);
 void ngb_finish_rangebounds_update(int nchanged, int *nodelist);
@@ -524,9 +528,6 @@ void mpi_distribute_items_to_tasks(void *data, int task_offset, int *n_items, in
 void tile_ics(void);
 void reallocate_memory_maxpart(void);
 void reallocate_memory_maxpartsph(void);
-#ifdef BLACKHOLES
-void reallocate_memory_maxpartbh(void);
-#endif
 
 void share_particle_number_in_file(const char *fname, int filenr, int readTask, int lastTask, int readTypes);
 int dump_memory_table_buffer(char *p);
