@@ -104,6 +104,9 @@ void allocate_memory(void)
 
   timebins_allocate(&TimeBinsHydro);
   timebins_allocate(&TimeBinsGravity);
+#ifdef BLACKHOLES
+  timebins_allocate(&TimeBinsBh);
+#endif
 
   /* set to zero */
   memset(P, 0, All.MaxPart * sizeof(struct particle_data));
