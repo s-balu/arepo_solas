@@ -662,6 +662,9 @@ extern MyDouble boxSize_Z, boxHalf_Z;
 
 extern int TimeBinSynchronized[TIMEBINS];
 extern struct TimeBinData TimeBinsHydro, TimeBinsGravity;
+#ifdef BLACKHOLES
+extern struct TimeBinData TimeBinsBh;
+#endif
 
 #ifdef USE_SFR
 extern double TimeBinSfr[TIMEBINS];
