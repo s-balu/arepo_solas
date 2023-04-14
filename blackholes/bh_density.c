@@ -387,7 +387,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   MyDouble *pos;
   MyDouble mass;
   integertime ngb_min_step;
-  int bin = NUMBINS;
+  int bin = TIMEBINS;
    
 
   data_in local, *target_data;

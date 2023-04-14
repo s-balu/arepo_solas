@@ -155,6 +155,7 @@ void reconstruct_timebins(void)
           TimeBinsBh.PrevInTimeBin[i] = TimeBinsBh.NextInTimeBin[i] = -1;
         }
       TimeBinsBh.TimeBinCount[bin]++;
+    }
 #endif
   make_list_of_active_particles();
 
@@ -519,7 +520,7 @@ TimeBinsBh.NActiveParticles = 0;
         {
           for(i = TimeBinsBh.FirstInTimeBin[n]; i >= 0; i = TimeBinsBh.NextInTimeBin[i])
             {
-              if(P[i].type == 5)
+              if(P[i].Type == 5)
                 {
                   if(P[i].Ti_Current != All.Ti_Current)
                     drift_particle(i, All.Ti_Current);
