@@ -264,6 +264,9 @@ int init(void)
       for(j = 0; j < 3; j++)
         P[i].GravPM[j] = 0;
 #endif /* #ifdef PMGRID */
+#ifdef BLACKHOLES
+      P[i].TimeBinBh    = 0;
+#endif
       P[i].TimeBinHydro = 0;
       P[i].TimeBinGrav  = 0;
       P[i].OldAcc       = 0; /* Do not zero as masses are stored here */

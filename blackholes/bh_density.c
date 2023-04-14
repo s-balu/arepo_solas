@@ -106,6 +106,7 @@ typedef struct
   MyFloat Rho;
   MyFloat DhsmlDensity;
   MyFloat Ngb;
+  integertime NgbMinStep;
 } data_out;
 
 static data_out *DataResult, *DataOut;
@@ -129,6 +130,7 @@ static void out2particle(data_out *out, int i, int mode)
       BhNumNgb[i]             = out->Ngb;
       BhP[i].Density          = out->Rho;
       BhDhsmlDensityFactor[i] = out->DhsmlDensity;
+      BhP[i].NgbMinStep       = out->NgbMinStep;
     }
   else /* combine */
     {
@@ -136,6 +138,8 @@ static void out2particle(data_out *out, int i, int mode)
       BhNumNgb[i]             += out->Ngb;
       BhP[i].Density          += out->Rho;
       BhDhsmlDensityFactor[i] += out->DhsmlDensity;
+      if(out->NgbMinStep < BhP[i].NgbMinStep)
+        BhP[i].NgbMinStep      = out->NgbMinStep;
     }
 }
 
@@ -382,6 +386,9 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   MyFloat dhsmlrho;
   MyDouble *pos;
   MyDouble mass;
+  integertime ngb_min_step;
+  int bin = NUMBINS;
+   
 
   data_in local, *target_data;
   data_out out;
@@ -422,6 +429,10 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   for(n = 0; n < nfound; n++)
     {
       j = Thread[threadid].Ngblist[n];
+
+ /*compute the min hydro step for neighbors*/     
+      if(bin > P[j].TimeBinHydro)
+        bin = P[j].TimeBinHydro;
 
 /*compute the bh-ngb-mass*/
       mass += P[j].Mass;
@@ -481,7 +492,9 @@ static int bh_density_evaluate(int target, int mode, int threadid)
           dhsmlrho += FLT(-mass_j * (NUMDIMS * hinv * wk + u * dwk));
         }
     }
-
+  ngb_min_step          = (((integertime)1) << bin);
+  
+  out.NgbMinStep   = ngb_min_step;
   out.Mass         = mass;
   out.Rho          = rho;
   out.Ngb          = weighted_numngb;
