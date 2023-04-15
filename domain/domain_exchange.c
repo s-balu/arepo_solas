@@ -102,7 +102,8 @@ void domain_resize_storage_bh(int count_get_bh)
   MPI_Allreduce(loc_data_bh, res_bh, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
 
   int max_bhload    = res_bh[0];
-
+  if(max_bhload < 20)
+    return;
   if(max_bhload > (1.0 - ALLOC_TOLERANCE) * All.MaxPartBh || max_bhload < (1.0 - 3 * ALLOC_TOLERANCE) * All.MaxPartBh)
     {
       All.MaxPartBh = max_bhload / (1.0 - 2 * ALLOC_TOLERANCE);
