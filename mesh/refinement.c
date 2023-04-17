@@ -216,6 +216,49 @@ void move_collisionless_particle(int new_i, int old_i)
         terminate("strange");
       tbData->LastInTimeBin[bin] = new_i;
     }
-}
+/*same operation for bh lists if the particle moved was a bh-particle*/
+#ifdef BLACKHOLES
+  if(P[new_i].Type==5)
+    {
+      tbData = &TimeBinsBh;
+      bin    = P[old_i].TimeBinsBh;
 
+/*here we have to remove the previous particle from the active list*/
+      if(TimeBinSynchronized[bin])
+        {
+          for(int idxx = 0, idxx < tbData->NActiveParticles; idxx++)
+            {
+              int ii = tbData->ActiveParticleList[idxx];
+              if(ii == old_i)
+                {
+                  tbData->ActiveParticleList[idxx] = new_i;
+                }
+            }
+        }
+      tbData->NextInTimeBin[new_i] = tbData->NextInTimeBin[old_i];
+      tbData->PrevInTimeBin[new_i] = tbData->PrevInTimeBin[old_i];
+
+      prev = tbData->PrevInTimeBin[old_i];
+      next = tbData->NextInTimeBin[old_i];
+
+      if(prev >= 0)
+      tbData->NextInTimeBin[prev] = new_i;
+      else
+        {
+          if(tbData->FirstInTimeBin[bin] != old_i)
+          terminate("strange");
+          tbData->FirstInTimeBin[bin] = new_i;
+        }
+
+      if(next >= 0)
+        tbData->PrevInTimeBin[next] = new_i;
+      else
+        {
+          if(tbData->LastInTimeBin[bin] != old_i)
+            terminate("strange");
+          tbData->LastInTimeBin[bin] = new_i;
+        }
+    }
+#endif
+}
 #endif /* REFINEMENT */
