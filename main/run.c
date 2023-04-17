@@ -382,7 +382,11 @@ void calculate_non_standard_physics_prior_mesh_construction(void)
 #endif /* #if defined(COOLING) && defined(USE_SFR) */
 #ifdef BLACKHOLES
   bh_density();
-  bh_ngb_feedback();
+   if(All.Time >= All.FeedbackTime)
+    {   
+      if(All.FeedbackFlag > 0)
+        bh_ngb_feedback();
+    }
 #endif
 }
 
