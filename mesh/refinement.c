@@ -221,12 +221,12 @@ void move_collisionless_particle(int new_i, int old_i)
   if(P[new_i].Type==5)
     {
       tbData = &TimeBinsBh;
-      bin    = P[old_i].TimeBinsBh;
+      bin    = P[old_i].TimeBinBh;
 
 /*here we have to remove the previous particle from the active list*/
       if(TimeBinSynchronized[bin])
         {
-          for(int idxx = 0, idxx < tbData->NActiveParticles; idxx++)
+          for(int idxx = 0; idxx < tbData->NActiveParticles; idxx++)
             {
               int ii = tbData->ActiveParticleList[idxx];
               if(ii == old_i)
