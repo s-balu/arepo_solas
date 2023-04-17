@@ -492,7 +492,10 @@ static int bh_density_evaluate(int target, int mode, int threadid)
           dhsmlrho += FLT(-mass_j * (NUMDIMS * hinv * wk + u * dwk));
         }
     }
-  ngb_min_step          = (((integertime)1) << bin);
+  if(bin == 0)
+    ngb_min_step = 0;
+  else
+    ngb_min_step   = (((integertime)1) << bin);
   
   out.NgbMinStep   = ngb_min_step;
   out.Mass         = mass;

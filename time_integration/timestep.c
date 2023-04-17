@@ -212,7 +212,7 @@ void find_timesteps_without_gravity(void)
       if(i < 0)
         continue;
 
-      ti_step = get_timestep_bh(i, BhP[i].NgbMinStep);
+      ti_step = get_timestep_bh(i, BPP[i].NgbMinStep);
 
       binold = P[i].TimeBinBh;
 
