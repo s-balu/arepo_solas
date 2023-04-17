@@ -205,7 +205,6 @@ void find_timesteps_without_gravity(void)
       P[i].TimeBinHydro = bin;
     }
 #ifdef BLACKHOLES
-  
   for(idx = 0; idx < TimeBinsBh.NActiveParticles; idx++)
     {
       i = TimeBinsBh.ActiveParticleList[idx];
@@ -223,7 +222,6 @@ void find_timesteps_without_gravity(void)
 
       P[i].TimeBinBh = bin;
     }
-
 #endif
 #endif /* #ifdef FORCE_EQUAL_TIMESTEPS #else */
   TIMER_STOP(CPU_TIMELINE);

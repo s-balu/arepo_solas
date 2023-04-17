@@ -1765,6 +1765,8 @@ enum iofields
   IO_BHID,
   IO_BHHSML,
   IO_BHEF,
+  IO_TIMEBIN_BH,
+  IO_TSTP_BH,
 #endif  
   IO_LASTENTRY /* This should be kept - it signals the end of the list */
 };

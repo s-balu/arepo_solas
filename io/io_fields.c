@@ -120,6 +120,22 @@ static void io_func_timestep(int particle, int components, void *out_buffer, int
 }
 #endif /* #ifdef OUTPUTTIMESTEP */
 
+#ifdef BLACKHOLES
+#ifdef OUTPUT_TIMEBIN_BH 
+static void io_func_timebin_bh(int particle, int components, void *out_buffer, int mode)
+{
+  ((int *)out_buffer)[0] = P[particle].TimeBinBh;
+}
+#endif
+#ifdef OUTPUTTIMESTEP_BH
+static void io_func_timestep_bh(int particle, int components, void *out_buffer, int mode)
+{
+  ((MyOutputFloat *)out_buffer)[0] =
+      (P[particle].TimeBinBh ? (((integertime)1) << P[particle].TimeBinBh) : 0) * All.Timebase_interval;
+}
+#endif
+#endif
+
 #ifdef OUTPUT_SOFTENINGS
 /*! \brief Output function of the force softening.
  *  \param[in] particle Index of particle/cell.
@@ -768,6 +784,16 @@ void init_io_fields()
              BHS_ONLY);
   init_units(IO_BHTEMPERATURE, 0., 0., 0., 0., 0., 0);
   */
+
+#ifdef OUTPUT_TIMEBIN_BH
+  init_field(IO_TIMEBIN_BH, "TBBH", "TimebinBh", MEM_NONE, FILE_INT, FILE_NONE, 1, A_NONE, 0, io_func_timebin_bh, BHS_ONLY);
+  init_units(IO_TIMEBIN_BH, 0., 0., 0., 0., 0., 0.0);
+#endif 
+
+#ifdef OUTPUTTIMESTEP_BH
+  init_field(IO_TSTP_BH, "TSBH", "TimeStepBh", MEM_NONE, FILE_MY_IO_FLOAT, FILE_MY_IO_FLOAT, 1, A_NONE, 0, io_func_timestep_bh, BHS_ONLY);
+  init_units(IO_TSTP_BH, 0., -1., 1., 0., -1., All.UnitTime_in_s);
+#endif 
 
   init_field(IO_BHHSML, "BHHS", "BlackholeHsml", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, FILE_MY_IO_FLOAT, 1, A_BH, &BhP[0].Hsml, 0, BHS_ONLY);
   init_units(IO_BHHSML, 1., -1., 1., 0., 0., All.UnitLength_in_cm);
