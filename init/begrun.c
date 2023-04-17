@@ -146,7 +146,7 @@ void begrun1(void)
 
   timebins_init(&TimeBinsHydro, "Hydro", &All.MaxPartSph);
   timebins_init(&TimeBinsGravity, "Gravity", &All.MaxPart);
-#ifdef BLACKHOLES /*have to allocate for maxpart, not maxpartbh, for active particle loop to work correctly*/
+#ifdef BLACKHOLES /*have to allocate for maxpart, not maxpartbh, for active-particle loop to work*/
   timebins_init(&TimeBinsBh, "Bh", &All.MaxPart);
 #endif
 
