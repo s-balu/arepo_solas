@@ -70,6 +70,7 @@ typedef struct
   MyDouble Pos[3];
   MyFloat Hsml;
   int Firstnode;
+  int Bin;
   MyDouble NgbMass;
   MyDouble Feed;
 } data_in;
@@ -90,6 +91,7 @@ static void particle2in(data_in *in, int i, int firstnode)
   in->Pos[0]  = PPB(i).Pos[0];
   in->Pos[1]  = PPB(i).Pos[1];
   in->Pos[2]  = PPB(i).Pos[2];
+  in->Bin     = PPB(i).TimeBinBh;
   in->Hsml    = BhP[i].Hsml;
   in->NgbMass = BhP[i].NgbMass;
   in->Feed    = BhP[i].EnergyRateFeed;
@@ -227,10 +229,10 @@ void bh_ngb_feedback(void)
  */
 static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 {
-  int j, n;
+  int j, n, bin;
   int numnodes, *firstnode;
-  double h;
-  MyDouble ngbmass, feed;
+  double h, dt, dtime;
+  MyDouble ngbmass, feed, energyfeed;
   MyDouble *pos;
 
   data_in local, *target_data;
@@ -254,15 +256,25 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   pos     = target_data->Pos;
   h       = target_data->Hsml;
   ngbmass = target_data->NgbMass;
-  bin = 
+  bin     = target_data->Bin;
   feed    = target_data->Feed;
+
+/*get energy from rate*/
+  dt    = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
+  dtime = All.cf_atime * dt / All.cf_time_hubble_a;
+  energyfeed = feed * dt;
+
+ /*in the case of a sedov blast the rate parameter has to represent the energy injected*/ 
+  #ifdef SEDOV_BLAST
+  energyfeed = feed;
+  #endif
 
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
   for(n = 0; n < nfound; n++)
     {
       j = Thread[threadid].Ngblist[n];
-      SphP[j].BhFeed += feed/ngbmass*P[j].Mass;
-      All.EnergyExchange[0] += feed/ngbmass*P[j].Mass;
+      SphP[j].BhFeed += energyfeed/ngbmass*P[j].Mass;
+      All.EnergyExchange[0] += energyfeed/ngbmass*P[j].Mass;
     }
    
   /* Now collect the result at the right place 
