@@ -571,9 +571,6 @@ int init(void)
   All.EnergyExchange[0] = All.EnergyExchange[1] = 0;
   double *exch = All.EnergyExchangeTot;
   exch = malloc(2 * sizeof(double));
-
-  for(i=0; i<NumGas; i++)
-    SphP[i].BhFeed = 0;
 #endif
 
   return -1;  // return -1 means we ran to completion, i.e. not an endrun code

@@ -149,17 +149,21 @@ static void kernel_local(void)
     for(j = 0; j < NTask; j++)
       Thread[threadid].Exportflag[j] = -1;
 
-    while(1)
+while(1)
       {
         if(Thread[threadid].ExportSpace < MinSpace)
           break;
 
         idx = NextParticle++;
-        
-        if(idx >= NumBh)
+
+        if(idx >= TimeBinsBh.NActiveParticles)
           break;
-        
-        bh_ngb_feedback_evaluate(idx, MODE_LOCAL_PARTICLES, threadid);
+
+        int i = TimeBinsBh.ActiveParticleList[idx];
+        if(i < 0)
+          continue;
+        if(bh_density_isactive(P[i].BhID))
+          bh_ngb_feedback_evaluate(P[i].BhID, MODE_LOCAL_PARTICLES, threadid);
       }
   }
 }
@@ -206,7 +210,7 @@ void bh_ngb_feedback(void)
 {
   generic_set_MaxNexport();
 
-  generic_comm_pattern(NumBh, kernel_local, kernel_imported);
+  generic_comm_pattern(TimeBinsBh.NActiveParticles, kernel_local, kernel_imported);
 }
 
 

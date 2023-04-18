@@ -1465,7 +1465,6 @@ MyDouble NgbMass;
 MyDouble EnergyFeed;
 MyFloat Hsml;
 MyIDType PID;
-int mark;
 integertime NgbMinStep;
 }  *BhP,          
     *DomainBhBuf; 
