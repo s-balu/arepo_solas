@@ -92,7 +92,7 @@ static void particle2in(data_in *in, int i, int firstnode)
   in->Pos[2]  = PPB(i).Pos[2];
   in->Hsml    = BhP[i].Hsml;
   in->NgbMass = BhP[i].NgbMass;
-  in->Feed    = BhP[i].EnergyFeed;
+  in->Feed    = BhP[i].EnergyRateFeed;
 
   in->Firstnode = firstnode;
 }
@@ -254,6 +254,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   pos     = target_data->Pos;
   h       = target_data->Hsml;
   ngbmass = target_data->NgbMass;
+  bin = 
   feed    = target_data->Feed;
 
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);

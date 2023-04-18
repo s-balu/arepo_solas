@@ -1462,7 +1462,7 @@ extern struct bh_particle_data
 {
 MyFloat Density;
 MyDouble NgbMass;
-MyDouble EnergyFeed;
+MyDouble EnergyRateFeed;
 MyFloat Hsml;
 MyIDType PID;
 integertime NgbMinStep;
