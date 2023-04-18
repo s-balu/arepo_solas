@@ -237,7 +237,7 @@ void bh_density(void)
       if(i < 0)
         continue;
 
-      if(density_isactive(P[i].BhID))
+      if(bh_density_isactive(P[i].BhID))
         {
           Left[P[i].BhID] = Right[P[i].BhID] = 0;
         }
@@ -323,7 +323,7 @@ void bh_density(void)
 
                 if(Right[P[i].BhID] > 0 && Left[P[i].BhID] == 0)
                   {
-                    BPP(i)].Hsml /= 1.26;
+                    BPP(i).Hsml /= 1.26;
                   }
               }
           }
