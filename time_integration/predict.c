@@ -531,7 +531,6 @@ TimeBinsBh.NActiveParticles = 0;
             }
         }
     }
-
 #endif
 
   /* sort both lists for better memory efficiency */
@@ -559,3 +558,41 @@ TimeBinsBh.NActiveParticles = 0;
 
   TIMER_STOP(CPU_DRIFTS);
 }
+
+/*call this function after updating the bh-timebin to the ngb condition*/
+#ifdef BLACKHOLES
+void update_list_of_active_bh_particles(void)
+  {
+    int i, n;
+    TimeBinsBh.NActiveParticles = 0;
+
+    for(n = 0; n < TIMEBINS; n++)
+      {
+        if(TimeBinSynchronized[n])
+          {
+            for(i = TimeBinsBh.FirstInTimeBin[n]; i >= 0; i = TimeBinsBh.NextInTimeBin[i])
+              {
+                if(P[i].Type == 5)
+                  {
+                    if(P[i].Ti_Current != All.Ti_Current)
+                      drift_particle(i, All.Ti_Current);
+
+                    TimeBinsBh.ActiveParticleList[TimeBinsBh.NActiveParticles] = i;
+                    TimeBinsBh.NActiveParticles++;
+                  }
+              }
+          }
+      }
+
+     mysort(TimeBinsBh.ActiveParticleList, TimeBinsBh.NActiveParticles, sizeof(int), int_compare);
+
+    long long out;
+
+    in = TimeBinsBh.NActiveParticles;
+
+    sumup_large_ints(n, in, out);
+
+    TimeBinsBh.GlobalNActiveParticles = out;
+  }
+#endif
+
