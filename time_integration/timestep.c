@@ -266,7 +266,7 @@ void update_timesteps_from_gravity(void)
 
 /*update bh-timestep at prior_mesh_construction based on ngb smallest timestep*/
 #ifdef BLACKHOLES
-void update_bh_timesteps(void);
+void update_bh_timesteps(void)
 {
   int idx, i, binold, bin;
   integertime ti_step;

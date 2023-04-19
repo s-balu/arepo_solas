@@ -587,11 +587,12 @@ void update_list_of_active_bh_particles(void)
     mysort(TimeBinsBh.ActiveParticleList, TimeBinsBh.NActiveParticles, sizeof(int), int_compare);
 
   n = 1;
+  int in;
   long long out;
 
   in = TimeBinsBh.NActiveParticles;
 
-  sumup_large_ints(n, in, out);
+  sumup_large_ints(n, &in, &out);
 
   TimeBinsBh.GlobalNActiveParticles = out;
 }
