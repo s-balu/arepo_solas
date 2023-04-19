@@ -274,7 +274,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
     {
       j = Thread[threadid].Ngblist[n];
 /*modify for jet along 0-axis*/      
-      if(abs(pos[0] - P[j].Pos[0]) < 0.1)
+      if(fabs(pos[0] - P[j].Pos[0]) < 0.001)
         {
           SphP[j].BhFeed += energyfeed/ngbmass*P[j].Mass;
           All.EnergyExchange[0] += energyfeed/ngbmass*P[j].Mass;
