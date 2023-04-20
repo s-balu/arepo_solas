@@ -277,17 +277,18 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   for(n = 0; n < nfound; n++)
     {
       j = Thread[threadid].Ngblist[n];
-/*modify for jet along 0-axis*/    
+
+/*jet along 0-axis*/    
   
 // Calculate the distance to the cone vertex
       distance_to_cone_vertex = sqrt(pow(P[j].Pos[0] - pos[0], 2.0) + pow(P[j].Pos[1] - pos[1], 2.0) + pow(P[j].Pos[2] - pos[2], 2.0));
 
 // Calculate the angle between the particle's position and the x-axis
-      angle_to_cone_axis = atan2(P[j].Pos[3] - pos[3], P[j].Pos[2] - pos[2]);
+      angle_to_cone_axis = atan2(P[j].Pos[2] - pos[2], P[j].Pos[1] - pos[1]);
 
-    // Check if the particle is inside the cones
-      if ((x >= cone_vertex_x && distance_to_cone_vertex <= distance_to_cone_vertex * tan(cone_angle)) ||
-        (x < cone_vertex_x && distance_to_cone_vertex <= distance_to_cone_vertex * tan(cone_angle))) 
+// Check if the particle is inside the cones
+      if ((P[j].Pos[0] >= pos[0] && distance_to_cone_vertex <= distance_to_cone_vertex * tan(cone_angle)) ||
+        (P[j].Pos[0] < pos[0] && distance_to_cone_vertex <= distance_to_cone_vertex * tan(cone_angle))) 
         {
           if (angle_to_cone_axis >= -cone_angle && angle_to_cone_axis <= cone_angle) 
             {
