@@ -278,26 +278,29 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
     {
       j = Thread[threadid].Ngblist[n];
 
-/*jet along 0-axis*/    
+/*modify for jet along 0-axis*/    
+
+/*positive and negative jet axes*/
+      double pos_x_axis[3] = {1, 0, 0};
+      double neg_x_axis[3] = {-1, 0, 0};
+      
+/*jet angle*/
+      double theta = M_PI/4;
   
-// Calculate the distance to the cone vertex
-      distance_to_cone_vertex = sqrt(pow(P[j].Pos[0] - pos[0], 2.0) + pow(P[j].Pos[1] - pos[1], 2.0) + pow(P[j].Pos[2] - pos[2], 2.0));
-
-// Calculate the angle between the particle's position and the x-axis
-      angle_to_cone_axis = atan2(P[j].Pos[2] - pos[2], P[j].Pos[1] - pos[1]);
-
-// Check if the particle is inside the cones
-      if ((P[j].Pos[0] >= pos[0] && distance_to_cone_vertex <= distance_to_cone_vertex * tan(cone_angle)) ||
-        (P[j].Pos[0] < pos[0] && distance_to_cone_vertex <= distance_to_cone_vertex * tan(cone_angle))) 
+// Calculate the vector to the cone vertex
+      double vx = P[j].Pos[0] - pos[0]; // x-component of the vector from the vertex to the point
+      double vy = P[j].Pos[1] - pos[1]; // y-component of the vector from the vertex to the point
+      double vz = P[j].Pos[2] - pos[2]; // z-component of the vector from the vertex to the point
+    
+      double pos_x_angle = acos((vx*pos_x_axis[0] + vy*pos_x_axis[1] + vz*pos_x_axis[2]) / (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2))));
+      double neg_x_angle = acos((vx*neg_x_axis[0] + vy*neg_x_axis[1] + vz*neg_x_axis[2]) / (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) + pow(neg_x_axis[2], 2))));
+    
+      if((pos_x_angle <= theta) || (neg_x_angle <= theta))
         {
-          if (angle_to_cone_axis >= -cone_angle && angle_to_cone_axis <= cone_angle) 
-            {
-              SphP[j].BhFeed += energyfeed/ngbmass*P[j].Mass;
-              All.EnergyExchange[0] += energyfeed/ngbmass*P[j].Mass;
-            }
+          SphP[j].BhFeed += energyfeed/ngbmass*P[j].Mass;
+          All.EnergyExchange[0] += energyfeed/ngbmass*P[j].Mass;
         }
     }
-   
   /* Now collect the result at the right place 
   if(mode == MODE_LOCAL_PARTICLES)
     out2particle(&out, target, MODE_LOCAL_PARTICLES);
