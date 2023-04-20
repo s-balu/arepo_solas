@@ -234,6 +234,10 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   double h, dt, dtime;
   MyDouble ngbmass, feed, energyfeed;
   MyDouble *pos;
+  double cone_angle = M_PI / 4.0; // cone angle of 45 degrees
+  double distance_to_cone_vertex;
+  double angle_to_cone_axis;
+
 
   data_in local, *target_data;
   /*data_out out;*/
@@ -273,11 +277,23 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   for(n = 0; n < nfound; n++)
     {
       j = Thread[threadid].Ngblist[n];
-/*modify for jet along 0-axis*/      
-      if(fabs(pos[0] - P[j].Pos[0]) < 0.01 && fabs(pos[2] - P[j].Pos[2]) < 0.01)
+/*modify for jet along 0-axis*/    
+  
+// Calculate the distance to the cone vertex
+      distance_to_cone_vertex = sqrt(pow(P[j].Pos[0] - pos[0], 2.0) + pow(P[j].Pos[1] - pos[1], 2.0) + pow(P[j].Pos[2] - pos[2], 2.0));
+
+// Calculate the angle between the particle's position and the x-axis
+      angle_to_cone_axis = atan2(P[j].Pos[3] - pos[3], P[j].Pos[2] - pos[2]);
+
+    // Check if the particle is inside the cones
+      if ((x >= cone_vertex_x && distance_to_cone_vertex <= distance_to_cone_vertex * tan(cone_angle)) ||
+        (x < cone_vertex_x && distance_to_cone_vertex <= distance_to_cone_vertex * tan(cone_angle))) 
         {
-          SphP[j].BhFeed += energyfeed/ngbmass*P[j].Mass;
-          All.EnergyExchange[0] += energyfeed/ngbmass*P[j].Mass;
+          if (angle_to_cone_axis >= -cone_angle && angle_to_cone_axis <= cone_angle) 
+            {
+              SphP[j].BhFeed += energyfeed/ngbmass*P[j].Mass;
+              All.EnergyExchange[0] += energyfeed/ngbmass*P[j].Mass;
+            }
         }
     }
    
