@@ -1460,12 +1460,13 @@ extern struct sph_particle_data
 #ifdef BLACKHOLES
 extern struct bh_particle_data
 {
+MyIDType PID;
+MyFloat Hsml;
 MyFloat Density;
 MyDouble NgbMass;
 MyDouble EnergyRateFeed;
-MyFloat Hsml;
-MyIDType PID;
 integertime NgbMinStep;
+MyDouble VelocityGas[3];
 }  *BhP,          
     *DomainBhBuf; 
 
