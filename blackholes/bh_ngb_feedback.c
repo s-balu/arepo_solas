@@ -246,7 +246,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   MyDouble *pos, *velocity_gas;
 
   data_in local, *target_data;
-  /*data_out out;*/
+  data_out out;
 
   if(mode == MODE_LOCAL_PARTICLES)
     {
@@ -292,8 +292,10 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 
 /*get soundspeed*/
       sound_speed = sqrt(GAMMA * pressure / density);
+      
+      double velocity_gas_norm = sqrt(velocity_gas[0]*velocity_gas[0] + velocity_gas[1]*velocity_gas[1] + velocity_gas[2]*velocity_gas[2]); 
 
-      double denominator = (sound_speed*sound_speed + velocity_gas*velocity_gas);
+      double denominator = (sound_speed*sound_speed + velocity_gas_norm*velocity_gas_norm);
       if(denominator > 0)
         {
           double denominator_inv = 1. / sqrt(denominator);
@@ -308,13 +310,13 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   
   /*limit by Eddington accretion rate*/
   double EddingtonRate =
-      4. * M_PI * GRAVITY * bh_mass * PROTONMASS / (Epsilon_r * CLIGHT * THOMSON);
-  Eddington_rate *= All.UnitTime_in_s / All.UnitMass_in_g;
+      4. * M_PI * GRAVITY * bh_mass * PROTONMASS / (All.Epsilon_r * CLIGHT * THOMPSON);
+  EddingtonRate *= All.UnitTime_in_s / All.UnitMass_in_g;
   
-  accretion_rate = min(BondiRate, EddingtonRate);
+  accretion_rate = fmin(BondiRate, EddingtonRate);
   
   /*efficiency*/
-  accretion_rate *= (1. - Epsilon_r);
+  accretion_rate *= (1. - All.Epsilon_r);
   
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
   for(n = 0; n < nfound; n++)
