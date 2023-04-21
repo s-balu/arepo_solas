@@ -89,14 +89,14 @@ static data_in *DataIn, *DataGet;
  */
 static void particle2in(data_in *in, int i, int firstnode)
 {
-  in->Pos[0]      = PPB(i).Pos[0];
-  in->Pos[1]      = PPB(i).Pos[1];
-  in->Pos[2]      = PPB(i).Pos[2];
-  in->Vel[0]      = PPB(i).Vel[0];
-  in->Vel[1]      = PPB(i).Vel[1];
-  in->Vel[2]      = PPB(i).Vel[2];
-  in->Hsml        = BhP[i].Hsml;
-  in->Firstnode   = firstnode;
+  in->Pos[0]        = PPB(i).Pos[0];
+  in->Pos[1]        = PPB(i).Pos[1];
+  in->Pos[2]        = PPB(i).Pos[2];
+  in->Vel[0]        = PPB(i).Vel[0];
+  in->Vel[1]        = PPB(i).Vel[1];
+  in->Vel[2]        = PPB(i).Vel[2];
+  in->Hsml          = BhP[i].Hsml;
+  in->Firstnode     = firstnode;
 }  
 
 /*! \brief Local data structure that holds results acquired on remote
@@ -111,6 +111,7 @@ typedef struct
   MyFloat Ngb;
   integertime NgbMinStep;
   MyDouble VelocityGas[3];
+  MyFloat InternalEnergyGas;
 } data_out;
 
 static data_out *DataResult, *DataOut;
@@ -130,26 +131,28 @@ static void out2particle(data_out *out, int i, int mode)
 {
   if(mode == MODE_LOCAL_PARTICLES) /* initial store */
     {
-      BhP[i].NgbMass          = out->Mass;
-      BhNumNgb[i]             = out->Ngb;
-      BhP[i].Density          = out->Rho;
-      BhDhsmlDensityFactor[i] = out->DhsmlDensity;
-      BhP[i].NgbMinStep       = out->NgbMinStep;
-      BhP[i].VelocityGas[0]   = out->VelocityGas[0];
-      BhP[i].VelocityGas[1]   = out->VelocityGas[1];
-      BhP[i].VelocityGas[2]   = out->VelocityGas[2];
+      BhP[i].NgbMass           = out->Mass;
+      BhNumNgb[i]              = out->Ngb;
+      BhP[i].Density           = out->Rho;
+      BhDhsmlDensityFactor[i]  = out->DhsmlDensity;
+      BhP[i].NgbMinStep        = out->NgbMinStep;
+      BhP[i].VelocityGas[0]    = out->VelocityGas[0];
+      BhP[i].VelocityGas[1]    = out->VelocityGas[1];
+      BhP[i].VelocityGas[2]    = out->VelocityGas[2];
+      BhP[i].InternalEnergyGas = out->InternalEnergyGas;
     }
   else /* combine */
     {
-      BhP[i].NgbMass          += out->Mass;
-      BhNumNgb[i]             += out->Ngb;
-      BhP[i].Density          += out->Rho;
-      BhDhsmlDensityFactor[i] += out->DhsmlDensity;
+      BhP[i].NgbMass           += out->Mass;
+      BhNumNgb[i]              += out->Ngb;
+      BhP[i].Density           += out->Rho;
+      BhDhsmlDensityFactor[i]  += out->DhsmlDensity;
       if(out->NgbMinStep < BhP[i].NgbMinStep)
-        BhP[i].NgbMinStep      = out->NgbMinStep;
-      BhP[i].VelocityGas[0]   += out->VelocityGas[0];
-      BhP[i].VelocityGas[1]   += out->VelocityGas[1];
-      BhP[i].VelocityGas[2]   += out->VelocityGas[2];
+        BhP[i].NgbMinStep       = out->NgbMinStep;
+      BhP[i].VelocityGas[0]    += out->VelocityGas[0];
+      BhP[i].VelocityGas[1]    += out->VelocityGas[1];
+      BhP[i].VelocityGas[2]    += out->VelocityGas[2];
+      BhP[i].InternalEnergyGas += out->InternalEnergyGas;
     }
 }
 
@@ -398,11 +401,11 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   double h, h2, hinv, hinv3, hinv4;
   MyFloat rho;
   double wk, dwk;
-  double dx, dy, dz, dvx, dvy, dvz, r, r2, u, mass_j;
+  double dx, dy, dz, dvx, dvy, dvz, r, r2, u, mass_j, rho_j;
   MyFloat weighted_numngb;
   MyFloat dhsmlrho;
   MyDouble *pos, *vel, *velocitygas;
-  MyDouble mass;
+  MyDouble mass, internal_energy_gas;
   integertime ngb_min_step;
   int bin = TIMEBINS;
    
@@ -440,7 +443,8 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 
   numngb = 0;
   rho = weighted_numngb = dhsmlrho = 0;
-  mass = 0;
+  mass = internal_energy_gas = 0;
+  velocitygas[0] = velocitygas[1] = velocitygas[2] = 0;
 
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
 
@@ -506,10 +510,16 @@ static int bh_density_evaluate(int target, int mode, int threadid)
             }
 
           mass_j = P[j].Mass;
+          if(SphP[j].Density > 0)
+            rho_j  = SphP[j].Density;
+          else
+            rho_j = 1;
 
-          velocitygas[0] += dvx*mass_j*wk
-          velocitygas[1] += dvy*mass_j*wk
-          velocitygas[2] += dvz*mass_j*wk
+          velocitygas[0] += dvx*mass_j/rho_j*wk;
+          velocitygas[1] += dvy*mass_j/rho_j*wk;
+          velocitygas[2] += dvz*mass_j/rho_j*wk;
+
+          internal_energy_gas += SphP[j].Utherm*mass_j/rho_j*wk;
 
           rho += FLT(mass_j * wk);
 
@@ -528,9 +538,10 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   out.Rho          = rho;
   out.Ngb          = weighted_numngb;
   out.DhsmlDensity = dhsmlrho;
-  out.VelocityGas[0]  = velocitygas[0]
-  out.VelocityGas[1]  = velocitygas[1]
-  out.VelocityGas[2]  = velocitygas[2]
+  out.VelocityGas[0]  = velocitygas[0];
+  out.VelocityGas[1]  = velocitygas[1];
+  out.VelocityGas[2]  = velocitygas[2];
+  out.InternalEnergyGas = internal_energy_gas;
 
   /* Now collect the result at the right place */
   if(mode == MODE_LOCAL_PARTICLES)

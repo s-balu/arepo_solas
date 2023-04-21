@@ -1467,6 +1467,7 @@ MyDouble NgbMass;
 MyDouble EnergyRateFeed;
 integertime NgbMinStep;
 MyDouble VelocityGas[3];
+MyFloat InternalEnergyGas;
 }  *BhP,          
     *DomainBhBuf; 
 
