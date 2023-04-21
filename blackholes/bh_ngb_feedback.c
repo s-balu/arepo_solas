@@ -73,10 +73,6 @@ typedef struct
   int Bin;
   MyDouble NgbMass;
   MyDouble Feed;
-  MyDouble VelocityGas[3];
-  MyFloat InternalEnergyGas;
-  MyFloat Density;
-  MyFloat BhMass;
 } data_in;
 
 static data_in *DataIn, *DataGet;
@@ -92,19 +88,13 @@ static data_in *DataIn, *DataGet;
  */
 static void particle2in(data_in *in, int i, int firstnode)
 {
-  in->Pos[0]            = PPB(i).Pos[0];
-  in->Pos[1]            = PPB(i).Pos[1];
-  in->Pos[2]            = PPB(i).Pos[2];
-  in->Bin               = PPB(i).TimeBinBh;
-  in->Hsml              = BhP[i].Hsml;
-  in->NgbMass           = BhP[i].NgbMass;
-  in->Feed              = BhP[i].EnergyRateFeed;
-  in->VelocityGas[0]    = BhP[i].VelocityGas[0];
-  in->VelocityGas[1]    = BhP[i].VelocityGas[1];
-  in->VelocityGas[2]    = BhP[i].VelocityGas[2];
-  in->InternalEnergyGas = BhP[i].InternalEnergyGas;
-  in->Density           = BhP[i].Density;
-  in->BhMass            = PPB(i).Mass;
+  in->Pos[0]  = PPB(i).Pos[0];
+  in->Pos[1]  = PPB(i).Pos[1];
+  in->Pos[2]  = PPB(i).Pos[2];
+  in->Bin     = PPB(i).TimeBinBh;
+  in->Hsml    = BhP[i].Hsml;
+  in->NgbMass = BhP[i].NgbMass;
+  in->Feed    = BhP[i].EnergyRateFeed;
 
   in->Firstnode = firstnode;
 }
@@ -115,7 +105,7 @@ static void particle2in(data_in *in, int i, int firstnode)
 
 typedef struct
 {
-  MyFloat AccretionRate;
+
 } data_out;
 
 static data_out *DataResult, *DataOut;
@@ -135,11 +125,11 @@ static void out2particle(data_out *out, int i, int mode)
 {
   if(mode == MODE_LOCAL_PARTICLES) /* initial store */
     {
-      BhP[i].AccretionRate = out->AccretionRate;
+      return;
     }
   else /* combine */
     {
-      BhP[i].AccretionRate += out->AccretionRate;
+      return;
     }
 }
 
@@ -241,12 +231,12 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 {
   int j, n, bin;
   int numnodes, *firstnode;
-  double h, dt, dtime, pressure, sound_speed;
-  MyDouble ngbmass, feed, energyfeed, density, bh_mass, internal_energy_gas, accretion_rate;
-  MyDouble *pos, *velocity_gas;
+  double h, dt, dtime;
+  MyDouble ngbmass, feed, energyfeed;
+  MyDouble *pos;
 
   data_in local, *target_data;
-  data_out out;
+  /*data_out out;*/
 
   if(mode == MODE_LOCAL_PARTICLES)
     {
@@ -263,17 +253,13 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
       generic_get_numnodes(target, &numnodes, &firstnode);
     }
 
-  pos                 = target_data->Pos;
-  h                   = target_data->Hsml;
-  ngbmass             = target_data->NgbMass;
-  bin                 = target_data->Bin;
-  feed                = target_data->Feed;
-  velocity_gas        = target_data->VelocityGas;
-  density             = target_data->Density;
-  bh_mass             = target_data->BhMass;
-  internal_energy_gas = target_data->InternalEnergyGas;
+  pos     = target_data->Pos;
+  h       = target_data->Hsml;
+  ngbmass = target_data->NgbMass;
+  bin     = target_data->Bin;
+  feed    = target_data->Feed;
 
-/*get feedback energy from feedback rate*/
+/*get energy from rate*/
   dt    = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
   dtime = All.cf_atime * dt / All.cf_time_hubble_a;
   energyfeed = feed * dt;
@@ -283,41 +269,6 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   energyfeed = feed;
 #endif
 
-/*calculate bondi accretion rate*/
-  double BondiRate;
-/*get pressure*/
-  if(density>0)
-    {  
-      pressure = GAMMA_MINUS1 * density * internal_energy_gas;
-
-/*get soundspeed*/
-      sound_speed = sqrt(GAMMA * pressure / density);
-      
-      double velocity_gas_norm = sqrt(velocity_gas[0]*velocity_gas[0] + velocity_gas[1]*velocity_gas[1] + velocity_gas[2]*velocity_gas[2]); 
-
-      double denominator = (sound_speed*sound_speed + velocity_gas_norm*velocity_gas_norm);
-      if(denominator > 0)
-        {
-          double denominator_inv = 1. / sqrt(denominator);
-          BondiRate = 4. * M_PI * GRAVITY * GRAVITY * bh_mass * density *
-                   denominator_inv * denominator_inv * denominator_inv;
-        }
-      else
-        terminate("Invalid denominator in Bondi Accretion Rate");
-    }
-  else
-    BondiRate = 0;
-  
-  /*limit by Eddington accretion rate*/
-  double EddingtonRate =
-      4. * M_PI * GRAVITY * bh_mass * PROTONMASS / (All.Epsilon_r * CLIGHT * THOMPSON);
-  EddingtonRate *= All.UnitTime_in_s / All.UnitMass_in_g;
-  
-  accretion_rate = fmin(BondiRate, EddingtonRate);
-  
-  /*efficiency*/
-  accretion_rate *= (1. - All.Epsilon_r);
-  
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
   for(n = 0; n < nfound; n++)
     {
@@ -346,13 +297,11 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
           All.EnergyExchange[0] += energyfeed/ngbmass*P[j].Mass;
         }
     }
-  
-  out.AccretionRate = accretion_rate;
-
+  /* Now collect the result at the right place 
   if(mode == MODE_LOCAL_PARTICLES)
     out2particle(&out, target, MODE_LOCAL_PARTICLES);
   else
-    DataResult[target] = out;
+    DataResult[target] = out;*/
 
   return 0;
 }

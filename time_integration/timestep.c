@@ -264,32 +264,6 @@ void update_timesteps_from_gravity(void)
   TIMER_STOP(CPU_TIMELINE);
 }
 
-/*update bh-timestep at prior_mesh_construction based on ngb smallest timestep*/
-#ifdef BLACKHOLES
-void update_bh_timesteps(void)
-{
-  int idx, i, binold, bin;
-  integertime ti_step;
-
-  for(idx = 0; idx < TimeBinsBh.NActiveParticles; idx++)
-    {
-      i = TimeBinsBh.ActiveParticleList[idx];
-      if(i < 0)
-        continue;
-      
-      ti_step = BPP(i).NgbMinStep;
-      binold = P[i].TimeBinBh;
-      timebins_get_bin_and_do_validity_checks(ti_step, &bin, binold);
-
-      if(bin < binold || binold == 0) /*need the "or" condition for first loop for these ngb criteria*/
-        {
-          timebin_move_particle(&TimeBinsBh, i, binold, bin);
-          P[i].TimeBinBh = bin;
-        }
-    }
-}
-#endif
-
 #ifdef PMGRID
 /*! \brief Returns particle-mesh timestep as an integer-time variable.
  *
