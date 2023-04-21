@@ -123,3 +123,13 @@ void update_list_of_active_bh_particles(void)
   TimeBinsBh.GlobalNActiveParticles = out;
 }
 
+static int int_compare(const void *a, const void *b)
+{
+  if(*((int *)a) < *((int *)b))
+    return -1;
+
+  if(*((int *)a) > *((int *)b))
+    return +1;
+
+  return 0;
+}
