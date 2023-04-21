@@ -1224,9 +1224,10 @@ extern struct global_data_all_processes
   int FeedbackFlag;
 
   /*for parameter file*/
-  double FeedbackTime;
   int BhDesNumNgb;
   int BhMaxNumNgbDeviation;
+  double FeedbackTime;
+  double Epsilon_r;
 #endif
 } All;
 
@@ -1468,6 +1469,7 @@ MyDouble EnergyRateFeed;
 integertime NgbMinStep;
 MyDouble VelocityGas[3];
 MyFloat InternalEnergyGas;
+MyFloat AccretionRate;
 }  *BhP,          
     *DomainBhBuf; 
 
