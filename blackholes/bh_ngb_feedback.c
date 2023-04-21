@@ -307,10 +307,14 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
     BondiRate = 0;
   
   /*limit by Eddington accretion rate*/
-  double Eddington_rate =
+  double EddingtonRate =
       4. * M_PI * GRAVITY * bh_mass * PROTONMASS / (Epsilon_r * CLIGHT * THOMSON);
-
-  accretion_rate = (1. - Epsilon_r) * BondiRate;
+  Eddington_rate *= All.UnitTime_in_s / All.UnitMass_in_g;
+  
+  accretion_rate = min(BondiRate, EddingtonRate);
+  
+  /*efficiency*/
+  accretion_rate *= (1. - Epsilon_r);
   
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
   for(n = 0; n < nfound; n++)
