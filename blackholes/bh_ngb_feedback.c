@@ -234,10 +234,6 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   double h, dt, dtime;
   MyDouble ngbmass, feed, energyfeed;
   MyDouble *pos;
-  double cone_angle = M_PI / 4.0; // cone angle of 45 degrees
-  double distance_to_cone_vertex;
-  double angle_to_cone_axis;
-
 
   data_in local, *target_data;
   /*data_out out;*/

@@ -404,7 +404,8 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   double dx, dy, dz, dvx, dvy, dvz, r, r2, u, mass_j, rho_j;
   MyFloat weighted_numngb;
   MyFloat dhsmlrho;
-  MyDouble *pos, *vel, *velocitygas;
+  MyDouble *pos, *vel;
+  MyDouble velocity_gas[3];
   MyDouble mass, internal_energy_gas;
   integertime ngb_min_step;
   int bin = TIMEBINS;
@@ -444,7 +445,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   numngb = 0;
   rho = weighted_numngb = dhsmlrho = 0;
   mass = internal_energy_gas = 0;
-  velocitygas[0] = velocitygas[1] = velocitygas[2] = 0;
+  velocity_gas[0] = velocity_gas[1] = velocity_gas[2] = 0;
 
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
 
@@ -515,9 +516,9 @@ static int bh_density_evaluate(int target, int mode, int threadid)
           else
             rho_j = 1;
 
-          velocitygas[0] += dvx*mass_j/rho_j*wk;
-          velocitygas[1] += dvy*mass_j/rho_j*wk;
-          velocitygas[2] += dvz*mass_j/rho_j*wk;
+          velocity_gas[0] += dvx*mass_j/rho_j*wk;
+          velocity_gas[1] += dvy*mass_j/rho_j*wk;
+          velocity_gas[2] += dvz*mass_j/rho_j*wk;
 
           internal_energy_gas += SphP[j].Utherm*mass_j/rho_j*wk;
 
@@ -538,9 +539,9 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   out.Rho          = rho;
   out.Ngb          = weighted_numngb;
   out.DhsmlDensity = dhsmlrho;
-  out.VelocityGas[0]  = velocitygas[0];
-  out.VelocityGas[1]  = velocitygas[1];
-  out.VelocityGas[2]  = velocitygas[2];
+  out.VelocityGas[0]  = velocity_gas[0];
+  out.VelocityGas[1]  = velocity_gas[1];
+  out.VelocityGas[2]  = velocity_gas[2];
   out.InternalEnergyGas = internal_energy_gas;
 
   /* Now collect the result at the right place */
