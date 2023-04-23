@@ -76,7 +76,7 @@ void update_bh_timesteps(void)
       
       ti_step = BPP(i).NgbMinStep;
       binold = P[i].TimeBinBh;
-      timebins_get_bin_and_do_validity_checks(ti_step, &bin, binold);
+      bin_get_timestep_bin(ti_step);
 
       if(bin < binold || binold == 0) /*need the "or" condition for first loop for these ngb criteria*/
         {
