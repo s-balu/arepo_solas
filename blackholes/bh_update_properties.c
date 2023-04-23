@@ -38,7 +38,7 @@ void update_bh_accretion_rate(void)
           if(denominator > 0)
             {
               denominator_inv = 1. / sqrt(denominator);
-              BondiRate = 4. * M_PI * GRAVITY * GRAVITY * PPB(i).Mass * density *
+              BondiRate = 4. * M_PI * All.G * All.G * PPB(i).Mass * density *
                    denominator_inv * denominator_inv * denominator_inv;
             }
           else
@@ -48,9 +48,8 @@ void update_bh_accretion_rate(void)
         BondiRate = 0;
   
 /*limit by Eddington accretion rate*/
-      EddingtonRate = 4. * M_PI * GRAVITY * PPB(i).Mass * PROTONMASS / (All.Epsilon_r * CLIGHT * THOMPSON);
-      EddingtonRate *= All.UnitTime_in_s / All.UnitMass_in_g;
-  
+      EddingtonRate = 4. * M_PI * GRAVITY * (PPB(i).Mass / All.UnitMass_in_g )* PROTONMASS / (All.Epsilon_r * CLIGHT * THOMPSON);
+      EddingtonRate *=  (All.UnitMass_in_g / All.UnitTime_in_s)
       accretion_rate = fmin(BondiRate, EddingtonRate);
   
 /*efficiency*/
