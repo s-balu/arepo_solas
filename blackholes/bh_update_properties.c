@@ -8,7 +8,7 @@
 #include "../main/allvars.h"
 #include "../main/proto.h"
 
-static int int_compare(const void *a, const void *b)
+static int int_compare(const void *a, const void *b);
 
 void update_bh_accretion_rate(void)
 {

@@ -407,7 +407,7 @@ void calculate_non_standard_physics_end_of_step(void)
     {   
       if(All.FeedbackFlag > 0)
         {
-          struct pv_update_data pvd
+          struct pv_update_data pvd;
           if(All.ComovingIntegrationOn)
             {
               pvd.atime    = All.Time;
@@ -434,7 +434,7 @@ void calculate_non_standard_physics_end_of_step(void)
                   /*update internal energy*/
                   update_internal_energy(P, SphP, i, &pvd);
                   /*update pressure*/
-                  set_pressure_of_cell_internal(P, SphP, i)
+                  set_pressure_of_cell_internal(P, SphP, i);
                   /*set feed flags to zero*/
                   SphP[i].ThermalFeed = SphP[i].KineticFeed = 0;
                 }
