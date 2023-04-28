@@ -439,7 +439,7 @@ void calculate_non_standard_physics_end_of_step(void)
                   SphP[i].ThermalFeed = SphP[i].KineticFeed = 0;
                 }
             }
-#ifdef SEDOV_BLAST
+#ifdef BURST_MODE
           All.FeedbackFlag = -1;
 #endif      
         }
@@ -447,7 +447,13 @@ void calculate_non_standard_physics_end_of_step(void)
   MPI_Reduce(&All.EnergyExchange, &All.EnergyExchangeTot, 2, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   MPI_Barrier(MPI_COMM_WORLD); // synchronize all tasks
   mpi_printf("Energy given by BH = %f, Energy taken up by gas particles = %f \n", All.EnergyExchangeTot[0], All.EnergyExchangeTot[1]);
+
+#ifdef BURST_MODE
+  if(All.EnergyExchangeTot[0] - All.EnergyExchangeTot[1] > 10)  
+    All.FeedbackFlag = 1;
+#endif   
 #endif 
+
 #ifdef COOLING
 #ifdef USE_SFR
   cooling_and_starformation();

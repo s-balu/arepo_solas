@@ -264,11 +264,6 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   dtime = All.cf_atime * dt / All.cf_time_hubble_a;
   energyfeed = feed * dt;
 
- /*in the case of a sedov blast the rate parameter has to represent the energy injected*/ 
-#ifdef SEDOV_BLAST
-  energyfeed = feed;
-#endif
-
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
   for(n = 0; n < nfound; n++)
     {
