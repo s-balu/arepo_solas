@@ -412,11 +412,14 @@ void calculate_non_standard_physics_end_of_step(void)
               int i = TimeBinsHydro.ActiveParticleList[idx];
               if(i < 0)
               continue;
-              SphP[i].Energy += SphP[i].BhFeed;
-              All.EnergyExchange[1] += SphP[i].BhFeed;
-              SphP[i].BhFeed = 0;
+              if(SphP[i].ThermalFeed > 0 || SphP[i].KineticFeed > 0)
+                {
+                  SphP[i].Energy += SphP[i].ThermalFeed + SphP[i].KineticFeed;
+                  All.EnergyExchange[1] += SphP[i].ThermalFeed + SphP[i].KineticFeed;
+                  SphP[i].ThermalFeed = SphP[i].KineticFeed = 0;
+                  
+                }
             }
-          update_primitive_variables();
 #ifdef SEDOV_BLAST
           All.FeedbackFlag = -1;
 #endif      

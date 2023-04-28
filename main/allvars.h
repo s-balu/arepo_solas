@@ -1452,7 +1452,8 @@ extern struct sph_particle_data
 #endif /* #ifdef ADDBACKGROUNDGRID */
     
 #ifdef BLACKHOLES
-  MyDouble BhFeed;
+  MyDouble ThermalFeed;
+  MyDouble KineticFeed;
 #endif
 
 } * SphP,          /*!< holds SPH particle data on local processor */
