@@ -387,8 +387,7 @@ void calculate_non_standard_physics_prior_mesh_construction(void)
   update_bh_accretion_rate();
    if(All.Time >= All.FeedbackTime)
     {   
-      if(All.FeedbackFlag > 0)
-        bh_ngb_feedback();
+      bh_ngb_feedback();
     }
 #endif
 }
