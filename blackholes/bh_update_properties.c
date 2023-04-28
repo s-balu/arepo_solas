@@ -49,7 +49,7 @@ void update_bh_accretion_rate(void)
   
 /*limit by Eddington accretion rate*/
       EddingtonRate = 4. * M_PI * GRAVITY * (PPB(i).Mass / All.UnitMass_in_g )* PROTONMASS / (All.Epsilon_r * CLIGHT * THOMPSON);
-      EddingtonRate *=  (All.UnitMass_in_g / All.UnitTime_in_s)
+      EddingtonRate *=  (All.UnitMass_in_g / All.UnitTime_in_s);
       accretion_rate = fmin(BondiRate, EddingtonRate);
   
 /*efficiency*/
@@ -76,7 +76,7 @@ void update_bh_timesteps(void)
       
       ti_step = BPP(i).NgbMinStep;
       binold = P[i].TimeBinBh;
-      bin_get_timestep_bin(ti_step);
+      bin = get_timestep_bin(ti_step);
 
       if(bin < binold || binold == 0) /*need the "or" condition for first loop for these ngb criteria*/
         {
