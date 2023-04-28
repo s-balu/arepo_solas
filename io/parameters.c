@@ -522,6 +522,10 @@ void read_parameter_file(char *fname)
       strcpy(tag[nt], "Epsilon_r");
       addr[nt] = &All.Epsilon_r;
       id[nt++] = REAL;
+
+      strcpy(tag[nt], "Ftherm");
+      addr[nt] = &All.Ftherm;
+      id[nt++] = REAL;
 #endif
 
       if((fd = fopen(fname, "r")))

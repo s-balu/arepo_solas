@@ -293,8 +293,8 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
     
       if((pos_x_angle <= theta) || (neg_x_angle <= theta))
         {
-          SphP[j].ThermalFeed += 0.5 * energyfeed/ngbmass*P[j].Mass;
-          SphP[j].KineticFeed += 0.5 * energyfeed/ngbmass*P[j].Mass;
+          SphP[j].ThermalFeed += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
+          SphP[j].KineticFeed += (1-All.Ftherm) * energyfeed/ngbmass*P[j].Mass;
           All.EnergyExchange[0] += energyfeed/ngbmass*P[j].Mass;
         }
     }
