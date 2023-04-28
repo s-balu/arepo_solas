@@ -426,8 +426,11 @@ void calculate_non_standard_physics_end_of_step(void)
                   /*update total energy*/
                   SphP[i].Energy += SphP[i].ThermalFeed + SphP[i].KineticFeed;
                   All.EnergyExchange[1] += SphP[i].ThermalFeed + SphP[i].KineticFeed;
-                  /*update momentum*/
-                  SphP[i].Momentum[0] += sqrt(2 * P[i].Mass * SphP[i].KineticFeed);
+                  /*update momentum -> include flag for momentum direction*/ 
+                  if(P[i].Pos[0] >= 0.5)
+                    SphP[i].Momentum[0] += sqrt(2 * P[i].Mass * SphP[i].KineticFeed);
+                  if(P[i].Pos[0] < 0.5)
+                    SphP[i].Momentum[0] -= sqrt(2 * P[i].Mass * SphP[i].KineticFeed);
                   /*update velocities*/
                   update_primitive_variables_single(P, SphP, i, &pvd);
                   /*update internal energy*/
