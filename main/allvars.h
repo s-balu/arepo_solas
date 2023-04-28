@@ -1470,8 +1470,10 @@ MyDouble NgbMass;
 MyDouble EnergyRateFeed;
 integertime NgbMinStep;
 MyDouble VelocityGas[3];
+MyDouble CircularVelocityGas[3];
 MyFloat InternalEnergyGas;
 MyFloat AccretionRate;
+MyFloat AngularMomentum;
 }  *BhP,          
     *DomainBhBuf; 
 
