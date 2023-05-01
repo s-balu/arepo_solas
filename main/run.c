@@ -402,58 +402,7 @@ void calculate_non_standard_physics_prior_mesh_construction(void)
 void calculate_non_standard_physics_end_of_step(void)
 {
 #ifdef BLACKHOLES
-  if(All.Time >= All.FeedbackTime)
-    {   
-      if(All.FeedbackFlag > 0)
-        {
-          struct pv_update_data pvd;
-          if(All.ComovingIntegrationOn)
-            {
-              pvd.atime    = All.Time;
-              pvd.hubble_a = hubble_function(All.Time);
-              pvd.a3inv    = 1 / (All.Time * All.Time * All.Time);
-            }
-          else
-            pvd.atime = pvd.hubble_a = pvd.a3inv = 1.0;
-
-          for(int idx = 0; idx < TimeBinsHydro.NActiveParticles; idx++)
-            {
-              int i = TimeBinsHydro.ActiveParticleList[idx];
-              if(i < 0)
-              continue;
-              if(SphP[i].ThermalFeed > 0 || SphP[i].KineticFeed > 0)
-                {
-                  /*update total energy*/
-                  SphP[i].Energy += SphP[i].ThermalFeed + SphP[i].KineticFeed;
-                  All.EnergyExchange[1] += SphP[i].ThermalFeed + SphP[i].KineticFeed;
-                  /*update momentum -> include flag for momentum direction*/ 
-                  if(P[i].Pos[0] >= 0.5)
-                    SphP[i].Momentum[0] += sqrt(2 * P[i].Mass * SphP[i].KineticFeed);
-                  if(P[i].Pos[0] < 0.5)
-                    SphP[i].Momentum[0] -= sqrt(2 * P[i].Mass * SphP[i].KineticFeed);
-                  /*update velocities*/
-                  update_primitive_variables_single(P, SphP, i, &pvd);
-                  /*update internal energy*/
-                  update_internal_energy(P, SphP, i, &pvd);
-                  /*update pressure*/
-                  set_pressure_of_cell_internal(P, SphP, i);
-                  /*set feed flags to zero*/
-                  SphP[i].ThermalFeed = SphP[i].KineticFeed = 0;
-                }
-            }
-#ifdef BURST_MODE
-          All.FeedbackFlag = -1;
-#endif      
-        }
-    }
-  MPI_Reduce(&All.EnergyExchange, &All.EnergyExchangeTot, 2, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-  MPI_Barrier(MPI_COMM_WORLD); // synchronize all tasks
-  mpi_printf("Energy given by BH = %f, Energy taken up by gas particles = %f \n", All.EnergyExchangeTot[0], All.EnergyExchangeTot[1]);
-
-#ifdef BURST_MODE
-  if(All.EnergyExchangeTot[0] - All.EnergyExchangeTot[1] > 10)  
-    All.FeedbackFlag = 1;
-#endif   
+  perform_end_of_step_bh_physics();
 #endif 
 
 #ifdef COOLING

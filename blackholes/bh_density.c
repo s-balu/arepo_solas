@@ -531,9 +531,9 @@ static int bh_density_evaluate(int target, int mode, int threadid)
           velocity_gas[1] += dvy*mass_j/rho_j*wk;
           velocity_gas[2] += dvz*mass_j/rho_j*wk;
 
-          velocity_gas_circular[0] += (dy * dvz - dz * dvy)*mass_j/rho_j*wk;
-          velocity_gas_circular[1] += (dz * dvx - dx * dvz)*mass_j/rho_j*wk;
-          velocity_gas_circular[2] += (dx * dvy - dy * dvx)*mass_j/rho_j*wk;
+          velocity_gas_circular[0] -= (dy * dvz - dz * dvy)*mass_j/rho_j*wk;
+          velocity_gas_circular[1] -= (dz * dvx - dx * dvz)*mass_j/rho_j*wk;
+          velocity_gas_circular[2] -= (dx * dvy - dy * dvx)*mass_j/rho_j*wk;
 
           internal_energy_gas += SphP[j].Utherm*mass_j/rho_j*wk;
 

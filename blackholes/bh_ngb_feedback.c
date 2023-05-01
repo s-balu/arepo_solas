@@ -72,6 +72,7 @@ typedef struct
   int Firstnode;
   int Bin;
   MyDouble NgbMass;
+  MyDouble AccretionRate;
   MyDouble Feed;
 } data_in;
 
@@ -88,15 +89,16 @@ static data_in *DataIn, *DataGet;
  */
 static void particle2in(data_in *in, int i, int firstnode)
 {
-  in->Pos[0]  = PPB(i).Pos[0];
-  in->Pos[1]  = PPB(i).Pos[1];
-  in->Pos[2]  = PPB(i).Pos[2];
-  in->Bin     = PPB(i).TimeBinBh;
-  in->Hsml    = BhP[i].Hsml;
-  in->NgbMass = BhP[i].NgbMass;
-  in->Feed    = BhP[i].EnergyRateFeed;
+  in->Pos[0]        = PPB(i).Pos[0];
+  in->Pos[1]        = PPB(i).Pos[1];
+  in->Pos[2]        = PPB(i).Pos[2];
+  in->Hsml          = BhP[i].Hsml;
+  in->NgbMass       = BhP[i].NgbMass;
+  in->Bin           = PPB(i).TimeBinBh;
+  in->AccretionRate = BhP[i].AccretionRate;
+  in->Feed          = BhP[i].EnergyRateFeed;
 
-  in->Firstnode = firstnode;
+  in->Firstnode     = firstnode;
 }
 
 /*! \brief Local data structure that holds results acquired on remote
@@ -232,7 +234,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   int j, n, bin;
   int numnodes, *firstnode;
   double h, dt, dtime;
-  MyDouble ngbmass, feed, energyfeed;
+  MyDouble ngbmass, accretion_rate, mass_to_accrete, feed, energyfeed;
   MyDouble *pos;
 
   data_in local, *target_data;
@@ -253,15 +255,20 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
       generic_get_numnodes(target, &numnodes, &firstnode);
     }
 
-  pos     = target_data->Pos;
-  h       = target_data->Hsml;
-  ngbmass = target_data->NgbMass;
-  bin     = target_data->Bin;
-  feed    = target_data->Feed;
+  pos            = target_data->Pos;
+  h              = target_data->Hsml;
+  ngbmass        = target_data->NgbMass;
+  bin            = target_data->Bin;
+  accretion_rate = target_data->AccretionRate; 
+  feed           = target_data->Feed;
 
-/*get energy from rate*/
+
+/*bh timestep*/
   dt    = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
   dtime = All.cf_atime * dt / All.cf_time_hubble_a;
+/*get accreted mass from accretion rate*/
+  mass_to_accrete = accretion_rate * dt; 
+/*get feedback energy from feedback rate*/
   energyfeed = feed * dt;
 
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
@@ -278,18 +285,20 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 /*jet angle*/
       double theta = M_PI/4;
   
-// Calculate the vector to the cone vertex
+/*calculate the vector to the cone vertex*/
       double vx = P[j].Pos[0] - pos[0]; // x-component of the vector from the vertex to the point
       double vy = P[j].Pos[1] - pos[1]; // y-component of the vector from the vertex to the point
       double vz = P[j].Pos[2] - pos[2]; // z-component of the vector from the vertex to the point
-    
+/*calculate angles*/    
       double pos_x_angle = acos((vx*pos_x_axis[0] + vy*pos_x_axis[1] + vz*pos_x_axis[2]) / (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2))));
       double neg_x_angle = acos((vx*neg_x_axis[0] + vy*neg_x_axis[1] + vz*neg_x_axis[2]) / (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) + pow(neg_x_axis[2], 2))));
-    
+/*check if particle is inside the cone*/    
       if((pos_x_angle <= theta) || (neg_x_angle <= theta))
         {
-          SphP[j].ThermalFeed += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
-          SphP[j].KineticFeed += (1-All.Ftherm) * energyfeed/ngbmass*P[j].Mass;
+/*split kinetic and thermal energy feed*/
+          SphP[j].MassDrain      = mass_to_accrete/ngbmass*P[j].Mass;
+          SphP[j].ThermalFeed   += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
+          SphP[j].KineticFeed   += (1-All.Ftherm) * energyfeed/ngbmass*P[j].Mass;
           All.EnergyExchange[0] += energyfeed/ngbmass*P[j].Mass;
         }
     }

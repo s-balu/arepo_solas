@@ -1455,6 +1455,7 @@ extern struct sph_particle_data
 #ifdef BLACKHOLES
   MyDouble ThermalFeed;
   MyDouble KineticFeed;
+  MyDouble MassDrain;
 #endif
 
 } * SphP,          /*!< holds SPH particle data on local processor */
@@ -1473,7 +1474,7 @@ MyDouble VelocityGas[3];
 MyDouble CircularVelocityGas[3];
 MyDouble InternalEnergyGas;
 MyDouble AccretionRate;
-MyDouble AngularMomentum;
+MyDouble AngularMomentum[3];
 }  *BhP,          
     *DomainBhBuf; 
 
