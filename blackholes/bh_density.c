@@ -469,14 +469,14 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 /*compute the bh-ngb-mass*/
       mass += P[j].Mass;
 
-/*compute bh->cell position and velocity vectors*/
+/*compute bh->cell position and velocity vectors: posBhP-posSphP while velSphP-velBhP*/
       dx = pos[0] - P[j].Pos[0];
       dy = pos[1] - P[j].Pos[1];
       dz = pos[2] - P[j].Pos[2];
 
-      dvx = vel[0] - P[j].Vel[0];
-      dvy = vel[1] - P[j].Vel[1];
-      dvz = vel[2] - P[j].Vel[2];
+      dvx = P[j].Vel[0] - vel[0]; 
+      dvy = P[j].Vel[1] - vel[1]; 
+      dvz = P[j].Vel[2] - vel[2]; 
 
 /* now find the closest image in the given box size */
 #ifndef REFLECTIVE_X
