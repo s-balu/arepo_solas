@@ -147,21 +147,21 @@ void perform_end_of_step_bh_physics(void)
               continue;
               if(SphP[i].ThermalFeed > 0 || SphP[i].KineticFeed > 0)
                 {
-/*update total energy*/
+                  /*update total energy*/
                   SphP[i].Energy += SphP[i].ThermalFeed + SphP[i].KineticFeed;
                   All.EnergyExchange[1] += SphP[i].ThermalFeed + SphP[i].KineticFeed;
-/*update momentum -> include flag for momentum direction*/ 
+                  /*update momentum -> include flag for momentum direction*/ 
                   if(P[i].Pos[0] >= 0.5)
                     SphP[i].Momentum[0] += sqrt(2 * P[i].Mass * SphP[i].KineticFeed);
                   if(P[i].Pos[0] < 0.5)
                     SphP[i].Momentum[0] -= sqrt(2 * P[i].Mass * SphP[i].KineticFeed);
-/*update velocities*/
+                  /*update velocities*/
                   update_primitive_variables_single(P, SphP, i, &pvd);
-/*update internal energy*/
+                  /*update internal energy*/
                   update_internal_energy(P, SphP, i, &pvd);
-/*update pressure*/
+                  /*update pressure*/
                   set_pressure_of_cell_internal(P, SphP, i);
-/*set feed flags to zero*/
+                  /*set feed flags to zero*/
                   SphP[i].ThermalFeed = SphP[i].KineticFeed = 0;
                 }
             }

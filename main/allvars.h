@@ -1471,7 +1471,7 @@ MyDouble NgbMass;
 MyDouble EnergyRateFeed;
 integertime NgbMinStep;
 MyDouble VelocityGas[3];
-MyDouble CircularVelocityGas[3];
+MyDouble VelocityGasCircular[3];
 MyDouble InternalEnergyGas;
 MyDouble AccretionRate;
 MyDouble AngularMomentum[3];
