@@ -1464,16 +1464,16 @@ extern struct sph_particle_data
 extern struct bh_particle_data
 {
 MyIDType PID;
-MyFloat Hsml;
-MyFloat Density;
+MyDouble Hsml;
+MyDouble Density;
 MyDouble NgbMass;
 MyDouble EnergyRateFeed;
 integertime NgbMinStep;
 MyDouble VelocityGas[3];
 MyDouble CircularVelocityGas[3];
-MyFloat InternalEnergyGas;
-MyFloat AccretionRate;
-MyFloat AngularMomentum;
+MyDouble InternalEnergyGas;
+MyDouble AccretionRate;
+MyDouble AngularMomentum;
 }  *BhP,          
     *DomainBhBuf; 
 
