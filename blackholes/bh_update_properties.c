@@ -48,15 +48,14 @@ void update_bh_accretion_rate(void)
         BondiRate = 0;
   
 /*limit by Eddington accretion rate*/
-      EddingtonRate = 4. * M_PI * GRAVITY * (PPB(i).Mass / All.UnitMass_in_g )* PROTONMASS / (All.Epsilon_r * CLIGHT * THOMPSON);
-      EddingtonRate *=  (All.UnitMass_in_g / All.UnitTime_in_s);
+      EddingtonRate = 4. * M_PI * GRAVITY * (PPB(i).Mass * All.UnitMass_in_g)* PROTONMASS / (All.Epsilon_r * CLIGHT * THOMPSON);
+      EddingtonRate *=  (All.UnitTime_in_s / All.UnitMass_in_g);
       accretion_rate = fmin(BondiRate, EddingtonRate);
   
 /*efficiency*/
       accretion_rate *= (1. - All.Epsilon_r);
 
       BhP[i].AccretionRate = accretion_rate;
-
     }
 }
 
