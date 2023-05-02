@@ -62,7 +62,6 @@ void update_bh_accretion_rate(void)
 /*update bh-timestep at prior_mesh_construction based on ngb smallest timestep*/
 void update_bh_timesteps(void)
 {
-  
   int idx, i, binold, bin;
   integertime ti_step;
 
