@@ -1773,7 +1773,6 @@ enum iofields
   IO_BHDENSITY,
   IO_BHID,
   IO_BHHSML,
-  IO_BHEF,
   IO_TIMEBIN_BH,
   IO_TSTP_BH,
 #endif  
