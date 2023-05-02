@@ -89,6 +89,9 @@ void update_bh_timesteps(void)
 /*call this function after updating the bh-timebin to the ngb condition*/
 void update_list_of_active_bh_particles(void)
 {
+  if(NumBh == 0)
+    return;
+
   int i, n;
   TimeBinsBh.NActiveParticles = 0;
 
