@@ -62,8 +62,6 @@ void update_bh_accretion_rate(void)
 /*update bh-timestep at prior_mesh_construction based on ngb smallest timestep*/
 void update_bh_timesteps(void)
 {
-  if(NumBh == 0)
-    return;
   
   int idx, i, binold, bin;
   integertime ti_step;
@@ -89,9 +87,6 @@ void update_bh_timesteps(void)
 /*call this function as the reconstruct_timebins() bh version*/
 void reconstruct_bh_timebins(void)
 {
-  if(NumBh == 0)
-    return;
-  
   int i, bin;
 
   for(bin = 0; bin < TIMEBINS; bin++)
@@ -127,9 +122,6 @@ void reconstruct_bh_timebins(void)
 /*call this function after updating the bh-timebin to the ngb condition*/
 void update_list_of_active_bh_particles(void)
 {
-  if(NumBh == 0)
-    return;
-
   int i, n;
   TimeBinsBh.NActiveParticles = 0;
 
@@ -153,7 +145,6 @@ void update_list_of_active_bh_particles(void)
 
     mysort(TimeBinsBh.ActiveParticleList, TimeBinsBh.NActiveParticles, sizeof(int), int_compare);
 
-/*  
   n = 1;
   int in;
   long long out;
@@ -163,8 +154,6 @@ void update_list_of_active_bh_particles(void)
   sumup_large_ints(n, &in, &out);
 
   TimeBinsBh.GlobalNActiveParticles = out;
-  
-  */
 }
 
 void perform_end_of_step_bh_physics(void)
