@@ -74,11 +74,11 @@ void reconstruct_timebins(void)
       TimeBinsGravity.TimeBinCount[bin]   = 0;
       TimeBinsGravity.FirstInTimeBin[bin] = -1;
       TimeBinsGravity.LastInTimeBin[bin]  = -1;
-#ifdef BLACKHOLES
+/*#ifdef BLACKHOLES
       TimeBinsBh.TimeBinCount[bin]   = 0;
       TimeBinsBh.FirstInTimeBin[bin] = -1;
       TimeBinsBh.LastInTimeBin[bin]  = -1;
-#endif
+#endif*/
 #ifdef USE_SFR
       TimeBinSfr[bin] = 0;
 #endif

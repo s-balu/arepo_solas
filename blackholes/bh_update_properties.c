@@ -86,6 +86,41 @@ void update_bh_timesteps(void)
     }
 }
 
+/*call this function as the reconstruct_timebins() bh version*/
+void reconstruct_bh_timebins(void)
+{
+  int i, bin;
+
+  for(bin = 0; bin < TIMEBINS; bin++)
+    {
+      TimeBinsBh.TimeBinCount[bin]   = 0;
+      TimeBinsBh.FirstInTimeBin[bin] = -1;
+      TimeBinsBh.LastInTimeBin[bin]  = -1;
+    }
+  
+  for(i = 0; i < NumPart; i++)
+    {
+      if(P[i].Type != 5)
+        continue;
+      bin = P[i].TimeBinBh;
+
+      if(TimeBinsBh.TimeBinCount[bin] > 0)
+        {
+          TimeBinsBh.PrevInTimeBin[i]                                  = TimeBinsBh.LastInTimeBin[bin];
+          TimeBinsBh.NextInTimeBin[i]                                  = -1;
+          TimeBinsBh.NextInTimeBin[TimeBinsBh.LastInTimeBin[bin]]      = i;
+          TimeBinsBh.LastInTimeBin[bin]                                = i;
+        }
+      else
+        {
+          TimeBinsBh.FirstInTimeBin[bin] = TimeBinsBh.LastInTimeBin[bin] = i;
+          TimeBinsBh.PrevInTimeBin[i] = TimeBinsBh.NextInTimeBin[i] = -1;
+        }
+      TimeBinsBh.TimeBinCount[bin]++;
+    }
+  update_list_of_active_bh_particles();
+}
+
 /*call this function after updating the bh-timebin to the ngb condition*/
 void update_list_of_active_bh_particles(void)
 {
@@ -97,8 +132,8 @@ void update_list_of_active_bh_particles(void)
 
   for(n = 0; n < TIMEBINS; n++)
     {
-      if(TimeBinSynchronized[n])
-        {
+      //if(TimeBinSynchronized[n]) --> need additional bh timestep criteria to include this
+        //{
           for(i = TimeBinsBh.FirstInTimeBin[n]; i >= 0; i = TimeBinsBh.NextInTimeBin[i])
             {
               if(P[i].Type == 5)
@@ -110,7 +145,7 @@ void update_list_of_active_bh_particles(void)
                   TimeBinsBh.NActiveParticles++;
                 }
             }
-        }
+        //}
     }
 
     mysort(TimeBinsBh.ActiveParticleList, TimeBinsBh.NActiveParticles, sizeof(int), int_compare);

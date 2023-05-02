@@ -567,6 +567,7 @@ int init(void)
 
 /*initialize bh_feedback variables*/
 #ifdef BLACKHOLES
+  reconstruct_bh_timebins();
   All.FeedbackFlag = 1;
   All.EnergyExchange[0] = All.EnergyExchange[1] = 0;
   double *exch = All.EnergyExchangeTot;

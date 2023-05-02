@@ -205,7 +205,7 @@ void find_timesteps_without_gravity(void)
       P[i].TimeBinHydro = bin;
     }
 #endif /* #ifdef FORCE_EQUAL_TIMESTEPS #else */
-
+/*
 #ifdef BLACKHOLES
   for(idx = 0; idx < TimeBinsBh.NActiveParticles; idx++)
     {
@@ -225,6 +225,7 @@ void find_timesteps_without_gravity(void)
       P[i].TimeBinBh = bin;
     }
 #endif
+*/
   TIMER_STOP(CPU_TIMELINE);
 }
 
@@ -467,12 +468,14 @@ integertime get_timestep_hydro(int p)
   return ti_step;
 }
 
+/*
 #ifdef BLACKHOLES
 integertime get_timestep_bh(int p, integertime ti_step)
 {
   return ti_step;
 }
 #endif
+*/
 
 /*! \brief Checks if timestep is a valid one.
  *
