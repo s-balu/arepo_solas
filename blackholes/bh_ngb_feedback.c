@@ -73,7 +73,6 @@ typedef struct
   int Bin;
   MyDouble NgbMass;
   MyDouble AccretionRate;
-  MyDouble Feed;
 } data_in;
 
 static data_in *DataIn, *DataGet;
@@ -96,7 +95,6 @@ static void particle2in(data_in *in, int i, int firstnode)
   in->NgbMass       = BhP[i].NgbMass;
   in->Bin           = PPB(i).TimeBinBh;
   in->AccretionRate = BhP[i].AccretionRate;
-  in->Feed          = BhP[i].EnergyRateFeed;
 
   in->Firstnode     = firstnode;
 }
@@ -234,7 +232,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   int j, n, bin;
   int numnodes, *firstnode;
   double h, dt, dtime;
-  MyDouble ngbmass, accretion_rate, mass_to_accrete, feed, energyfeed;
+  MyDouble ngbmass, accretion_rate, mass_to_accrete;
   MyDouble *pos;
 
   data_in local, *target_data;
@@ -260,7 +258,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   ngbmass        = target_data->NgbMass;
   bin            = target_data->Bin;
   accretion_rate = target_data->AccretionRate; 
-  feed           = target_data->Feed;
+  
 
 
 /*bh timestep*/
@@ -268,8 +266,9 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   dtime = All.cf_atime * dt / All.cf_time_hubble_a;
 /*get accreted mass from accretion rate*/
   mass_to_accrete = accretion_rate * dt; 
-/*get feedback energy from feedback rate*/
-  energyfeed = feed * dt;
+/*get feedback energy from accreted mass*/
+  energyfeed = Epsilon_f * mass_to_accrete * (CLIGHT * CLIGHT / (UnitVelocity_in_cm_per_s * UnitVelocity_in_cm_per_s))
+ 
 
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
   for(n = 0; n < nfound; n++)
@@ -295,8 +294,9 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 /*check if particle is inside the cone*/    
       if((pos_x_angle <= theta) || (neg_x_angle <= theta))
         {
-/*split kinetic and thermal energy feed*/
+/*set drain mass flag*/
           SphP[j].MassDrain      = mass_to_accrete/ngbmass*P[j].Mass;
+/*split kinetic and thermal energy feed*/      
           SphP[j].ThermalFeed   += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
           SphP[j].KineticFeed   += (1-All.Ftherm) * energyfeed/ngbmass*P[j].Mass;
           All.EnergyExchange[0] += energyfeed/ngbmass*P[j].Mass;

@@ -196,9 +196,14 @@ void perform_end_of_step_bh_physics(void)
       BhP[i].AngularMomentum[0] += BhP[i].AccretionRate * dt * BhP[i].VelocityGasCircular[0];
       BhP[i].AngularMomentum[1] += BhP[i].AccretionRate * dt * BhP[i].VelocityGasCircular[1];
       BhP[i].AngularMomentum[2] += BhP[i].AccretionRate * dt * BhP[i].VelocityGasCircular[2];
-
+    
       for(j=0; j<NumGas; j++)
-        P[j].Mass -= SphP[j].MassDrain;
+        {
+          if(P[j].Mass - SphP[j].MassDrain < 0.1 * P[j].Mass)
+            P[j].Mass = 0.1 * P[j].Mass;
+          else
+            P[j].Mass -= SphP[j].MassDrain;
+        }
     }
 }
 
