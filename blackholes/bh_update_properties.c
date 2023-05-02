@@ -89,6 +89,9 @@ void update_bh_timesteps(void)
 /*call this function as the reconstruct_timebins() bh version*/
 void reconstruct_bh_timebins(void)
 {
+  if(NumBh == 0)
+    return;
+  
   int i, bin;
 
   for(bin = 0; bin < TIMEBINS; bin++)
