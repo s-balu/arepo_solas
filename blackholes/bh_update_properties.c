@@ -232,6 +232,8 @@ void perform_end_of_step_bh_physics(void)
             P[j].Mass = 0.1 * P[j].Mass;
           else
             P[j].Mass -= SphP[j].MassDrain;
+          
+          SphP[j].MassDrain = 0;
         }
     }
 }
