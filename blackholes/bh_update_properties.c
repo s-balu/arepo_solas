@@ -220,7 +220,7 @@ void perform_end_of_step_bh_physics(void)
       bin = PPB(i).TimeBinBh;
       dt    = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
       
-      PPB(i).Mass += BhP[i].AccretionRate * dt;
+      PPB(i).Mass += (1-All.Epsilon_f) * BhP[i].AccretionRate * dt;
 
       BhP[i].AngularMomentum[0] += BhP[i].AccretionRate * dt * BhP[i].VelocityGasCircular[0];
       BhP[i].AngularMomentum[1] += BhP[i].AccretionRate * dt * BhP[i].VelocityGasCircular[1];
@@ -229,7 +229,7 @@ void perform_end_of_step_bh_physics(void)
       for(j=0; j<NumGas; j++)
         {
           if(P[j].Mass - SphP[j].MassDrain < 0.1 * P[j].Mass)
-            P[j].Mass = 0.1 * P[j].Mass;
+            P[j].Mass *= 0.1;
           else
             P[j].Mass -= SphP[j].MassDrain;
           
