@@ -267,7 +267,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 /*get accreted mass from accretion rate*/
   mass_to_accrete = accretion_rate * dt; 
 /*get feedback energy from accreted mass*/
-  energyfeed = All.Epsilon_f * mass_to_accrete * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
+  energyfeed = All.Epsilon_r / (1 - Epsilon_r) * All.Epsilon_f * mass_to_accrete * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
  
 
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
