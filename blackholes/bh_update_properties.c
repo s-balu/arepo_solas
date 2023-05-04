@@ -211,7 +211,7 @@ void perform_end_of_step_bh_physics(void)
     All.FeedbackFlag = 1;
 #endif   
 
-/*accrete mass, angular momentum into the bh and drain ngb cells*/
+/*accrete mass, angular momentum onto the bh and drain ngb cells*/
   int i, j, bin;
   double dt;
   
