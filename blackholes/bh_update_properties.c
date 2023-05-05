@@ -56,6 +56,8 @@ void update_bh_accretion_rate(void)
       accretion_rate *= (1. - All.Epsilon_r);
 
       BhP[i].AccretionRate = accretion_rate;
+
+      MyDouble accretion_timestep = BhP[i].NgbMass / BhP[i].AccretionRate;
     }
 }
 
@@ -182,11 +184,10 @@ void perform_end_of_step_bh_physics(void)
                   /*update total energy*/
                   SphP[i].Energy += SphP[i].ThermalFeed + SphP[i].KineticFeed;
                   All.EnergyExchange[1] += SphP[i].ThermalFeed + SphP[i].KineticFeed;
-                  /*update momentum -> include flag for momentum direction*/ 
-                  if(P[i].Pos[0] >= 0.5)
-                    SphP[i].Momentum[0] += sqrt(2 * P[i].Mass * SphP[i].KineticFeed);
-                  if(P[i].Pos[0] < 0.5)
-                    SphP[i].Momentum[0] -= sqrt(2 * P[i].Mass * SphP[i].KineticFeed);
+                  /*update momentum*/
+                    SphP[i].Momentum[0] += SphP.MomentumFeed[0];
+                    SphP[i].Momentum[1] += SphP.MomentumFeed[1];
+                    SphP[i].Momentum[2] += SphP.MomentumFeed[2];
                   /*update velocities*/
                   update_primitive_variables_single(P, SphP, i, &pvd);
                   /*update internal energy*/
@@ -229,7 +230,10 @@ void perform_end_of_step_bh_physics(void)
       for(j=0; j<NumGas; j++)
         {
           if(P[j].Mass - SphP[j].MassDrain < 0.1 * P[j].Mass)
-            P[j].Mass *= 0.1;
+            {
+              P[j].Mass *= 0.1;
+              BhP[i].MassToDrain += SphP[j].MassDrain - 0.9 * P[j].Mass; 
+            }
           else
             P[j].Mass -= SphP[j].MassDrain;
           

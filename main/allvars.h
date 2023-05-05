@@ -1454,9 +1454,11 @@ extern struct sph_particle_data
 #endif /* #ifdef ADDBACKGROUNDGRID */
     
 #ifdef BLACKHOLES
+  int PositiveJet;
+  MyDouble MassDrain;
   MyDouble ThermalFeed;
   MyDouble KineticFeed;
-  MyDouble MassDrain;
+  MyDouble MomentumFeed[3];
 #endif
 
 } * SphP,          /*!< holds SPH particle data on local processor */
@@ -1469,12 +1471,14 @@ MyIDType PID;
 MyDouble Hsml;
 MyDouble Density;
 MyDouble NgbMass;
-MyDouble EnergyRateFeed;
-integertime NgbMinStep;
 MyDouble VelocityGas[3];
 MyDouble VelocityGasCircular[3];
 MyDouble InternalEnergyGas;
 MyDouble AccretionRate;
+MyDouble MassToDrain;
+MyDouble EnergyRateFeed;
+integertime NgbMinStep;
+
 MyDouble AngularMomentum[3];
 }  *BhP,          
     *DomainBhBuf; 
