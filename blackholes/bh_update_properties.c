@@ -87,11 +87,8 @@ void update_bh_timesteps(void)
       binold = P[i].TimeBinBh;
       bin = get_timestep_bin(ti_step);
 
-      if(bin < binold || binold == 0) /*need the "or" condition for first loop for these ngb criteria*/
-        {
-          timebin_move_particle(&TimeBinsBh, i, binold, bin);
-          P[i].TimeBinBh = bin;
-        }
+      timebin_move_particle(&TimeBinsBh, i, binold, bin);
+      P[i].TimeBinBh = bin;
     }
 }
 
@@ -135,10 +132,9 @@ void update_list_of_active_bh_particles(void)
 {
   int i, n;
   TimeBinsBh.NActiveParticles = 0;
-
   for(n = 0; n < TIMEBINS; n++)
     {
-      //if(TimeBinSynchronized[n]) --> need additional bh timestep criteria to include this
+      //if(TimeBinSynchronized[n]) --> need early bh timestep criteria in the run loop to include this
         //{
           for(i = TimeBinsBh.FirstInTimeBin[n]; i >= 0; i = TimeBinsBh.NextInTimeBin[i])
             {
