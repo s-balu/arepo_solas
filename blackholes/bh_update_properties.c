@@ -12,9 +12,6 @@ static int int_compare(const void *a, const void *b);
 
 void update_bh_accretion_rate(void)
 {
-  if(NumBh == 0)
-    return;
-
 /*calculate bondi accretion rate*/
   int i;
   double density, pressure, sound_speed, velocity_gas_norm;
@@ -32,7 +29,8 @@ void update_bh_accretion_rate(void)
 /*get soundspeed*/
           sound_speed = sqrt(GAMMA * pressure / density);
       
-          velocity_gas_norm = sqrt(BhP[i].VelocityGas[0]*BhP[i].VelocityGas[0] + BhP[i].VelocityGas[1]*BhP[i].VelocityGas[1] + BhP[i].VelocityGas[2]*BhP[i].VelocityGas[2]); 
+          velocity_gas_norm = sqrt(BhP[i].VelocityGas[0]*BhP[i].VelocityGas[0] + 
+          BhP[i].VelocityGas[1]*BhP[i].VelocityGas[1] + BhP[i].VelocityGas[2]*BhP[i].VelocityGas[2]); 
 
           denominator = (sound_speed*sound_speed + velocity_gas_norm*velocity_gas_norm);
           if(denominator > 0)
@@ -54,14 +52,26 @@ void update_bh_accretion_rate(void)
   
 /*efficiency*/
       accretion_rate *= (1. - All.Epsilon_r);
-
       BhP[i].AccretionRate = accretion_rate;
-
-      MyDouble accretion_timestep = BhP[i].NgbMass / BhP[i].AccretionRate;
     }
 }
 
-/*update bh-timestep at prior_mesh_construction based on ngb smallest timestep*/
+/*get timestep for bh based on smallest between ngbmin and acc_timestep*/
+integertime get_timestep_bh(int p)
+{
+  MyDouble accretion_timestep;
+  integertime acc_timestep;
+
+      accretion_timestep = BhP[p].NgbMass / BhP[p].AccretionRate;
+      acc_timestep = accretion_timestep / All.Timebase_interval;
+      
+      if(acc_timestep < BhP[p].NgbMinStep)
+        return acc_timestep;
+      
+      return BhP[p].NgbMinStep;
+}
+
+/*update bh-timestep at prior_mesh_construction*/
 void update_bh_timesteps(void)
 {
   int idx, i, binold, bin;
@@ -73,7 +83,7 @@ void update_bh_timesteps(void)
       if(i < 0)
         continue;
       
-      ti_step = BPP(i).NgbMinStep;
+      ti_step = get_timestep_bh(P[i].BhID);
       binold = P[i].TimeBinBh;
       bin = get_timestep_bin(ti_step);
 
@@ -159,6 +169,35 @@ void update_list_of_active_bh_particles(void)
 
 void perform_end_of_step_bh_physics(void)
 {
+/*accrete mass, angular momentum onto the bh and drain ngb cells*/
+  int i, j, bin;
+  double dt;
+  
+  for(i=0; i<NumBh; i++)
+    {
+      bin = PPB(i).TimeBinBh;
+      dt    = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
+      
+      PPB(i).Mass += (1-All.Epsilon_f) * BhP[i].AccretionRate * dt;
+
+      BhP[i].AngularMomentum[0] += BhP[i].AccretionRate * dt * BhP[i].VelocityGasCircular[0];
+      BhP[i].AngularMomentum[1] += BhP[i].AccretionRate * dt * BhP[i].VelocityGasCircular[1];
+      BhP[i].AngularMomentum[2] += BhP[i].AccretionRate * dt * BhP[i].VelocityGasCircular[2];
+    
+      for(j=0; j<NumGas; j++)
+        {
+          if(P[j].Mass - SphP[j].MassDrain < 0.1 * P[j].Mass)
+            {
+              P[j].Mass *= 0.1;
+              BhP[i].MassToDrain += SphP[j].MassDrain - 0.9 * P[j].Mass; 
+            }
+          else
+            P[j].Mass -= SphP[j].MassDrain;
+          
+          SphP[j].MassDrain = 0;
+        }
+    }
+
 /*inject feedback to ngb cells*/
     if(All.Time >= All.FeedbackTime)
     {   
@@ -211,35 +250,6 @@ void perform_end_of_step_bh_physics(void)
   if(All.EnergyExchangeTot[0] - All.EnergyExchangeTot[1] > 10)  
     All.FeedbackFlag = 1;
 #endif   
-
-/*accrete mass, angular momentum onto the bh and drain ngb cells*/
-  int i, j, bin;
-  double dt;
-  
-  for(i=0; i<NumBh; i++)
-    {
-      bin = PPB(i).TimeBinBh;
-      dt    = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
-      
-      PPB(i).Mass += (1-All.Epsilon_f) * BhP[i].AccretionRate * dt;
-
-      BhP[i].AngularMomentum[0] += BhP[i].AccretionRate * dt * BhP[i].VelocityGasCircular[0];
-      BhP[i].AngularMomentum[1] += BhP[i].AccretionRate * dt * BhP[i].VelocityGasCircular[1];
-      BhP[i].AngularMomentum[2] += BhP[i].AccretionRate * dt * BhP[i].VelocityGasCircular[2];
-    
-      for(j=0; j<NumGas; j++)
-        {
-          if(P[j].Mass - SphP[j].MassDrain < 0.1 * P[j].Mass)
-            {
-              P[j].Mass *= 0.1;
-              BhP[i].MassToDrain += SphP[j].MassDrain - 0.9 * P[j].Mass; 
-            }
-          else
-            P[j].Mass -= SphP[j].MassDrain;
-          
-          SphP[j].MassDrain = 0;
-        }
-    }
 }
 
 static int int_compare(const void *a, const void *b)
