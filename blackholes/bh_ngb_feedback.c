@@ -273,7 +273,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 /*get accreted mass from accretion rate*/
   mass_to_accrete = accretion_rate * dt; 
 /*get feedback energy from accreted mass*/
-  energyfeed = All.Epsilon_r / (1 - Epsilon_r) * All.Epsilon_f * mass_to_accrete * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
+  energyfeed = All.Epsilon_r / (1 - All.Epsilon_r) * All.Epsilon_f * mass_to_accrete * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
  
 
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
@@ -303,7 +303,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
           (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) + pow(neg_x_axis[2], 2))));
 /*set flag to 1 if gas particle is on the positive side of jet*/
           if(pos_x_angle <= theta)
-            SphP[i].PositiveJet = 1;
+            SphP[j].PositiveJet = 1;
 /*check if particle is inside the cone*/ 
           if((pos_x_angle <= theta) || (neg_x_angle <= theta))
             {
@@ -313,16 +313,16 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 /*calculate momentum feed exactly so energy is conserved*/
               p0 = sqrt(pow(SphP[j].Momentum[0], 2) + pow(SphP[j].Momentum[1], 2) + pow(SphP[j].Momentum[2], 2));
           
-              if(SphP[i].PositiveJet)
+              if(SphP[j].PositiveJet)
                 cos_theta = (SphP[j].Momentum[0]*pos_x_axis[0] + SphP[j].Momentum[1]*pos_x_axis[1] + SphP[j].Momentum[2]*pos_x_axis[2]) / 
                 (p0*sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) + pow(pos_x_axis[2], 2)));       
               else
                 cos_theta = (SphP[j].Momentum[0]*neg_x_axis[0] + SphP[j].Momentum[1]*neg_x_axis[1] + SphP[j].Momentum[2]*neg_x_axis[2]) / 
                 (p0*sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) + pow(neg_x_axis[2], 2)));
           
-              pj = -p0*cos_theta + sqrt(po*po * cos_theta*cos_theta + 2*P[j].Mass*SphP[j].KineticFeed);
+              pj = -p0*cos_theta + sqrt(p0*p0 * cos_theta*cos_theta + 2*P[j].Mass*SphP[j].KineticFeed);
 
-              if(SphP[i].PositiveJet) 
+              if(SphP[j].PositiveJet) 
                 { 
                   SphP[j].MomentumFeed[0] += pos_x_axis[0] * pj / sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2));
                   SphP[j].MomentumFeed[1] += pos_x_axis[1] * pj / sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2));
@@ -357,6 +357,8 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 /*set drain mass flag*/
       SphP[j].MassDrain = mass_to_accrete/ngbmass*P[j].Mass + mass_to_drain/ngbmass*P[j].Mass;
     }
+  
+  return 0;
 }
   /* Now collect the result at the right place 
   if(mode == MODE_LOCAL_PARTICLES)

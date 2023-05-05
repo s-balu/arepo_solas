@@ -224,9 +224,9 @@ void perform_end_of_step_bh_physics(void)
                   SphP[i].Energy += SphP[i].ThermalFeed + SphP[i].KineticFeed;
                   All.EnergyExchange[1] += SphP[i].ThermalFeed + SphP[i].KineticFeed;
                   /*update momentum*/
-                    SphP[i].Momentum[0] += SphP.MomentumFeed[0];
-                    SphP[i].Momentum[1] += SphP.MomentumFeed[1];
-                    SphP[i].Momentum[2] += SphP.MomentumFeed[2];
+                    SphP[i].Momentum[0] += SphP[i].MomentumFeed[0];
+                    SphP[i].Momentum[1] += SphP[i].MomentumFeed[1];
+                    SphP[i].Momentum[2] += SphP[i].MomentumFeed[2];
                   /*update velocities*/
                   update_primitive_variables_single(P, SphP, i, &pvd);
                   /*update internal energy*/

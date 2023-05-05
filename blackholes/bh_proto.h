@@ -7,7 +7,7 @@ void bh_density(void);
 void update_bh_accretion_rate(void);
 void bh_ngb_feedback(void);
 
-integertime get_timestep_bh(int p, integertime ti_step);
+integertime get_timestep_bh(int p);
 void update_bh_timesteps(void);
 void reconstruct_bh_timebins(void);
 void update_list_of_active_bh_particles(void);
