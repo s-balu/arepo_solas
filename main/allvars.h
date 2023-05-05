@@ -1226,6 +1226,7 @@ extern struct global_data_all_processes
   /*for parameter file*/
   int BhDesNumNgb;
   int BhMaxNumNgbDeviation;
+  int JetFeedback;
   double FeedbackTime;
   double Epsilon_r;
   double Epsilon_f;
@@ -1471,6 +1472,7 @@ MyIDType PID;
 MyDouble Hsml;
 MyDouble Density;
 MyDouble NgbMass;
+MyDouble NgbMassFeed;
 MyDouble VelocityGas[3];
 MyDouble VelocityGasCircular[3];
 MyDouble InternalEnergyGas;

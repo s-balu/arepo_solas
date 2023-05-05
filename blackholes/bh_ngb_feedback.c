@@ -72,6 +72,7 @@ typedef struct
   int Firstnode;
   int Bin;
   MyDouble NgbMass;
+  MyDouble NgbMassFeed;
   MyDouble AccretionRate;
   MyDouble MassToDrain;
 } data_in;
@@ -94,6 +95,7 @@ static void particle2in(data_in *in, int i, int firstnode)
   in->Pos[2]        = PPB(i).Pos[2];
   in->Hsml          = BhP[i].Hsml;
   in->NgbMass       = BhP[i].NgbMass;
+  in->NgbMassFeed   = BhP[i].NgbMassFeed;
   in->Bin           = PPB(i).TimeBinBh;
   in->AccretionRate = BhP[i].AccretionRate;
   in->MassToDrain   = BhP[i].MassToDrain;
@@ -234,7 +236,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   int j, n, bin;
   int numnodes, *firstnode;
   double h, dt, dtime;
-  MyDouble ngbmass, accretion_rate, mass_to_accrete, mass_to_drain; 
+  MyDouble ngbmass, ngbmass_feed, accretion_rate, mass_to_accrete, mass_to_drain; 
   MyDouble energyfeed, cos_theta, p0, pj;
   MyDouble *pos;
 
@@ -259,6 +261,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   pos            = target_data->Pos;
   h              = target_data->Hsml;
   ngbmass        = target_data->NgbMass;
+  ngbmass_feed   = target_data->NgbMassFeed;
   bin            = target_data->Bin;
   accretion_rate = target_data->AccretionRate; 
   mass_to_drain  = target_data->MassToDrain; 
@@ -277,69 +280,90 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   for(n = 0; n < nfound; n++)
     {
       j = Thread[threadid].Ngblist[n];
-
+/*flag for jet -> 0: isotropic thermal injection, 1: kinetic jet and isotropic thermal injection, 2: kinetic and thermal jet*/
+      if(All.JetFeedback)
+        {
 /*jet setup/    
 
 /*positive and negative jet axes (no need to be normalized)*/
-      double pos_x_axis[3] = {1, 0, 0};
-      double neg_x_axis[3] = {-1, 0, 0};
+          double pos_x_axis[3] = {1, 0, 0};
+          double neg_x_axis[3] = {-1, 0, 0};
       
 /*jet angle*/
-      double theta = M_PI/4;
+          double theta = M_PI/4;
   
 /*calculate the vector to the cone vertex*/
-      double vx = P[j].Pos[0] - pos[0]; // x-component of the vector from the vertex to the point
-      double vy = P[j].Pos[1] - pos[1]; // y-component of the vector from the vertex to the point
-      double vz = P[j].Pos[2] - pos[2]; // z-component of the vector from the vertex to the point
+          double vx = P[j].Pos[0] - pos[0]; // x-component of the vector from the vertex to the point
+          double vy = P[j].Pos[1] - pos[1]; // y-component of the vector from the vertex to the point
+          double vz = P[j].Pos[2] - pos[2]; // z-component of the vector from the vertex to the point
 /*calculate angles*/    
-      double pos_x_angle = acos((vx*pos_x_axis[0] + vy*pos_x_axis[1] + vz*pos_x_axis[2]) / 
-      (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2))));
-      double neg_x_angle = acos((vx*neg_x_axis[0] + vy*neg_x_axis[1] + vz*neg_x_axis[2]) / 
-      (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) + pow(neg_x_axis[2], 2))));
+          double pos_x_angle = acos((vx*pos_x_axis[0] + vy*pos_x_axis[1] + vz*pos_x_axis[2]) / 
+          (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2))));
+          double neg_x_angle = acos((vx*neg_x_axis[0] + vy*neg_x_axis[1] + vz*neg_x_axis[2]) / 
+          (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) + pow(neg_x_axis[2], 2))));
 /*set flag to 1 if gas particle is on the positive side of jet*/
-      if(pos_x_angle <= theta)
-        SphP[i].PositiveJet = 1;
+          if(pos_x_angle <= theta)
+            SphP[i].PositiveJet = 1;
 /*check if particle is inside the cone*/ 
-      if((pos_x_angle <= theta) || (neg_x_angle <= theta))
-        {
-/*split kinetic and thermal energy feed*/      
-          SphP[j].ThermalFeed   += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
-          SphP[j].KineticFeed   += (1-All.Ftherm) * energyfeed/ngbmass*P[j].Mass;
-          All.EnergyExchange[0] += energyfeed/ngbmass*P[j].Mass;
+          if((pos_x_angle <= theta) || (neg_x_angle <= theta))
+            {
+/*split kinetic and thermal energy feed*/ 
+              SphP[j].KineticFeed       += (1-All.Ftherm) * energyfeed/ngbmass_feed*P[j].Mass;
+              All.EnergyExchange[0]     += (1-All.Ftherm) * energyfeed/ngbmass_feed*P[j].Mass;
 /*calculate momentum feed exactly so energy is conserved*/
-          p0 = sqrt(pow(SphP[j].Momentum[0], 2) + pow(SphP[j].Momentum[1], 2) + pow(SphP[j].Momentum[2], 2));
+              p0 = sqrt(pow(SphP[j].Momentum[0], 2) + pow(SphP[j].Momentum[1], 2) + pow(SphP[j].Momentum[2], 2));
           
-          if(SphP[i].PositiveJet)
-            cos_theta = (SphP[j].Momentum[0]*pos_x_axis[0] + SphP[j].Momentum[1]*pos_x_axis[1] + SphP[j].Momentum[2]*pos_x_axis[2]) / 
-            (p0*sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) + pow(pos_x_axis[2], 2)));       
-          else
-            cos_theta = (SphP[j].Momentum[0]*neg_x_axis[0] + SphP[j].Momentum[1]*neg_x_axis[1] + SphP[j].Momentum[2]*neg_x_axis[2]) / 
-            (p0*sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) + pow(neg_x_axis[2], 2)));
+              if(SphP[i].PositiveJet)
+                cos_theta = (SphP[j].Momentum[0]*pos_x_axis[0] + SphP[j].Momentum[1]*pos_x_axis[1] + SphP[j].Momentum[2]*pos_x_axis[2]) / 
+                (p0*sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) + pow(pos_x_axis[2], 2)));       
+              else
+                cos_theta = (SphP[j].Momentum[0]*neg_x_axis[0] + SphP[j].Momentum[1]*neg_x_axis[1] + SphP[j].Momentum[2]*neg_x_axis[2]) / 
+                (p0*sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) + pow(neg_x_axis[2], 2)));
           
-          pj = -p0*cos_theta + sqrt(po*po * cos_theta*cos_theta + 2*P[j].Mass*SphP[j].KineticFeed);
+              pj = -p0*cos_theta + sqrt(po*po * cos_theta*cos_theta + 2*P[j].Mass*SphP[j].KineticFeed);
 
-          if(SphP[i].PositiveJet) 
-            { 
-              SphP[j].MomentumFeed[0] += pos_x_axis[0] * pj / sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2));
-              SphP[j].MomentumFeed[1] += pos_x_axis[1] * pj / sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2));
-              SphP[j].MomentumFeed[2] += pos_x_axis[2] * pj / sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2)); 
-            }
-          else
-            {  
-              SphP[j].MomentumFeed[0] += neg_x_axis[0] * pj / sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) +  pow(neg_x_axis[2], 2));
-              SphP[j].MomentumFeed[1] += neg_x_axis[1] * pj / sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) +  pow(neg_x_axis[2], 2));
-              SphP[j].MomentumFeed[2] += neg_x_axis[2] * pj / sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) +  pow(neg_x_axis[2], 2));
+              if(SphP[i].PositiveJet) 
+                { 
+                  SphP[j].MomentumFeed[0] += pos_x_axis[0] * pj / sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2));
+                  SphP[j].MomentumFeed[1] += pos_x_axis[1] * pj / sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2));
+                  SphP[j].MomentumFeed[2] += pos_x_axis[2] * pj / sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2)); 
+                }
+              else
+                {  
+                  SphP[j].MomentumFeed[0] += neg_x_axis[0] * pj / sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) +  pow(neg_x_axis[2], 2));
+                  SphP[j].MomentumFeed[1] += neg_x_axis[1] * pj / sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) +  pow(neg_x_axis[2], 2));
+                  SphP[j].MomentumFeed[2] += neg_x_axis[2] * pj / sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) +  pow(neg_x_axis[2], 2));
+                }
+/*only jet particles injected with thermal feedback if JetFeedback == 2, else isotropic*/             
+              if(All.JetFeedback == 2)     
+                {
+                  SphP[j].ThermalFeed   += All.Ftherm * energyfeed/ngbmass_feed*P[j].Mass;
+                  All.EnergyExchange[0] += All.Ftherm * energyfeed/ngbmass_feed*P[j].Mass;
+                }
+              else
+                {
+                  SphP[j].ThermalFeed   += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
+                  All.EnergyExchange[0] += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
+                } 
             }
         }
-      /*set drain mass flag*/
+/*else All.JetFeedback == 0 i.e. only isotropic thermal injection*/
+      else
+        {
+          SphP[j].ThermalFeed   += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
+          All.EnergyExchange[0] += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
+        }
+
+/*set drain mass flag*/
       SphP[j].MassDrain = mass_to_accrete/ngbmass*P[j].Mass + mass_to_drain/ngbmass*P[j].Mass;
     }
+}
   /* Now collect the result at the right place 
   if(mode == MODE_LOCAL_PARTICLES)
     out2particle(&out, target, MODE_LOCAL_PARTICLES);
   else
-    DataResult[target] = out;*/
+    DataResult[target] = out;
 
   return 0;
-}
+}*/
 

@@ -109,6 +109,7 @@ typedef struct
   MyDouble Ngb;
   MyDouble Rho;
   MyDouble Mass;
+  MyDouble MassFeed;
   integertime NgbMinStep;
   MyDouble VelocityGas[3];
   MyDouble VelocityGasCircular[3];
@@ -136,6 +137,7 @@ static void out2particle(data_out *out, int i, int mode)
       BhNumNgb[i]                      = out->Ngb;
       BhP[i].Density                   = out->Rho;
       BhP[i].NgbMass                   = out->Mass;
+      BhP[i].NgbMassFeed               = out->MassFeed;
       BhP[i].NgbMinStep                = out->NgbMinStep;
       BhP[i].VelocityGas[0]            = out->VelocityGas[0];
       BhP[i].VelocityGas[1]            = out->VelocityGas[1];
@@ -414,7 +416,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   MyFloat dhsmlrho;
   MyDouble *pos, *vel;
   MyDouble velocity_gas[3], velocity_gas_circular[3];
-  MyDouble mass, internal_energy_gas;
+  MyDouble mass, mass_feed, internal_energy_gas;
   integertime ngb_min_step;
   int bin = TIMEBINS;
    
@@ -452,7 +454,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 
   numngb = 0;
   rho = weighted_numngb = dhsmlrho = 0;
-  mass = internal_energy_gas = 0;
+  mass = mass_feed = internal_energy_gas = 0;
   velocity_gas[0] = velocity_gas[1] = velocity_gas[2] = 0;
   velocity_gas_circular[0] = velocity_gas_circular[1] = velocity_gas_circular[2] = 0;
 
@@ -544,7 +546,33 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 
           dhsmlrho += FLT(-mass_j * (NUMDIMS * hinv * wk + u * dwk));
         }
+      
+      if(All.JetFeedback)
+        {
+/*jet setup/    
+
+/*positive and negative jet axes (no need to be normalized)*/
+          double pos_x_axis[3] = {1, 0, 0};
+          double neg_x_axis[3] = {-1, 0, 0};
+      
+/*jet angle*/
+          double theta = M_PI/4;
+  
+/*calculate the vector to the cone vertex*/
+          double vx = P[j].Pos[0] - pos[0]; // x-component of the vector from the vertex to the point
+          double vy = P[j].Pos[1] - pos[1]; // y-component of the vector from the vertex to the point
+          double vz = P[j].Pos[2] - pos[2]; // z-component of the vector from the vertex to the point
+/*calculate angles*/    
+          double pos_x_angle = acos((vx*pos_x_axis[0] + vy*pos_x_axis[1] + vz*pos_x_axis[2]) / 
+          (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2))));
+          double neg_x_angle = acos((vx*neg_x_axis[0] + vy*neg_x_axis[1] + vz*neg_x_axis[2]) / 
+          (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) + pow(neg_x_axis[2], 2))));
+/*check if particle is inside the cone*/ 
+          if((pos_x_angle <= theta) || (neg_x_angle <= theta))
+            mass_feed += P[j].Mass;
+        }
     }
+
 /*compute bh timestep based on min ngb timestep*/
   if(bin == 0)
     ngb_min_step = 0;
@@ -555,6 +583,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   out.Ngb                     = weighted_numngb;
   out.Rho                     = rho;
   out.Mass                    = mass;
+  out.MassFeed                = mass_feed;
   out.NgbMinStep              = ngb_min_step;
   out.VelocityGas[0]          = velocity_gas[0];
   out.VelocityGas[1]          = velocity_gas[1];
