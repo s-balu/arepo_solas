@@ -312,8 +312,10 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
               All.EnergyExchange[0]     += (1-All.Ftherm) * energyfeed/ngbmass_feed*P[j].Mass;
 /*calculate momentum feed exactly so energy is conserved*/
               p0 = sqrt(pow(SphP[j].Momentum[0], 2) + pow(SphP[j].Momentum[1], 2) + pow(SphP[j].Momentum[2], 2));
-          
-              if(SphP[j].PositiveJet)
+              
+              if(p0 < pow(10,-10)) //protect against p0 = 0;
+                cos_theta = 1;
+              else if(SphP[j].PositiveJet)
                 cos_theta = (SphP[j].Momentum[0]*pos_x_axis[0] + SphP[j].Momentum[1]*pos_x_axis[1] + SphP[j].Momentum[2]*pos_x_axis[2]) / 
                 (p0*sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) + pow(pos_x_axis[2], 2)));       
               else
