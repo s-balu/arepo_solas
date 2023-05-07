@@ -15,7 +15,10 @@ void update_bh_accretion_rate(void)
 /*calculate bondi accretion rate*/
   int i;
   double density, pressure, sound_speed, velocity_gas_norm;
-  double denominator, denominator_inv, BondiRate, EddingtonRate, accretion_rate;
+  double denominator, denominator_inv, BondiRate, EddingtonRate;
+  double accretion_rate, acc_rate_for_print;
+
+  accretion_rate = acc_rate_for_print = 0;
 
   for(i = 0; i < NumBh; i++)
     {
@@ -54,6 +57,10 @@ void update_bh_accretion_rate(void)
       accretion_rate *= (1. - All.Epsilon_r);
       BhP[i].AccretionRate = accretion_rate;
     }
+  
+  MPI_Allreduce(&accretion_rate, &acc_rate_for_print, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+  MPI_Barrier(MPI_COMM_WORLD); // synchronize all tasks
+  mpi_printf("BLACK_HOLES: Black hole accretion rate: %e \n", acc_rate_for_print);
 }
 
 /*get timestep for bh based on smallest between ngbmin and acc_timestep*/
@@ -240,7 +247,7 @@ void perform_end_of_step_bh_physics(void)
     }
   MPI_Allreduce(&All.EnergyExchange, &All.EnergyExchangeTot, 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
   MPI_Barrier(MPI_COMM_WORLD); // synchronize all tasks
-  mpi_printf("Energy given by BH = %f, Energy taken up by gas particles = %f \n", All.EnergyExchangeTot[0], All.EnergyExchangeTot[1]);
+  mpi_printf("BLACK_HOLES: Energy given by BH = %e, Energy taken up by gas particles = %e \n", All.EnergyExchangeTot[0], All.EnergyExchangeTot[1]);
 
 #ifdef BURST_MODE
   if(All.EnergyExchangeTot[0] - All.EnergyExchangeTot[1] > 10)  
