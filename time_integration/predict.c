@@ -194,7 +194,8 @@ void find_next_sync_point(void)
         */
 /*include the bh accretion timestep*/
 #ifdef BLACKHOLES
-      active += TimeBinsBh.TimeBinCount[n];
+      if(n > 0)
+        active += TimeBinsBh.TimeBinCount[n];
 #endif
       if(active)
         {
