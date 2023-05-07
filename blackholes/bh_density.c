@@ -153,6 +153,7 @@ static void out2particle(data_out *out, int i, int mode)
       BhNumNgb[i]                      += out->Ngb;
       BhP[i].Density                   += out->Rho;
       BhP[i].NgbMass                   += out->Mass;
+      BhP[i].NgbMassFeed               += out->MassFeed;
       if(out->NgbMinStep < BhP[i].NgbMinStep)
         BhP[i].NgbMinStep               = out->NgbMinStep;
       BhP[i].VelocityGas[0]            += out->VelocityGas[0];
