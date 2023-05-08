@@ -71,6 +71,7 @@ integertime get_timestep_bh(int p)
 
       accretion_timestep = BhP[p].NgbMass / BhP[p].AccretionRate;
       acc_timestep = accretion_timestep / All.Timebase_interval;
+      acc_timestep *= 0.01;
       
       if(acc_timestep < BhP[p].NgbMinStep)
         return acc_timestep;
