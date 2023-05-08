@@ -1,51 +1,3 @@
-/*!
- * \copyright   This file is part of the public version of the AREPO code.
- * \copyright   Copyright (C) 2009-2019, Max-Planck Institute for Astrophysics
- * \copyright   Developed by Volker Springel (vspringel@MPA-Garching.MPG.DE) and
- *              contributing authors.
- * \copyright   Arepo is free software: you can redistribute it and/or modify
- *              it under the terms of the GNU General Public License as published by
- *              the Free Software Foundation, either version 3 of the License, or
- *              (at your option) any later version.
- *
- *              Arepo is distributed in the hope that it will be useful,
- *              but WITHOUT ANY WARRANTY; without even the implied warranty of
- *              MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *              GNU General Public License for more details.
- *
- *              A copy of the GNU General Public License is available under
- *              LICENSE as part of this program.  See also
- *              <https://www.gnu.org/licenses/>.
- *
- * \file        src/init/density.c
- * \date        05/2018
- * \brief       SPH density computation and smoothing length determination.
- * \details     This file contains the "first SPH loop", where the SPH
- *              densities and smoothing lengths are calculated.
- *              In Arepo, this is used in setup_smoothinglengths() (init.c) to
- *              get an initial guess for MaxDelaunayRadius.
- *              Note that the SPH density is NOT used in the subsequent
- *              hydrodynamics calculation, but the density is either set by the
- *              initial conditions explicitly (DENSITY_AS_MASS_IN_INPUT) or
- *              calculated by the mass given in the initial conditions divided
- *              by the volume of the cell calculated by the Voronoi
- *              tessellation algorithm.
- *              contains functions:
- *                static void particle2in(data_in * in, int i, int firstnode)
- *                static void out2particle(data_out * out, int i, int mode)
- *                static void kernel_local(void)
- *                static void kernel_imported(void)
- *                void density(void)
- *                static int density_evaluate(int target, int mode, int
- *                  threadid)
- *                int density_isactive(int n)
- *
- * \par Major modifications and contributions:
- *
- * - DD.MM.YYYY Description
- * - 04.05.2018 Prepared file for public release -- Rainer Weinberger
- */
-
 #include <gsl/gsl_math.h>
 #include <math.h>
 #include <mpi.h>
@@ -198,19 +150,6 @@ static void kernel_imported(void)
   }
 }
 
-
-/*! \brief Main function of SPH density calculation.
- *
- *  This function computes the local density for each active SPH particle and
- *  the number of weighted neighbors in the current smoothing radius. If a
- *  particle with its smoothing region is fully inside the local domain, it is
- *  not exported to the other processors. The function also detects particles
- *  that have a number of neighbors outside the allowed tolerance range. For
- *  these particles, the smoothing length is adjusted accordingly, and the
- *  computation is called again.
- *
- *  \return void
- */
 void bh_ngb_feedback(void)
 {
   generic_set_MaxNexport();
@@ -218,19 +157,6 @@ void bh_ngb_feedback(void)
   generic_comm_pattern(TimeBinsBh.NActiveParticles, kernel_local, kernel_imported);
 }
 
-
-/*! \brief Inner function of the SPH density calculation
- *
- *  This function represents the core of the SPH density computation. The
- *  target particle may either be local, or reside in the communication
- *  buffer.
- *
- *  \param[in] target Index of particle in local data/import buffer.
- *  \param[in] mode Mode in which function is called (local or impored data).
- *  \param[in] threadid ID of local thread.
- *
- *  \return 0
- */
 static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 {
   int j, n, bin;

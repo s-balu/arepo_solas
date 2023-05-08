@@ -1,51 +1,3 @@
-/*!
- * \copyright   This file is part of the public version of the AREPO code.
- * \copyright   Copyright (C) 2009-2019, Max-Planck Institute for Astrophysics
- * \copyright   Developed by Volker Springel (vspringel@MPA-Garching.MPG.DE) and
- *              contributing authors.
- * \copyright   Arepo is free software: you can redistribute it and/or modify
- *              it under the terms of the GNU General Public License as published by
- *              the Free Software Foundation, either version 3 of the License, or
- *              (at your option) any later version.
- *
- *              Arepo is distributed in the hope that it will be useful,
- *              but WITHOUT ANY WARRANTY; without even the implied warranty of
- *              MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *              GNU General Public License for more details.
- *
- *              A copy of the GNU General Public License is available under
- *              LICENSE as part of this program.  See also
- *              <https://www.gnu.org/licenses/>.
- *
- * \file        src/init/density.c
- * \date        05/2018
- * \brief       SPH density computation and smoothing length determination.
- * \details     This file contains the "first SPH loop", where the SPH
- *              densities and smoothing lengths are calculated.
- *              In Arepo, this is used in setup_smoothinglengths() (init.c) to
- *              get an initial guess for MaxDelaunayRadius.
- *              Note that the SPH density is NOT used in the subsequent
- *              hydrodynamics calculation, but the density is either set by the
- *              initial conditions explicitly (DENSITY_AS_MASS_IN_INPUT) or
- *              calculated by the mass given in the initial conditions divided
- *              by the volume of the cell calculated by the Voronoi
- *              tessellation algorithm.
- *              contains functions:
- *                static void particle2in(data_in * in, int i, int firstnode)
- *                static void out2particle(data_out * out, int i, int mode)
- *                static void kernel_local(void)
- *                static void kernel_imported(void)
- *                void density(void)
- *                static int density_evaluate(int target, int mode, int
- *                  threadid)
- *                int density_isactive(int n)
- *
- * \par Major modifications and contributions:
- *
- * - DD.MM.YYYY Description
- * - 04.05.2018 Prepared file for public release -- Rainer Weinberger
- */
-
 #include <gsl/gsl_math.h>
 #include <math.h>
 #include <mpi.h>
@@ -351,7 +303,7 @@ void bh_density(void)
               }
           }
         else
-             P[i].TimeBinBh = -P[i].TimeBinBh - 1; /* Mark as inactive */ /* Mark as inactive */
+             P[i].TimeBinBh = -P[i].TimeBinBh - 1; /* Mark as inactive */ 
         }
 
       sumup_large_ints(1, &npleft, &ntot);
@@ -603,9 +555,9 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   return 0;
 }
 
-/* \brief Determines if a cell is active in current timestep.
+/* \brief Determines if a BhP is active in current timestep.
  *
- *  If the cell is not active in a timestep, its value in TimeBinHydro is
+ *  If the BhP is not active in a timestep, its value in TimeBinBh is
  *  negative.
  *
  *  \param[in] n Index of BhP in Particle array
