@@ -796,7 +796,7 @@ void init_io_fields()
 #endif 
 
 #ifdef OUTPUTTIMESTEP_BH
-  init_field(IO_TSTP_BH, "TSBH", "TimeStepBh", MEM_NONE, FILE_MY_IO_FLOAT, FILE_MY_IO_FLOAT, 1, A_NONE, 0, io_func_timestep_bh, BHS_ONLY);
+  init_field(IO_TSTP_BH, "TSBH", "TimeStepBh", MEM_NONE, FILE_MY_IO_FLOAT, FILE_NONE, 1, A_NONE, 0, io_func_timestep_bh, BHS_ONLY);
   init_units(IO_TSTP_BH, 0., -1., 1., 0., -1., All.UnitTime_in_s);
 #endif 
 
