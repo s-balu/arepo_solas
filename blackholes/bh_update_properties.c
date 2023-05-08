@@ -239,6 +239,7 @@ void perform_end_of_step_bh_physics(void)
                   set_pressure_of_cell_internal(P, SphP, i);
                   /*set feed flags to zero*/
                   SphP[i].ThermalFeed = SphP[i].KineticFeed = 0;
+                  SphP[i].MomentumFeed[0] = SphP[i].MomentumFeed[1] = SphP[i].MomentumFeed[2] = 0;
                 }
             }
 #ifdef BURST_MODE
