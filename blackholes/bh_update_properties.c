@@ -197,10 +197,10 @@ void perform_end_of_step_bh_physics(void)
               {
                 P[j].Mass -= 0.9*P[j].Mass;
                 BhP[i].MassToDrain += SphP[j].MassDrain - 0.9*P[j].Mass; 
-                /*we're also losing energy & momentum (we're also losing thermal energy but we negelect that here)*/
+                /*we're also losing thermal and kinetic energy & momentum*/
                 
                 /*update total energy*/
-                SphP[j].Energy -= 0.5 * 0.9*P[j].Mass * (P[j].Vel[0]*P[j].Vel[0] + P[j].Vel[1]*P[j].Vel[1] + P[j].Vel[2]*P[j].Vel[2]);
+                SphP[j].Energy *= 0.1;
 
                 /*update momentum*/
                 SphP[j].Momentum[0] *= 0.1;
@@ -212,7 +212,7 @@ void perform_end_of_step_bh_physics(void)
                 P[j].Mass -= SphP[j].MassDrain;
                 
                 /*update total energy*/
-                SphP[j].Energy -= 0.5 * SphP[j].MassDrain * (P[j].Vel[0]*P[j].Vel[0] + P[j].Vel[1]*P[j].Vel[1] + P[j].Vel[2]*P[j].Vel[2]);
+                SphP[j].Energy *= (P[j].Mass)/(P[j].Mass + SphP[j].MassDrain);
 
                 /*update momentum*/
                 SphP[j].Momentum[0] *= (P[j].Mass)/(P[j].Mass + SphP[j].MassDrain);
