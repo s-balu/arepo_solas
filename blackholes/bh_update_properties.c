@@ -190,15 +190,37 @@ void perform_end_of_step_bh_physics(void)
     
       for(j=0; j<NumGas; j++)
         {
-          if(P[j].Mass - SphP[j].MassDrain < 0.1 * P[j].Mass)
-            {
-              P[j].Mass *= 0.1;
-              BhP[i].MassToDrain += SphP[j].MassDrain - 0.9 * P[j].Mass; 
-            }
-          else
-            P[j].Mass -= SphP[j].MassDrain;
+          if(SphP[j].MassDrain > 0)
+          {
+            if(P[j].Mass - SphP[j].MassDrain < 0.1*P[j].Mass)
+              {
+                P[j].Mass -= 0.9*P[j].Mass;
+                BhP[i].MassToDrain += SphP[j].MassDrain - 0.9*P[j].Mass; 
+                /*we're also losing energy & momentum (we're also losing thermal energy but we negelect that here)*/
+                
+                /*update total energy*/
+                SphP[j].Energy -= 0.5 * 0.9*P[j].Mass * (P[j].Vel[0]*P[j].Vel[0] + P[j].Vel[1]*P[j].Vel[1] + P[j].Vel[2]*P[j].Vel[2]);
+
+                /*update momentum*/
+                SphP[j].Momentum[0] *= 0.1;
+                SphP[j].Momentum[1] *= 0.1;
+                SphP[j].Momentum[2] *= 0.1;
+              }
+            else
+              {
+                P[j].Mass -= SphP[j].MassDrain;
+                
+                /*update total energy*/
+                SphP[j].Energy -= 0.5 * SphP[j].MassDrain * (P[j].Vel[0]*P[j].Vel[0] + P[j].Vel[1]*P[j].Vel[1] + P[j].Vel[2]*P[j].Vel[2]);
+
+                /*update momentum*/
+                SphP[j].Momentum[0] *= (P[j].Mass)/(P[j].Mass + SphP[j].MassDrain);
+                SphP[j].Momentum[1] *= (P[j].Mass)/(P[j].Mass + SphP[j].MassDrain);
+                SphP[j].Momentum[2] *= (P[j].Mass)/(P[j].Mass + SphP[j].MassDrain);
+              }
           
-          SphP[j].MassDrain = 0;
+            SphP[j].MassDrain = 0;
+          }
         }
     }
 
@@ -217,6 +239,10 @@ void perform_end_of_step_bh_physics(void)
           else
             pvd.atime = pvd.hubble_a = pvd.a3inv = 1.0;
 
+          /*momentum kick direction along jet axis*/
+          double pos_x_axis[3] = {1, 0, 0};
+          double neg_x_axis[3] = {-1, 0, 0};
+
           for(int idx = 0; idx < TimeBinsHydro.NActiveParticles; idx++)
             {
               int i = TimeBinsHydro.ActiveParticleList[idx];
@@ -224,6 +250,34 @@ void perform_end_of_step_bh_physics(void)
               continue;
               if(SphP[i].ThermalFeed > 0 || SphP[i].KineticFeed > 0)
                 {
+                  /*calculate momentum feed exactly so energy is conserved*/
+                  /*-> we need to do this here so that particle properties don't change between loading the buffer and writing it*/
+                  p0 = sqrt(pow(SphP[i].Momentum[0], 2) + pow(SphP[i].Momentum[1], 2) + pow(SphP[i].Momentum[2], 2));
+              
+                  if(p0 < pow(10,-10)) //protect against p0 = 0;
+                    cos_theta = 1;
+                  else if(SphP[i].PositiveJet)
+                    cos_theta = (SphP[i].Momentum[0]*pos_x_axis[0] + SphP[i].Momentum[1]*pos_x_axis[1] + SphP[i].Momentum[2]*pos_x_axis[2]) / 
+                    (p0*sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) + pow(pos_x_axis[2], 2)));       
+                  else
+                    cos_theta = (SphP[i].Momentum[0]*neg_x_axis[0] + SphP[i].Momentum[1]*neg_x_axis[1] + SphP[i].Momentum[2]*neg_x_axis[2]) / 
+                    (p0*sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) + pow(neg_x_axis[2], 2)));
+          
+                  pj = -p0*cos_theta + sqrt(p0*p0 * cos_theta*cos_theta + 2*P[i].Mass*SphP[i].KineticFeed);
+
+                  if(SphP[i].PositiveJet) 
+                    { 
+                      SphP[i].MomentumFeed[0] += pos_x_axis[0] * pj / sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2));
+                      SphP[i].MomentumFeed[1] += pos_x_axis[1] * pj / sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2));
+                      SphP[i].MomentumFeed[2] += pos_x_axis[2] * pj / sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2)); 
+                    }
+                  else
+                    {  
+                      SphP[i].MomentumFeed[0] += neg_x_axis[0] * pj / sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) +  pow(neg_x_axis[2], 2));
+                      SphP[i].MomentumFeed[1] += neg_x_axis[1] * pj / sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) +  pow(neg_x_axis[2], 2));
+                      SphP[i].MomentumFeed[2] += neg_x_axis[2] * pj / sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) +  pow(neg_x_axis[2], 2));
+                    }
+
                   /*update total energy*/
                   SphP[i].Energy += SphP[i].ThermalFeed + SphP[i].KineticFeed;
                   All.EnergyExchange[1] += SphP[i].ThermalFeed + SphP[i].KineticFeed;
