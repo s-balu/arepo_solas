@@ -163,7 +163,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   int numnodes, *firstnode;
   double h, dt, dtime;
   MyDouble ngbmass, ngbmass_feed, accretion_rate, mass_to_accrete, mass_to_drain; 
-  MyDouble energyfeed, cos_theta, p0, pj;
+  MyDouble energyfeed;
   MyDouble *pos;
 
   data_in local, *target_data;

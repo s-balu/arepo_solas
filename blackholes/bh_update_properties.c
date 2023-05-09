@@ -176,6 +176,7 @@ void perform_end_of_step_bh_physics(void)
 /*accrete mass, angular momentum onto the bh and drain ngb cells*/
   int i, j, bin;
   double dt;
+  double cos_theta, p0, pj;
   
   for(i=0; i<NumBh; i++)
     {
