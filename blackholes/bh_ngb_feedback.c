@@ -201,7 +201,9 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 /*get feedback energy from accreted mass*/
   energyfeed = All.Epsilon_r / (1 - All.Epsilon_r) * All.Epsilon_f * mass_to_accrete * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
  
-
+  double pos_x_axis[3], neg_x_axis[3];
+  double theta, vx, vy, vz, pos_x_angle, neg_x_angle; 
+  
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
   for(n = 0; n < nfound; n++)
     {
@@ -212,20 +214,18 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 /*jet setup/    
 
 /*positive and negative jet axes (no need to be normalized)*/
-          double pos_x_axis[3] = {1, 0, 0};
-          double neg_x_axis[3] = {-1, 0, 0};
-      
+          pos_x_axis[3] = {1, 0, 0};
+          neg_x_axis[3] = {-1, 0, 0};      
 /*jet angle*/
-          double theta = M_PI/4;
-  
+          theta = M_PI/4;
 /*calculate the vector to the cone vertex*/
-          double vx = P[j].Pos[0] - pos[0]; // x-component of the vector from the vertex to the point
-          double vy = P[j].Pos[1] - pos[1]; // y-component of the vector from the vertex to the point
-          double vz = P[j].Pos[2] - pos[2]; // z-component of the vector from the vertex to the point
+          vx = P[j].Pos[0] - pos[0]; // x-component of the vector from the vertex to the point
+          vy = P[j].Pos[1] - pos[1]; // y-component of the vector from the vertex to the point
+          vz = P[j].Pos[2] - pos[2]; // z-component of the vector from the vertex to the point
 /*calculate angles*/    
-          double pos_x_angle = acos((vx*pos_x_axis[0] + vy*pos_x_axis[1] + vz*pos_x_axis[2]) / 
+          pos_x_angle = acos((vx*pos_x_axis[0] + vy*pos_x_axis[1] + vz*pos_x_axis[2]) / 
           (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2))));
-          double neg_x_angle = acos((vx*neg_x_axis[0] + vy*neg_x_axis[1] + vz*neg_x_axis[2]) / 
+          neg_x_angle = acos((vx*neg_x_axis[0] + vy*neg_x_axis[1] + vz*neg_x_axis[2]) / 
           (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) + pow(neg_x_axis[2], 2))));
 /*set flag to 1 if gas particle is on the positive side of jet*/
           if(pos_x_angle <= theta)
