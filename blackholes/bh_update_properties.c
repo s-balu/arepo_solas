@@ -51,9 +51,7 @@ void update_bh_accretion_rate(void)
       EddingtonRate = 4. * M_PI * GRAVITY * (PPB(i).Mass * All.UnitMass_in_g) * PROTONMASS / (All.Epsilon_r * CLIGHT * THOMPSON);
       EddingtonRate *=  (All.UnitTime_in_s / All.UnitMass_in_g);
       accretion_rate = fmin(BondiRate, EddingtonRate);
-  
-/*efficiency*/
-      accretion_rate *= (1. - All.Epsilon_r);
+      
       BhP[i].AccretionRate = accretion_rate;
     }
   
@@ -252,7 +250,7 @@ void perform_end_of_step_bh_physics(void)
               int i = TimeBinsHydro.ActiveParticleList[idx];
               if(i < 0)
               continue;
-              if(SphP[i].ThermalFeed > 0 || SphP[i].KineticFeed > 0)
+              if(SphP[i].KineticFeed > 0)
                 {
                   /*calculate momentum feed exactly so energy is conserved*/
                   /*-> we need to do this here so that particle properties don't change between loading the buffer and writing it*/
@@ -281,7 +279,10 @@ void perform_end_of_step_bh_physics(void)
                       SphP[i].MomentumFeed[1] += neg_x_axis[1] * pj / sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) +  pow(neg_x_axis[2], 2));
                       SphP[i].MomentumFeed[2] += neg_x_axis[2] * pj / sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) +  pow(neg_x_axis[2], 2));
                     }
+                }
 
+              if(SphP[i].ThermalFeed > 0 || SphP[i].KineticFeed > 0)
+                {
                   /*update total energy*/
                   SphP[i].Energy += SphP[i].ThermalFeed + SphP[i].KineticFeed;
                   All.EnergyExchange[1] += SphP[i].ThermalFeed + SphP[i].KineticFeed;

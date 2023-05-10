@@ -197,9 +197,9 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   dt    = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
   dtime = All.cf_atime * dt / All.cf_time_hubble_a;
 /*get accreted mass from accretion rate*/
-  mass_to_accrete = accretion_rate * dt; 
+  mass_to_accrete = (1 - All.Epsilon_r) * accretion_rate * dt; 
 /*get feedback energy from accreted mass*/
-  energyfeed = All.Epsilon_r / (1 - All.Epsilon_r) * All.Epsilon_f * mass_to_accrete * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
+  energyfeed = All.Epsilon_f * All.Epsilon_r * accretion_rate * dt * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
  
   double pos_x_axis[3], neg_x_axis[3];
   double theta, vx, vy, vz, pos_x_angle, neg_x_angle; 
@@ -260,7 +260,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
         }
 
 /*set drain mass flag*/
-      SphP[j].MassDrain = mass_to_accrete/ngbmass*P[j].Mass + mass_to_drain/ngbmass*P[j].Mass;
+      SphP[j].MassDrain = accretion_rate*dt/ngbmass*P[j].Mass + mass_to_drain/ngbmass*P[j].Mass;
     }
   
   return 0;
