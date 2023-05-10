@@ -175,7 +175,10 @@ void domain_Decomposition(void)
     }
 
   reconstruct_timebins();
+  
+  #ifdef BLACKHOLES
   reconstruct_bh_timebins();
+  #endif 
 
   for(int i = 0; i < GRAVCOSTLEVELS; i++)
     All.LevelHasBeenMeasured[i] = 0;

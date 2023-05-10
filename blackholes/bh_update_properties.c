@@ -22,7 +22,6 @@ void update_bh_accretion_rate(void)
 
   for(i = 0; i < NumBh; i++)
     {
-
 /*get pressure*/
       if(BhP[i].Density>0)
         {  
@@ -70,13 +69,17 @@ integertime get_timestep_bh(int p)
   integertime acc_timestep;
 
       accretion_timestep = BhP[p].NgbMass / BhP[p].AccretionRate;
+      
+      if(acc_timestep > 1) /*if accretion rate is a small number the timestep becomes very large*/
+        return BhP[p].NgbMinStep;
+     
       acc_timestep = accretion_timestep / All.Timebase_interval;
       acc_timestep *= 0.01;
       
-      if(acc_timestep < BhP[p].NgbMinStep)
-        return acc_timestep;
+      if(BhP[p].NgbMinStep < acc_timestep)
+        return BhP[p].NgbMinStep;
       
-      return BhP[p].NgbMinStep;
+      return acc_timestep;
 }
 
 /*update bh-timestep at prior_mesh_construction*/
