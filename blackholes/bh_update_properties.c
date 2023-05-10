@@ -38,7 +38,7 @@ void update_bh_accretion_rate(void)
           if(denominator > 0)
             {
               denominator_inv = 1. / sqrt(denominator);
-              BondiRate = 4. * M_PI * All.G * All.G * PPB(i).Mass * density *
+              BondiRate = 4. * M_PI * All.G * All.G * PPB(i).Mass * PPB(i).Mass * density *
                    denominator_inv * denominator_inv * denominator_inv;
             }
           else
