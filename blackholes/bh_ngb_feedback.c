@@ -196,10 +196,10 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 /*bh timestep*/
   dt    = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
   dtime = All.cf_atime * dt / All.cf_time_hubble_a;
-/*get feedback energy from accreted mass*/
+/*get feedback energy from accretion rate*/
   energyfeed = All.Epsilon_f * All.Epsilon_r * accretion_rate * dt * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
  
-/*jet axis and opening angle/    
+/*jet axis and opening angle*/    
 
 /*positive and negative jet axes (no need to be normalized)*/
       double pos_x_axis[3] = {1, 0, 0};
