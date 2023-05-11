@@ -66,18 +66,18 @@ integertime get_timestep_bh(int p)
   MyDouble accretion_timestep;
   integertime acc_timestep;
 
-      accretion_timestep = BhP[p].NgbMass / BhP[p].AccretionRate;
+  accretion_timestep = BhP[p].NgbMass / BhP[p].AccretionRate;
       
-      if(accretion_timestep > 1) /*if accretion rate is a small number the timestep becomes very large*/
-        return BhP[p].NgbMinStep;
+  if(accretion_timestep > 1) /*if accretion rate is a small number the timestep becomes very large*/
+    return BhP[p].NgbMinStep;
      
-      acc_timestep = accretion_timestep / All.Timebase_interval;
-      acc_timestep *= 0.01;
+  acc_timestep = accretion_timestep / All.Timebase_interval;
+  acc_timestep *= 0.01;
       
-      if(BhP[p].NgbMinStep < acc_timestep)
-        return BhP[p].NgbMinStep;
+  if(BhP[p].NgbMinStep < acc_timestep)
+    return BhP[p].NgbMinStep;
       
-      return acc_timestep;
+  return acc_timestep;
 }
 
 /*update bh-timestep at prior_mesh_construction*/
