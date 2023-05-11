@@ -162,7 +162,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   int j, n, bin;
   int numnodes, *firstnode;
   double h, dt, dtime;
-  MyDouble ngbmass, ngbmass_feed, accretion_rate, mass_to_accrete, mass_to_drain; 
+  MyDouble ngbmass, ngbmass_feed, accretion_rate, mass_to_drain; 
   MyDouble energyfeed;
   MyDouble *pos;
 
@@ -196,13 +196,20 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 /*bh timestep*/
   dt    = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
   dtime = All.cf_atime * dt / All.cf_time_hubble_a;
-/*get accreted mass from accretion rate*/
-  mass_to_accrete = (1 - All.Epsilon_r) * accretion_rate * dt; 
 /*get feedback energy from accreted mass*/
   energyfeed = All.Epsilon_f * All.Epsilon_r * accretion_rate * dt * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
  
-  double pos_x_axis[3], neg_x_axis[3];
-  double theta, vx, vy, vz, pos_x_angle, neg_x_angle; 
+  if(All.JetFeedback)
+    {
+/*jet axis and opening angle/    
+
+/*positive and negative jet axes (no need to be normalized)*/
+      double pos_x_axis[3] = {1, 0, 0};
+      double neg_x_axis[3] = {-1, 0, 0};      
+/*jet angle*/
+      double theta = M_PI/4;
+      double vx, vy, vz, pos_x_angle, neg_x_angle;
+    } 
   
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
   for(n = 0; n < nfound; n++)
@@ -211,14 +218,9 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 /*flag for jet -> 0: isotropic thermal injection, 1: kinetic jet and isotropic thermal injection, 2: kinetic and thermal jet*/
       if(All.JetFeedback)
         {
-/*jet setup/    
+/*double cone jet setup*/
 
-/*positive and negative jet axes (no need to be normalized)*/
-          pos_x_axis[3] = {1, 0, 0};
-          neg_x_axis[3] = {-1, 0, 0};      
-/*jet angle*/
-          theta = M_PI/4;
-/*calculate the vector to the cone vertex*/
+/*calculate vector to cone vertex*/
           vx = P[j].Pos[0] - pos[0]; // x-component of the vector from the vertex to the point
           vy = P[j].Pos[1] - pos[1]; // y-component of the vector from the vertex to the point
           vz = P[j].Pos[2] - pos[2]; // z-component of the vector from the vertex to the point
