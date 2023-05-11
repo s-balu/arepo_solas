@@ -411,6 +411,15 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   velocity_gas[0] = velocity_gas[1] = velocity_gas[2] = 0;
   velocity_gas_circular[0] = velocity_gas_circular[1] = velocity_gas_circular[2] = 0;
 
+/*jet axis and opening angle*/    
+
+/*positive and negative jet axes (no need to be normalized) */
+  double pos_x_axis[3] = {1, 0, 0};
+  double neg_x_axis[3] = {-1, 0, 0};      
+/*jet angle*/
+  double theta = M_PI/4;
+  double vx, vy, vz, pos_x_angle, neg_x_angle; 
+
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
 
   for(n = 0; n < nfound; n++)
@@ -502,23 +511,16 @@ static int bh_density_evaluate(int target, int mode, int threadid)
       
       if(All.JetFeedback)
         {
-/*jet setup/    
-
-/*positive and negative jet axes (no need to be normalized)*/
-          double pos_x_axis[3] = {1, 0, 0};
-          double neg_x_axis[3] = {-1, 0, 0};
-      
-/*jet angle*/
-          double theta = M_PI/4;
+/*double cone jet setup/    
   
 /*calculate the vector to the cone vertex*/
-          double vx = P[j].Pos[0] - pos[0]; // x-component of the vector from the vertex to the point
-          double vy = P[j].Pos[1] - pos[1]; // y-component of the vector from the vertex to the point
-          double vz = P[j].Pos[2] - pos[2]; // z-component of the vector from the vertex to the point
+          vx = P[j].Pos[0] - pos[0]; // x-component of the vector from the vertex to the point
+          vy = P[j].Pos[1] - pos[1]; // y-component of the vector from the vertex to the point
+          vz = P[j].Pos[2] - pos[2]; // z-component of the vector from the vertex to the point
 /*calculate angles*/    
-          double pos_x_angle = acos((vx*pos_x_axis[0] + vy*pos_x_axis[1] + vz*pos_x_axis[2]) / 
+          pos_x_angle = acos((vx*pos_x_axis[0] + vy*pos_x_axis[1] + vz*pos_x_axis[2]) / 
           (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2))));
-          double neg_x_angle = acos((vx*neg_x_axis[0] + vy*neg_x_axis[1] + vz*neg_x_axis[2]) / 
+          neg_x_angle = acos((vx*neg_x_axis[0] + vy*neg_x_axis[1] + vz*neg_x_axis[2]) / 
           (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) + pow(neg_x_axis[2], 2))));
 /*check if particle is inside the cone*/ 
           if((pos_x_angle <= theta) || (neg_x_angle <= theta))

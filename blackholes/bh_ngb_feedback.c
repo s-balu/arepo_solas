@@ -201,12 +201,12 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
  
 /*jet axis and opening angle*/    
 
-/*positive and negative jet axes (no need to be normalized)*/
-      double pos_x_axis[3] = {1, 0, 0};
-      double neg_x_axis[3] = {-1, 0, 0};      
+/*positive and negative jet axes (no need to be normalized) */
+  double pos_x_axis[3] = {1, 0, 0};
+  double neg_x_axis[3] = {-1, 0, 0};      
 /*jet angle*/
-      double theta = M_PI/4;
-      double vx, vy, vz, pos_x_angle, neg_x_angle; 
+  double theta = M_PI/4;
+  double vx, vy, vz, pos_x_angle, neg_x_angle; 
   
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
   for(n = 0; n < nfound; n++)
