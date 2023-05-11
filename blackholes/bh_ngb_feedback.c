@@ -199,8 +199,6 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 /*get feedback energy from accreted mass*/
   energyfeed = All.Epsilon_f * All.Epsilon_r * accretion_rate * dt * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
  
-  if(All.JetFeedback)
-    {
 /*jet axis and opening angle/    
 
 /*positive and negative jet axes (no need to be normalized)*/
@@ -208,8 +206,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
       double neg_x_axis[3] = {-1, 0, 0};      
 /*jet angle*/
       double theta = M_PI/4;
-      double vx, vy, vz, pos_x_angle, neg_x_angle;
-    } 
+      double vx, vy, vz, pos_x_angle, neg_x_angle; 
   
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
   for(n = 0; n < nfound; n++)
