@@ -254,12 +254,17 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 /*else All.JetFeedback == 0 i.e. only isotropic thermal injection*/
       else
         {
+          SphP[j].KineticFeed   += (1-All.Ftherm) * energyfeed/ngbmass*P[j].Mass;
+          All.EnergyExchange[0] += (1-All.Ftherm) * energyfeed/ngbmass*P[j].Mass;
           SphP[j].ThermalFeed   += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
           All.EnergyExchange[0] += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
         }
 
 /*set drain mass flag*/
       SphP[j].MassDrain = accretion_rate*dt/ngbmass*P[j].Mass + mass_to_drain/ngbmass*P[j].Mass;
+      SphP[j].MomentumKickVector[0] = vx;
+      SphP[j].MomentumKickVector[1] = vy;
+      SphP[j].MomentumKickVector[2] = vz;
     }
   
   return 0;

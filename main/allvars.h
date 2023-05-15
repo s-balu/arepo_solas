@@ -1460,6 +1460,7 @@ extern struct sph_particle_data
   MyDouble ThermalFeed;
   MyDouble KineticFeed;
   MyDouble MomentumFeed[3];
+  MyDouble MomentumKickVector[3];
 #endif
 
 } * SphP,          /*!< holds SPH particle data on local processor */
