@@ -215,16 +215,14 @@ static void gravity_external_get_force(double pos[3], int type, MyIDType ID, dou
     double r, m, a;
     double dx, dy, dz;
 
-/*position of cell is relative to centre of the potential*/    
-
-    dx = pos[0] 
-    dy = pos[1] 
-    dz = pos[2] 
+    dx = pos[0] - boxHalf_X;
+    dy = pos[1] - boxHalf_Y;
+    dz = pos[2] - boxHalf_Z;
 
     r = sqrt(dx * dx + dy * dy + dz * dz);
 
     //a = pow(All.G * HQ_M200 / (100 * All.Hubble * All.Hubble), 1.0 / 3) / HQ_C * sqrt(2 * (log(1 + HQ_C) - HQ_C / (1 + HQ_C)));
-    a = HQ_C; //this will set the a parameter
+    a = HQ_C; //this will set a
     m = HQ_M200 * pow(r / (r + a), 2);
 #ifdef HQ_DARKFRACTION
     m *= HQ_DARKFRACTION;
