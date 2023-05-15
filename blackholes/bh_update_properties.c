@@ -53,6 +53,7 @@ void update_bh_accretion_rate(void)
       accretion_rate = fmin(BondiRate, EddingtonRate);
       
       BhP[i].AccretionRate  = accretion_rate;
+      BhP[i].AccretionRate *= 0;
     }
   
   MPI_Allreduce(&accretion_rate, &acc_rate_for_print, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
