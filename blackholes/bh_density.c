@@ -511,9 +511,9 @@ static int bh_density_evaluate(int target, int mode, int threadid)
       
       if(All.JetFeedback)
         {
-/*double cone jet setup/    
+/*double cone jet setup*/    
   
-/*calculate the vector to the cone vertex*/
+/*calculate vector to cone vertex*/
           vx = P[j].Pos[0] - pos[0]; // x-component of the vector from the vertex to the point
           vy = P[j].Pos[1] - pos[1]; // y-component of the vector from the vertex to the point
           vz = P[j].Pos[2] - pos[2]; // z-component of the vector from the vertex to the point
