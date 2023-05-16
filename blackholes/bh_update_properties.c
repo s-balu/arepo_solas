@@ -15,9 +15,9 @@ void update_bh_accretion_rate(void)
   int i;
  
   double EddingtonRate;
-  double accretion_rate, acc_rate_for_print;
+ /* double acc_rate_for_print;
 
-  accretion_rate = acc_rate_for_print = 0;
+  acc_rate_for_print = 0;*/
 
   for(i = 0; i < NumBh; i++)
     {
@@ -27,29 +27,15 @@ void update_bh_accretion_rate(void)
       BhP[i].AccretionRate  = EddingtonRate; //fix accretion to eddington rate
     }
   
-  MPI_Allreduce(&accretion_rate, &acc_rate_for_print, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+  /*MPI_Allreduce(&BhP[i].AccretionRate, &acc_rate_for_print, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
   MPI_Barrier(MPI_COMM_WORLD); // synchronize all tasks
-  mpi_printf("BLACK_HOLES: Black hole accretion rate: %e \n", acc_rate_for_print);
+  mpi_printf("BLACK_HOLES: Black hole accretion rate: %e \n", acc_rate_for_print);*/
 }
 
-/*get timestep for bh based on smallest between ngbmin and acc_timestep*/
+/*get timestep for bh based on smallest between ngbs*/
 integertime get_timestep_bh(int p)
 {
-  MyDouble accretion_timestep;
-  integertime acc_timestep;
-
-  accretion_timestep = BhP[p].NgbMass / BhP[p].AccretionRate;
-      
-  if(accretion_timestep > 1) /*if accretion rate is a small number the timestep becomes very large*/
-    return BhP[p].NgbMinStep;
-     
-  acc_timestep = accretion_timestep / All.Timebase_interval;
-  acc_timestep *= 0.01;
-      
-  if(BhP[p].NgbMinStep < acc_timestep)
-    return BhP[p].NgbMinStep;
-      
-  return acc_timestep;
+  return BhP[p].NgbMinStep;
 }
 
 /*update bh-timestep at prior_mesh_construction*/

@@ -351,7 +351,6 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   integertime ngb_min_step;
   int bin = TIMEBINS;
    
-
   data_in local, *target_data;
   data_out out;
 
