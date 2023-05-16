@@ -147,8 +147,8 @@ void update_list_of_active_bh_particles(void)
 void perform_end_of_step_bh_physics(void)
 {
 /*accrete mass, angular momentum onto the bh and drain ngb cells*/
-  int i;
-  double cos_theta, p0, pj;
+  int dx, i;
+  double pj;
 
 /*inject feedback to ngb cells*/
     if(All.Time >= All.FeedbackTime)
@@ -168,9 +168,9 @@ void perform_end_of_step_bh_physics(void)
           /*radial momentum kick*/
           double kick_vector[3];
 
-          for(int idx = 0; idx < TimeBinsHydro.NActiveParticles; idx++)
+          for(idx = 0; idx < TimeBinsHydro.NActiveParticles; idx++)
             {
-              int i = TimeBinsHydro.ActiveParticleList[idx];
+              i = TimeBinsHydro.ActiveParticleList[idx];
               if(i < 0)
               continue;
               if(SphP[i].KineticFeed > 0)
