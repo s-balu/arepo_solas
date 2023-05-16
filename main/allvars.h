@@ -1227,6 +1227,7 @@ extern struct global_data_all_processes
   int BhDesNumNgb;
   int BhMaxNumNgbDeviation;
   double FeedbackTime;
+  double Epsilon_r;
   double Lambda;
 #endif
 } All;

@@ -178,7 +178,7 @@ void perform_end_of_step_bh_physics(void)
                   kick_vector[0] = SphP[i].MomentumKickVector[0];
                   kick_vector[1] = SphP[i].MomentumKickVector[1];
                   kick_vector[2] = SphP[i].MomentumKickVector[2];
-                  pj = SphP[j].KineticFeed;
+                  pj = SphP[i].KineticFeed;
 
                   /*update momentum*/
                   SphP[i].Momentum[0] += kick_vector[0] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
