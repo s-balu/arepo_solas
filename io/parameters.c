@@ -515,6 +515,10 @@ void read_parameter_file(char *fname)
       addr[nt] = &All.BhMaxNumNgbDeviation;
       id[nt++] = INT;
 
+      strcpy(tag[nt], "FeedbackTime");
+      addr[nt] = &All.FeedbackTime;
+      id[nt++] = REAL;
+
       strcpy(tag[nt], "Epsilon_r");
       addr[nt] = &All.Epsilon_r;
       id[nt++] = REAL;
