@@ -252,8 +252,8 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
         }
 
 /*set radial momentum kick*/
-      SphP[j].KineticFeed   += All.Lambda * accretion_rate * dt * (CLIGHT * / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
-      All.EnergyExchange[0] += SphP[i].KineticFeed;
+      SphP[j].KineticFeed   += All.Lambda * accretion_rate * dt * (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
+      All.EnergyExchange[0] += SphP[j].KineticFeed;
 
       SphP[j].MomentumKickVector[0] = -dx;
       SphP[j].MomentumKickVector[1] = -dy;
