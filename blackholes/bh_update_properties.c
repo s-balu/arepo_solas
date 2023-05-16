@@ -147,7 +147,7 @@ void update_list_of_active_bh_particles(void)
 void perform_end_of_step_bh_physics(void)
 {
 /*accrete mass, angular momentum onto the bh and drain ngb cells*/
-  int dx, i;
+  int idx, i;
   double pj;
 
 /*inject feedback to ngb cells*/

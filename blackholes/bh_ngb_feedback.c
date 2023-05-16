@@ -249,17 +249,17 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
             {
               wk  = hinv3 * KERNEL_COEFF_5 * (1.0 - u) * (1.0 - u) * (1.0 - u);
             }
-        }
 
 /*set radial momentum kick*/
-      SphP[j].KineticFeed   += All.Lambda * accretion_rate * dt * (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
-      All.EnergyExchange[0] += SphP[j].KineticFeed;
+          SphP[j].KineticFeed   += All.Lambda * accretion_rate * dt * (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
+          All.EnergyExchange[0] += SphP[j].KineticFeed;
 
-      SphP[j].MomentumKickVector[0] = -dx;
-      SphP[j].MomentumKickVector[1] = -dy;
-      SphP[j].MomentumKickVector[2] = -dz;
-    }
+          SphP[j].MomentumKickVector[0] = -dx;
+          SphP[j].MomentumKickVector[1] = -dy;
+          SphP[j].MomentumKickVector[2] = -dz;
+        }
   
+    }
   return 0;
 }
   /* Now collect the result at the right place 
