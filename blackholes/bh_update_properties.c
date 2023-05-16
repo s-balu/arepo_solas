@@ -180,29 +180,24 @@ void perform_end_of_step_bh_physics(void)
                   kick_vector[2] = SphP[i].MomentumKickVector[2];
                   pj = SphP[j].KineticFeed;
 
-                  SphP[i].MomentumFeed[0] += kick_vector[0] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
-                  SphP[i].MomentumFeed[1] += kick_vector[1] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
-                  SphP[i].MomentumFeed[2] += kick_vector[2] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2)); 
-
-  
                   /*update momentum*/
-                  SphP[i].Momentum[0] += SphP[i].MomentumFeed[0];
-                  SphP[i].Momentum[1] += SphP[i].MomentumFeed[1];
-                  SphP[i].Momentum[2] += SphP[i].MomentumFeed[2];        
+                  SphP[i].Momentum[0] += kick_vector[0] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
+                  SphP[i].Momentum[1] += kick_vector[1] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
+                  SphP[i].Momentum[2] += kick_vector[2] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));  
+
+                  All.EnergyExchange[1] += SphP[i].KineticFeed;     
+                 
                   /*update velocities*/
                   update_primitive_variables_single(P, SphP, i, &pvd);  
 
                   /*update total energy*/
-                  SphP[i].Energy = SphP[i].ThermalFeed + SphP[i].KineticFeed;
-                  All.EnergyExchange[1] += SphP[i].ThermalFeed + SphP[i].KineticFeed;
-
+                  SphP[i].Energy = SphP[i].Utherm * P[i].Mass + 0.5 * P[i].Mass * (pow(P[i].Vel[0], 2) + pow(P[i].Vel[1], 2) + pow(P[i].Vel[2], 2));                 
                   /*update internal energy*/
                   update_internal_energy(P, SphP, i, &pvd);
                   /*update pressure*/
                   set_pressure_of_cell_internal(P, SphP, i);
-                  /*set feed flags to zero*/
-                  SphP[i].ThermalFeed = SphP[i].KineticFeed = 0;
-                  SphP[i].MomentumFeed[0] = SphP[i].MomentumFeed[1] = SphP[i].MomentumFeed[2] = 0;
+                  /*set feed flag to zero*/
+                  SphP[i].KineticFeed = 0;
                 }
             }
 #ifdef BURST_MODE

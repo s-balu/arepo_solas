@@ -1226,11 +1226,8 @@ extern struct global_data_all_processes
   /*for parameter file*/
   int BhDesNumNgb;
   int BhMaxNumNgbDeviation;
-  int JetFeedback;
   double FeedbackTime;
-  double Epsilon_r;
-  double Epsilon_f;
-  double Ftherm;
+  double Lambda;
 #endif
 } All;
 
@@ -1455,11 +1452,7 @@ extern struct sph_particle_data
 #endif /* #ifdef ADDBACKGROUNDGRID */
     
 #ifdef BLACKHOLES
-  int PositiveJet;
-  MyDouble MassDrain;
-  MyDouble ThermalFeed;
   MyDouble KineticFeed;
-  MyDouble MomentumFeed[3];
   MyDouble MomentumKickVector[3];
 #endif
 
@@ -1473,13 +1466,7 @@ MyIDType PID;
 MyDouble Hsml;
 MyDouble Density;
 MyDouble NgbMass;
-MyDouble NgbMassFeed;
-MyDouble VelocityGas[3];
-MyDouble VelocityGasCircular[3];
-MyDouble InternalEnergyGas;
 MyDouble AccretionRate;
-MyDouble MassToDrain;
-MyDouble EnergyRateFeed;
 integertime NgbMinStep;
 
 MyDouble AngularMomentum[3];
