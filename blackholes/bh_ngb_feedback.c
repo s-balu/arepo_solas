@@ -23,10 +23,9 @@ typedef struct
   MyFloat Hsml;
   int Firstnode;
   int Bin;
+  MyDouble BhRho;
   MyDouble NgbMass;
-  MyDouble NgbMassFeed;
   MyDouble AccretionRate;
-  MyDouble MassToDrain;
 } data_in;
 
 static data_in *DataIn, *DataGet;
@@ -45,12 +44,11 @@ static void particle2in(data_in *in, int i, int firstnode)
   in->Pos[0]        = PPB(i).Pos[0];
   in->Pos[1]        = PPB(i).Pos[1];
   in->Pos[2]        = PPB(i).Pos[2];
-  in->Hsml          = BhP[i].Hsml;
-  in->NgbMass       = BhP[i].NgbMass;
-  in->NgbMassFeed   = BhP[i].NgbMassFeed;
   in->Bin           = PPB(i).TimeBinBh;
+  in->Hsml          = BhP[i].Hsml;
+  in->BhRho         = BhP[i].Density;
+  in->NgbMass       = BhP[i].NgbMass;
   in->AccretionRate = BhP[i].AccretionRate;
-  in->MassToDrain   = BhP[i].MassToDrain;
 
   in->Firstnode     = firstnode;
 }
@@ -161,9 +159,10 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 {
   int j, n, bin;
   int numnodes, *firstnode;
-  double h, dt, dtime;
-  MyDouble ngbmass, ngbmass_feed, accretion_rate, mass_to_drain; 
-  MyDouble energyfeed;
+  double h, h2, hinv, hinv3, hinv4, wk;
+  double dx, dy, dz, r, r2, u;
+  double dt, dtime;
+  MyDouble bh_rho, ngbmass, accretion_rate; 
   MyDouble *pos;
 
   data_in local, *target_data;
@@ -186,85 +185,79 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 
   pos            = target_data->Pos;
   h              = target_data->Hsml;
-  ngbmass        = target_data->NgbMass;
-  ngbmass_feed   = target_data->NgbMassFeed;
   bin            = target_data->Bin;
+  bh_rho         = target_data->BhRho;
+  ngbmass        = target_data->NgbMass;
   accretion_rate = target_data->AccretionRate; 
-  mass_to_drain  = target_data->MassToDrain; 
 
-
+  h2   = h * h;
+  hinv = 1.0 / h;
+#ifndef TWODIMS
+  hinv3 = hinv * hinv * hinv;
+#else  /* #ifndef  TWODIMS */
+  hinv3 = hinv * hinv / boxSize_Z;
+#endif /* #ifndef  TWODIMS #else */
+  hinv4 = hinv3 * hinv;
+ 
 /*bh timestep*/
   dt    = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
   dtime = All.cf_atime * dt / All.cf_time_hubble_a;
-/*get feedback energy from accretion rate*/
-  energyfeed = All.Epsilon_f * All.Epsilon_r * accretion_rate * dt * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
- 
-/*jet axis and opening angle*/    
 
-/*positive and negative jet axes (no need to be normalized) */
-  double pos_x_axis[3] = {1, 0, 0};
-  double neg_x_axis[3] = {-1, 0, 0};      
-/*jet angle*/
-  double theta = M_PI/4;
-  double vx, vy, vz, pos_x_angle, neg_x_angle; 
-  
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
   for(n = 0; n < nfound; n++)
     {
       j = Thread[threadid].Ngblist[n];
-/*flag for jet -> 0: isotropic thermal injection, 1: kinetic jet and isotropic thermal injection, 2: kinetic and thermal jet*/
-      if(All.JetFeedback)
+
+      dx = pos[0] - P[j].Pos[0];
+      dy = pos[1] - P[j].Pos[1];
+      dz = pos[2] - P[j].Pos[2];
+
+#ifndef REFLECTIVE_X
+      if(dx > boxHalf_X)
+        dx -= boxSize_X;
+      if(dx < -boxHalf_X)
+        dx += boxSize_X;
+#endif /* #ifndef REFLECTIVE_X */
+
+#ifndef REFLECTIVE_Y
+      if(dy > boxHalf_Y)
+        dy -= boxSize_Y;
+      if(dy < -boxHalf_Y)
+        dy += boxSize_Y;
+#endif /* #ifndef REFLECTIVE_Y */
+
+#ifndef REFLECTIVE_Z
+      if(dz > boxHalf_Z)
+        dz -= boxSize_Z;
+      if(dz < -boxHalf_Z)
+        dz += boxSize_Z;
+#endif /* #ifndef REFLECTIVE_Z */
+      r2 = dx * dx + dy * dy + dz * dz;
+
+/*kernel*/
+      if(r2 < h2)
         {
-/*double cone jet setup*/
+          r = sqrt(r2);
 
-/*calculate vector to cone vertex*/
-          vx = P[j].Pos[0] - pos[0]; // x-component of the vector from the vertex to the point
-          vy = P[j].Pos[1] - pos[1]; // y-component of the vector from the vertex to the point
-          vz = P[j].Pos[2] - pos[2]; // z-component of the vector from the vertex to the point
-/*calculate angles*/    
-          pos_x_angle = acos((vx*pos_x_axis[0] + vy*pos_x_axis[1] + vz*pos_x_axis[2]) / 
-          (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2))));
-          neg_x_angle = acos((vx*neg_x_axis[0] + vy*neg_x_axis[1] + vz*neg_x_axis[2]) / 
-          (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) + pow(neg_x_axis[2], 2))));
-/*set flag to 1 if gas particle is on the positive side of jet*/
-          if(pos_x_angle <= theta)
-            SphP[j].PositiveJet = 1;
-/*check if particle is inside the cone*/ 
-          if((pos_x_angle <= theta) || (neg_x_angle <= theta))
+          u = r * hinv;
+
+          if(u < 0.5)
             {
-/*split kinetic and thermal energy feed*/ 
-              SphP[j].KineticFeed       += (1-All.Ftherm) * energyfeed/ngbmass_feed*P[j].Mass;
-              All.EnergyExchange[0]     += (1-All.Ftherm) * energyfeed/ngbmass_feed*P[j].Mass;
-
-/*only jet particles injected with thermal feedback if JetFeedback == 2, else isotropic*/             
-              if(All.JetFeedback == 2)     
-                {
-                  SphP[j].ThermalFeed   += All.Ftherm * energyfeed/ngbmass_feed*P[j].Mass;
-                  All.EnergyExchange[0] += All.Ftherm * energyfeed/ngbmass_feed*P[j].Mass;
-                }
+              wk  = hinv3 * (KERNEL_COEFF_1 + KERNEL_COEFF_2 * (u - 1) * u * u);
             }
-              
-          if(All.JetFeedback == 1)
+          else
             {
-              SphP[j].ThermalFeed   += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
-              All.EnergyExchange[0] += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
-            } 
-            
-        }
-/*else All.JetFeedback == 0 i.e. only isotropic thermal injection*/
-      else
-        {
-          SphP[j].KineticFeed   += (1-All.Ftherm) * energyfeed/ngbmass*P[j].Mass;
-          All.EnergyExchange[0] += (1-All.Ftherm) * energyfeed/ngbmass*P[j].Mass;
-          SphP[j].ThermalFeed   += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
-          All.EnergyExchange[0] += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
+              wk  = hinv3 * KERNEL_COEFF_5 * (1.0 - u) * (1.0 - u) * (1.0 - u);
+            }
         }
 
-/*set drain mass flag*/
-      SphP[j].MassDrain = accretion_rate*dt/ngbmass*P[j].Mass + mass_to_drain/ngbmass*P[j].Mass;
-      SphP[j].MomentumKickVector[0] = vx;
-      SphP[j].MomentumKickVector[1] = vy;
-      SphP[j].MomentumKickVector[2] = vz;
+/*set radial momentum kick*/
+      SphP[j].KineticFeed   += All.lambda * accretion_rate * dt * (CLIGHT * / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
+      All.EnergyExchange[0] += SphP[i].KineticFeed;
+
+      SphP[j].MomentumKickVector[0] = -dx;
+      SphP[j].MomentumKickVector[1] = -dy;
+      SphP[j].MomentumKickVector[2] = -dz;
     }
   
   return 0;

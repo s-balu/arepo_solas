@@ -61,11 +61,7 @@ typedef struct
   MyDouble Ngb;
   MyDouble Rho;
   MyDouble Mass;
-  MyDouble MassFeed;
   integertime NgbMinStep;
-  MyDouble VelocityGas[3];
-  MyDouble VelocityGasCircular[3];
-  MyDouble InternalEnergyGas;
 } data_out;
 
 static data_out *DataResult, *DataOut;
@@ -89,15 +85,7 @@ static void out2particle(data_out *out, int i, int mode)
       BhNumNgb[i]                      = out->Ngb;
       BhP[i].Density                   = out->Rho;
       BhP[i].NgbMass                   = out->Mass;
-      BhP[i].NgbMassFeed               = out->MassFeed;
       BhP[i].NgbMinStep                = out->NgbMinStep;
-      BhP[i].VelocityGas[0]            = out->VelocityGas[0];
-      BhP[i].VelocityGas[1]            = out->VelocityGas[1];
-      BhP[i].VelocityGas[2]            = out->VelocityGas[2];
-      BhP[i].VelocityGasCircular[0]    = out->VelocityGasCircular[0];
-      BhP[i].VelocityGasCircular[1]    = out->VelocityGasCircular[1];
-      BhP[i].VelocityGasCircular[2]    = out->VelocityGasCircular[2];
-      BhP[i].InternalEnergyGas         = out->InternalEnergyGas;
     }
   else /* combine */
     {
@@ -105,16 +93,8 @@ static void out2particle(data_out *out, int i, int mode)
       BhNumNgb[i]                      += out->Ngb;
       BhP[i].Density                   += out->Rho;
       BhP[i].NgbMass                   += out->Mass;
-      BhP[i].NgbMassFeed               += out->MassFeed;
       if(out->NgbMinStep < BhP[i].NgbMinStep)
         BhP[i].NgbMinStep               = out->NgbMinStep;
-      BhP[i].VelocityGas[0]            += out->VelocityGas[0];
-      BhP[i].VelocityGas[1]            += out->VelocityGas[1];
-      BhP[i].VelocityGas[2]            += out->VelocityGas[2];
-      BhP[i].VelocityGasCircular[0]    += out->VelocityGasCircular[0];
-      BhP[i].VelocityGasCircular[1]    += out->VelocityGasCircular[1];
-      BhP[i].VelocityGasCircular[2]    += out->VelocityGasCircular[2];
-      BhP[i].InternalEnergyGas         += out->InternalEnergyGas;
     }
 }
 
@@ -364,12 +344,10 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   double rho;
   double wk, dwk;
   double dx, dy, dz, r, r2, u, mass_j;
-  double dvx, dvy, dvz, rho_j;
   MyFloat weighted_numngb;
   MyFloat dhsmlrho;
-  MyDouble *pos, *vel;
-  MyDouble velocity_gas[3], velocity_gas_circular[3];
-  MyDouble mass, mass_feed, internal_energy_gas;
+  MyDouble *pos;
+  MyDouble mass;
   integertime ngb_min_step;
   int bin = TIMEBINS;
    
@@ -393,7 +371,6 @@ static int bh_density_evaluate(int target, int mode, int threadid)
     }
 
   pos = target_data->Pos;
-  vel = target_data->Vel;
   h   = target_data->Hsml;
 
   h2   = h * h;
@@ -407,18 +384,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 
   numngb = 0;
   rho = weighted_numngb = dhsmlrho = 0;
-  mass = mass_feed = internal_energy_gas = 0;
-  velocity_gas[0] = velocity_gas[1] = velocity_gas[2] = 0;
-  velocity_gas_circular[0] = velocity_gas_circular[1] = velocity_gas_circular[2] = 0;
-
-/*jet axis and opening angle*/    
-
-/*positive and negative jet axes (no need to be normalized) */
-  double pos_x_axis[3] = {1, 0, 0};
-  double neg_x_axis[3] = {-1, 0, 0};      
-/*jet angle*/
-  double theta = M_PI/4;
-  double vx, vy, vz, pos_x_angle, neg_x_angle; 
+  mass = 0;
 
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
 
@@ -426,21 +392,16 @@ static int bh_density_evaluate(int target, int mode, int threadid)
     {
       j = Thread[threadid].Ngblist[n];
 
- /*compute the min hydro step for neighbors*/     
+/*compute the min hydro step for neighbors*/     
       if(bin > P[j].TimeBinHydro)
         bin = P[j].TimeBinHydro;
 
 /*compute the bh-ngb-mass*/
       mass += P[j].Mass;
 
-/*compute bh->cell position and velocity vectors: posBhP-posSphP while velSphP-velBhP*/
       dx = pos[0] - P[j].Pos[0];
       dy = pos[1] - P[j].Pos[1];
       dz = pos[2] - P[j].Pos[2];
-
-      dvx = P[j].Vel[0] - vel[0]; 
-      dvy = P[j].Vel[1] - vel[1]; 
-      dvz = P[j].Vel[2] - vel[2]; 
 
 /* now find the closest image in the given box size */
 #ifndef REFLECTIVE_X
@@ -465,6 +426,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 #endif /* #ifndef REFLECTIVE_Z */
       r2 = dx * dx + dy * dy + dz * dz;
 
+/*kernel*/
       if(r2 < h2)
         {
           numngb++;
@@ -484,22 +446,8 @@ static int bh_density_evaluate(int target, int mode, int threadid)
               dwk = hinv4 * KERNEL_COEFF_6 * (1.0 - u) * (1.0 - u);
             }
 
-/*compute relative velocities, relative specific angular momenta and internal energy of gas*/
+
           mass_j = P[j].Mass;
-          if(SphP[j].Density > 0)
-            rho_j  = SphP[j].Density;
-          else
-            rho_j = 1;
-
-          velocity_gas[0] += dvx*mass_j/rho_j*wk;
-          velocity_gas[1] += dvy*mass_j/rho_j*wk;
-          velocity_gas[2] += dvz*mass_j/rho_j*wk;
-
-          velocity_gas_circular[0] -= (dy * dvz - dz * dvy)*mass_j/rho_j*wk;
-          velocity_gas_circular[1] -= (dz * dvx - dx * dvz)*mass_j/rho_j*wk;
-          velocity_gas_circular[2] -= (dx * dvy - dy * dvx)*mass_j/rho_j*wk;
-
-          internal_energy_gas += SphP[j].Utherm*mass_j/rho_j*wk;
 
 /*compute bh density*/
           rho += FLT(mass_j * wk);
@@ -507,24 +455,6 @@ static int bh_density_evaluate(int target, int mode, int threadid)
           weighted_numngb += FLT(NORM_COEFF * wk / hinv3); /* 4.0/3 * PI = 4.188790204786 */
 
           dhsmlrho += FLT(-mass_j * (NUMDIMS * hinv * wk + u * dwk));
-        }
-      
-      if(All.JetFeedback)
-        {
-/*double cone jet setup*/    
-  
-/*calculate vector to cone vertex*/
-          vx = P[j].Pos[0] - pos[0]; // x-component of the vector from the vertex to the point
-          vy = P[j].Pos[1] - pos[1]; // y-component of the vector from the vertex to the point
-          vz = P[j].Pos[2] - pos[2]; // z-component of the vector from the vertex to the point
-/*calculate angles*/    
-          pos_x_angle = acos((vx*pos_x_axis[0] + vy*pos_x_axis[1] + vz*pos_x_axis[2]) / 
-          (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2))));
-          neg_x_angle = acos((vx*neg_x_axis[0] + vy*neg_x_axis[1] + vz*neg_x_axis[2]) / 
-          (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) + pow(neg_x_axis[2], 2))));
-/*check if particle is inside the cone*/ 
-          if((pos_x_angle <= theta) || (neg_x_angle <= theta))
-            mass_feed += P[j].Mass;
         }
     }
 
@@ -538,15 +468,8 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   out.Ngb                     = weighted_numngb;
   out.Rho                     = rho;
   out.Mass                    = mass;
-  out.MassFeed                = mass_feed;
   out.NgbMinStep              = ngb_min_step;
-  out.VelocityGas[0]          = velocity_gas[0];
-  out.VelocityGas[1]          = velocity_gas[1];
-  out.VelocityGas[2]          = velocity_gas[2];
-  out.VelocityGasCircular[0]  = velocity_gas_circular[0];
-  out.VelocityGasCircular[1]  = velocity_gas_circular[1];
-  out.VelocityGasCircular[2]  = velocity_gas_circular[2];
-  out.InternalEnergyGas       = internal_energy_gas;
+
 
   /* now collect the result at the right place */
   if(mode == MODE_LOCAL_PARTICLES)
