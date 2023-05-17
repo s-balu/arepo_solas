@@ -11,6 +11,7 @@ integertime get_timestep_bh(int p);
 void update_bh_timesteps(void);
 void reconstruct_bh_timebins(void);
 void update_list_of_active_bh_particles(void);
+void update_list_of_active_bh_particles_prior_mesh(void);
 
 void perform_end_of_step_bh_physics(void);
 

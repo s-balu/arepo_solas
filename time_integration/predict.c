@@ -74,11 +74,6 @@ void reconstruct_timebins(void)
       TimeBinsGravity.TimeBinCount[bin]   = 0;
       TimeBinsGravity.FirstInTimeBin[bin] = -1;
       TimeBinsGravity.LastInTimeBin[bin]  = -1;
-/*#ifdef BLACKHOLES
-      TimeBinsBh.TimeBinCount[bin]   = 0;
-      TimeBinsBh.FirstInTimeBin[bin] = -1;
-      TimeBinsBh.LastInTimeBin[bin]  = -1;
-#endif*/
 #ifdef USE_SFR
       TimeBinSfr[bin] = 0;
 #endif
@@ -134,30 +129,7 @@ void reconstruct_timebins(void)
         }
       TimeBinsGravity.TimeBinCount[bin]++;
     }
-/*
-#ifdef BLACKHOLES
-  for(i = 0; i < NumPart; i++)
-    {
-      if(P[i].Type != 5)
-        continue;
-      bin = P[i].TimeBinBh;
 
-      if(TimeBinsBh.TimeBinCount[bin] > 0)
-        {
-          TimeBinsBh.PrevInTimeBin[i]                                  = TimeBinsBh.LastInTimeBin[bin];
-          TimeBinsBh.NextInTimeBin[i]                                  = -1;
-          TimeBinsBh.NextInTimeBin[TimeBinsBh.LastInTimeBin[bin]]      = i;
-          TimeBinsBh.LastInTimeBin[bin]                                = i;
-        }
-      else
-        {
-          TimeBinsBh.FirstInTimeBin[bin] = TimeBinsBh.LastInTimeBin[bin] = i;
-          TimeBinsBh.PrevInTimeBin[i] = TimeBinsBh.NextInTimeBin[i] = -1;
-        }
-      TimeBinsBh.TimeBinCount[bin]++;
-    }
-#endif
-*/
   make_list_of_active_particles();
 
   TIMER_STOP(CPU_TIMELINE);
@@ -517,34 +489,9 @@ void make_list_of_active_particles(void)
             }
         }
     }
-/*#ifdef BLACKHOLES
-TimeBinsBh.NActiveParticles = 0;
-
-  for(n = 0; n < TIMEBINS; n++)
-    {
-      if(TimeBinSynchronized[n])
-        {
-          for(i = TimeBinsBh.FirstInTimeBin[n]; i >= 0; i = TimeBinsBh.NextInTimeBin[i])
-            {
-              if(P[i].Type == 5)
-                {
-                  if(P[i].Ti_Current != All.Ti_Current)
-                    drift_particle(i, All.Ti_Current);
-
-                  TimeBinsBh.ActiveParticleList[TimeBinsBh.NActiveParticles] = i;
-                  TimeBinsBh.NActiveParticles++;
-                }
-            }
-        }
-    }
-#endif
-*/
   /* sort both lists for better memory efficiency */
   mysort(TimeBinsHydro.ActiveParticleList, TimeBinsHydro.NActiveParticles, sizeof(int), int_compare);
   mysort(TimeBinsGravity.ActiveParticleList, TimeBinsGravity.NActiveParticles, sizeof(int), int_compare);
-//#ifdef BLACKHOLES
-//  mysort(TimeBinsBh.ActiveParticleList, TimeBinsBh.NActiveParticles, sizeof(int), int_compare);
-//#endif
   int in[2];
   long long out[2];
 

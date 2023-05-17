@@ -94,7 +94,7 @@ void reconstruct_bh_timebins(void)
   update_list_of_active_bh_particles();
 }
 
-/*call this function after updating the bh-timebin to the ngb condition*/
+/*call this function after reconstruct_bh_timebins*/
 void update_list_of_active_bh_particles(void)
 {
   int i, n;
@@ -115,6 +115,42 @@ void update_list_of_active_bh_particles(void)
                 }
             }
         //}
+    }
+
+    mysort(TimeBinsBh.ActiveParticleList, TimeBinsBh.NActiveParticles, sizeof(int), int_compare);
+
+  n = 1;
+  int in;
+  long long out;
+
+  in = TimeBinsBh.NActiveParticles;
+
+  sumup_large_ints(n, &in, &out);
+
+  TimeBinsBh.GlobalNActiveParticles = out;
+}
+
+/*call this function after updating the bh-timebin to the ngb condition*/
+void update_list_of_active_bh_particles_prior_mesh(void)
+{
+  int i, n;
+  TimeBinsBh.NActiveParticles = 0;
+  for(n = 0; n < TIMEBINS; n++)
+    {
+      if(TimeBinSynchronized[n]) --> need early bh timestep criteria in the run loop to include this
+        {
+          for(i = TimeBinsBh.FirstInTimeBin[n]; i >= 0; i = TimeBinsBh.NextInTimeBin[i])
+            {
+              if(P[i].Type == 5)
+                {
+                  if(P[i].Ti_Current != All.Ti_Current)
+                    drift_particle(i, All.Ti_Current);
+
+                  TimeBinsBh.ActiveParticleList[TimeBinsBh.NActiveParticles] = i;
+                  TimeBinsBh.NActiveParticles++;
+                }
+            }
+        }
     }
 
     mysort(TimeBinsBh.ActiveParticleList, TimeBinsBh.NActiveParticles, sizeof(int), int_compare);
@@ -193,7 +229,7 @@ void perform_end_of_step_bh_physics(void)
     }
   MPI_Allreduce(&All.EnergyExchange, &All.EnergyExchangeTot, 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
   MPI_Barrier(MPI_COMM_WORLD); // synchronize all tasks
-  mpi_printf("BLACK_HOLES: Energy given by BH = %e, Energy taken up by gas particles = %e \n", All.EnergyExchangeTot[0], All.EnergyExchangeTot[1]);
+  mpi_printf("BLACK_HOLES: Momentum given by StarPart = %e, Momentum taken up by gas particles = %e \n", All.EnergyExchangeTot[0], All.EnergyExchangeTot[1]);
 
 #ifdef BURST_MODE
   if(All.EnergyExchangeTot[0] - All.EnergyExchangeTot[1] > 10)  
