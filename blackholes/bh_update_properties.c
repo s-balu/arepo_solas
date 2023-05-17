@@ -101,7 +101,7 @@ void update_list_of_active_bh_particles(void)
   TimeBinsBh.NActiveParticles = 0;
   for(n = 0; n < TIMEBINS; n++)
     {
-      //if(TimeBinSynchronized[n]) --> need early bh timestep criteria in the run loop to include this
+      //if(TimeBinSynchronized[n]) 
         //{
           for(i = TimeBinsBh.FirstInTimeBin[n]; i >= 0; i = TimeBinsBh.NextInTimeBin[i])
             {
@@ -137,7 +137,7 @@ void update_list_of_active_bh_particles_prior_mesh(void)
   TimeBinsBh.NActiveParticles = 0;
   for(n = 0; n < TIMEBINS; n++)
     {
-      if(TimeBinSynchronized[n]) --> need early bh timestep criteria in the run loop to include this
+      if(TimeBinSynchronized[n]) 
         {
           for(i = TimeBinsBh.FirstInTimeBin[n]; i >= 0; i = TimeBinsBh.NextInTimeBin[i])
             {

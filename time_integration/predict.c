@@ -164,11 +164,6 @@ void find_next_sync_point(void)
       active += TimeBinsGravity.TimeBinCount[n];
 #endif /* #if (defined(SELFGRAVITY) || defined(EXTERNALGRAVITY) || defined(EXACT_GRAVITY_FOR_PARTICLE_TYPE)) && !defined(MESHRELAX) \
         */
-/*include the bh accretion timestep*/
-#ifdef BLACKHOLES
-      if(n > 0)
-        active += TimeBinsBh.TimeBinCount[n];
-#endif
       if(active)
         {
           if(n > 0)
