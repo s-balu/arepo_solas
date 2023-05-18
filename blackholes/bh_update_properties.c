@@ -10,6 +10,109 @@
 
 static int int_compare(const void *a, const void *b);
 
+/*sph loop kernel function*/
+void kernel(double u, double hinv3, double hinv4, double *wk, double *dwk, int mode)
+{
+#ifdef CUBIC_SPLINE_KERNEL
+#if defined(WENDLAND_C2_KERNEL) || defined(WENDLAND_C4_KERNEL) || defined(WENDLAND_C6_KERNEL)
+#error "Only one SPH kernel can be used"
+#endif
+  if(u < 0.5)
+    {
+      if(mode >= COMPUTE_WK_AND_DWK)
+        *dwk = u * (18.0 * u - 12.0);
+      if(mode <= COMPUTE_WK_AND_DWK)
+        *wk = (1.0 + 6.0 * (u - 1.0) * u * u);
+    }
+  else
+    {
+      double t1 = (1.0 - u);
+      double t2 = t1 * t1;
+      if(mode >= COMPUTE_WK_AND_DWK)
+        *dwk = -6.0 * t2;
+      if(mode <= COMPUTE_WK_AND_DWK)
+        *wk = 2.0 * t2 * t1;
+    }
+#endif
+
+#ifdef WENDLAND_C2_KERNEL /* Dehnen & Aly 2012 */
+#ifdef ONEDIMS
+  double t1 = (1.0 - u);
+  double t2 = (t1 * t1);
+
+  if(mode >= COMPUTE_WK_AND_DWK)
+    *dwk = -12.0 * u * t2;
+  if(mode <= COMPUTE_WK_AND_DWK)
+    *wk = t2 * t1 * (1.0 + u * 3.0);
+
+#else /* 2d or 3d */
+  double t1 = (1.0 - u);
+  double t2 = (t1 * t1);
+  double t4 = t2 * t2;
+  if(mode >= COMPUTE_WK_AND_DWK)
+    *dwk = -20.0 * u * t2 * t1;
+  if(mode <= COMPUTE_WK_AND_DWK)
+    *wk = t4 * (1.0 + u * 4.0);
+
+#endif
+#endif /* WENDLAND_C2_KERNEL */
+
+#ifdef WENDLAND_C4_KERNEL /* Dehnen & Aly 2012 */
+#ifdef ONEDIMS
+  double t1 = (1.0 - u);
+  double t2 = t1 * t1;
+  double t4 = t2 * t2;
+  double t5 = t4 * t1;
+
+  if(mode >= COMPUTE_WK_AND_DWK)
+    *dwk = -14.0 * t4 * (4.0 * u + 1) * u;
+  if(mode <= COMPUTE_WK_AND_DWK)
+    *wk = t5 * (1.0 + u * (5.0 + 8.0 * u));
+
+#else /* 2d or 3d */
+  double t1 = (1.0 - u);
+  double t2 = (t1 * t1);
+  double t4 = t2 * t2;
+  double t6 = t2 * t2 * t2;
+  if(mode >= COMPUTE_WK_AND_DWK)
+    *dwk = -56.0 / 3.0 * u * t4 * t1 * (5.0 * u + 1);
+  if(mode <= COMPUTE_WK_AND_DWK)
+    *wk = t6 * (1.0 + u * (6.0 + 35.0 / 3.0 * u));
+
+#endif
+#endif /* WENDLAND_C4_KERNEL */
+
+#ifdef WENDLAND_C6_KERNEL /* Dehnen & Aly 2012 */
+#ifdef ONEDIMS
+  double t1 = (1.0 - u);
+  double t2 = (t1 * t1);
+  double t4 = t2 * t2;
+  double t6 = t4 * t2;
+  double t7 = t4 * t2 * t1;
+  if(mode >= COMPUTE_WK_AND_DWK)
+    *dwk = -6.0 * u * t6 * (3.0 + u * (18.0 + 35.0 * u));
+  if(mode <= COMPUTE_WK_AND_DWK)
+    *wk = t7 * (1.0 + u * (7.0 + u * (19.0 + 21.0 * u)));
+
+#else /* 2d or 3d */
+  double t1 = (1.0 - u);
+  double t2 = (t1 * t1);
+  double t4 = t2 * t2;
+  double t7 = t4 * t2 * t1;
+  double t8 = t4 * t4;
+  if(mode >= COMPUTE_WK_AND_DWK)
+    *dwk = -22.0 * u * (1.0 + u * (7.0 + 16.0 * u)) * t7;
+  if(mode <= COMPUTE_WK_AND_DWK)
+    *wk = t8 * (1.0 + u * (8.0 + u * (25.0 + 32.0 * u)));
+
+#endif
+#endif /* WENDLAND_C6_KERNEL */
+  if(mode >= COMPUTE_WK_AND_DWK)
+    *dwk *= NORM * hinv4;
+  if(mode <= COMPUTE_WK_AND_DWK)
+    *wk *= NORM * hinv3;
+}
+
 void update_bh_accretion_rate(void)
 {
   int i;
