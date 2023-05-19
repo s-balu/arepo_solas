@@ -433,18 +433,8 @@ static int bh_density_evaluate(int target, int mode, int threadid)
           r = sqrt(r2);
 
           u = r * hinv;
-
-          if(u < 0.5)
-            {
-              wk  = hinv3 * (KERNEL_COEFF_1 + KERNEL_COEFF_2 * (u - 1) * u * u);
-              dwk = hinv4 * u * (KERNEL_COEFF_3 * u - KERNEL_COEFF_4);
-            }
-          else
-            {
-              wk  = hinv3 * KERNEL_COEFF_5 * (1.0 - u) * (1.0 - u) * (1.0 - u);
-              dwk = hinv4 * KERNEL_COEFF_6 * (1.0 - u) * (1.0 - u);
-            }
-
+          
+          kernel(u, hinv3, hinv4, &wk, &dwk);
 
           mass_j = P[j].Mass;
 

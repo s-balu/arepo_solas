@@ -241,14 +241,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 
           u = r * hinv;
 
-          if(u < 0.5)
-            {
-              wk  = hinv3 * (KERNEL_COEFF_1 + KERNEL_COEFF_2 * (u - 1) * u * u);
-            }
-          else
-            {
-              wk  = hinv3 * KERNEL_COEFF_5 * (1.0 - u) * (1.0 - u) * (1.0 - u);
-            }
+          kernel(u, hinv3, hinv4, &wk, &dwk);
 
 /*set radial momentum kick*/
           SphP[j].KineticFeed   += All.Lambda * accretion_rate * dt * (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
