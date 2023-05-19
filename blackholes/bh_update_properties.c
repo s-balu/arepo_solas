@@ -8,6 +8,81 @@
 #include "../main/allvars.h"
 #include "../main/proto.h"
 
+/* fall back to cubic spline kernel */
+#if !defined(CUBIC_SPLINE_KERNEL) && !defined(WENDLAND_C2_KERNEL) && !defined(WENDLAND_C4_KERNEL) && !defined(WENDLAND_C6_KERNEL)
+#define CUBIC_SPLINE_KERNEL 
+#endif
+
+/* fall back to three dimensions */
+#if !defined(TWODIMS) && !defined(ONEDIMS)
+#define THREEDIMS
+#endif
+
+/* Norms */
+#ifdef CUBIC_SPLINE_KERNEL
+
+#ifdef THREEDIMS
+#define NORM (8.0 / M_PI) /*!< For 3D-normalized kernel */
+#endif
+
+#ifdef TWODIMS
+#define NORM (40.0 / (7.0 * M_PI)) /*!< For 2D-normalized kernel */
+#endif
+
+#ifdef ONEDIMS
+#define NORM (4.0 / 3.0) /*!< For 1D-normalized kernel */
+#endif
+
+#endif /* CUBIC_SPLINE_KERNEL */
+
+#ifdef WENDLAND_C2_KERNEL
+
+#ifdef THREEDIMS
+#define NORM (21.0 / (2.0 * M_PI)) /*!< For 3D-normalized kernel */
+#endif
+
+#ifdef TWODIMS
+#define NORM (7.0 / M_PI) /*!< For 2D-normalized kernel */
+#endif
+
+#ifdef ONEDIMS
+#define NORM (5.0 / 4.0) /*!< For 1D-normalized kernel */
+#endif
+
+#endif /* WENDLAND_C2_KERNEL */
+
+#ifdef WENDLAND_C4_KERNEL
+
+#ifdef THREEDIMS
+#define NORM (495.0 / (32.0 * M_PI)) /*!< For 3D-normalized kernel */
+#endif
+
+#ifdef TWODIMS
+#define NORM (9.0 / M_PI) /*!< For 2D-normalized kernel */
+#endif
+
+#ifdef ONEDIMS
+#define NORM (3.0 / 2.0) /*!< For 1D-normalized kernel */
+#endif
+
+#endif /* WENDLAND_C4_KERNEL */
+
+#ifdef WENDLAND_C6_KERNEL
+
+#ifdef THREEDIMS
+#define NORM (1365.0 / (64.0 * M_PI)) /*!< For 3D-normalized kernel */
+#endif
+
+#ifdef TWODIMS
+#define NORM (78.0 / (7.0 * M_PI)) /*!< For 2D-normalized kernel */
+#endif
+
+#ifdef ONEDIMS
+#define NORM (55.0 / 32.0) /*!< For 1D-normalized kernel */
+#endif
+
+#endif /* WENDLAND_C6_KERNEL */
+
 static int int_compare(const void *a, const void *b);
 
 /*sph loop kernel function -> u < 1 */
