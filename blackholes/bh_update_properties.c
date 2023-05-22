@@ -8,6 +8,8 @@
 #include "../main/allvars.h"
 #include "../main/proto.h"
 
+
+/*THIS PART ADAPTED FROM GADGET4*/
 /* fall back to cubic spline kernel */
 #if !defined(CUBIC_SPLINE_KERNEL) && !defined(WENDLAND_C2_KERNEL) && !defined(WENDLAND_C4_KERNEL) && !defined(WENDLAND_C6_KERNEL)
 #define CUBIC_SPLINE_KERNEL 
@@ -186,6 +188,7 @@ void kernel(double u, double hinv3, double hinv4, double *wk, double *dwk)
   
   *wk *= NORM * hinv3;
 }
+/*THIS PART ADAPTED FROM GADGET4*/
 
 void update_bh_accretion_rate(void)
 {

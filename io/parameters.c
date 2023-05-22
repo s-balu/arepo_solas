@@ -507,11 +507,11 @@ void read_parameter_file(char *fname)
 #endif /* #ifdef ONEDIMS_SPHERICAL */
 
 #ifdef BLACKHOLES
-      strcpy(tag[nt], "BhDesNumNgb");
+      strcpy(tag[nt], "BhDesNgbMass");
       addr[nt] = &All.BhDesNumNgb;
       id[nt++] = INT;
       
-      strcpy(tag[nt], "BhMaxNumNgbDeviation");
+      strcpy(tag[nt], "BhDesNgbMassDev");
       addr[nt] = &All.BhMaxNumNgbDeviation;
       id[nt++] = INT;
 
