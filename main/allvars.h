@@ -1224,8 +1224,8 @@ extern struct global_data_all_processes
   int FeedbackFlag;
 
   /*for parameter file*/
-  int BhDesNgbMass;
-  int BhDesNgbMassDev;
+  double BhDesNgbMass;
+  double BhDesNgbMassDev;
   double FeedbackTime;
   double Epsilon_r;
   double Lambda;
