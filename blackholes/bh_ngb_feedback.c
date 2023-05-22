@@ -159,7 +159,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 {
   int j, n, bin;
   int numnodes, *firstnode;
-  double h, h2, hinv, hinv3, hinv4, wk;
+  double h, h2, hinv, hinv3, hinv4, wk, dwk;
   double dx, dy, dz, r, r2, u;
   double dt, dtime;
   MyDouble bh_rho, ngbmass, accretion_rate; 
