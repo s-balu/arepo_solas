@@ -29,10 +29,10 @@ def sample_from_pdf(num_samples):
         print(len(samples))
     return samples
 
-def spherical_to_cartesian(r, theta, phi):
-    x = r * np.sin(theta) * np.cos(phi)
-    y = r * np.sin(theta) * np.sin(phi)
-    z = r * np.cos(theta)
+def spherical_to_cartesian(r,phi,theta):
+    x = r * np.sin(phi) * np.cos(theta)
+    y = r * np.sin(phi) * np.sin(theta)
+    z = r * np.cos(phi)
     return x, y, z
     
         
