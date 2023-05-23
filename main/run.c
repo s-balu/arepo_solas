@@ -228,11 +228,13 @@ void run(void)
 
           find_next_sync_point(); /* find next synchronization time */
 
+#ifdef BLACKHOLES
 /*limit timestep before first energy injection*/
           if(All.MaxSizeTimestep > 1e-5 && All.FeedbackTime - All.Time > 0 && All.FeedbackTime - All.Time <= All.MaxSizeTimestep)
             All.MaxSizeTimestep *= 0.1;
           if(All.FeedbackTime - All.Time < 0)
             All.MaxSizeTimestep = 1e-3;
+#endif
 
           make_list_of_active_particles();
 
