@@ -101,6 +101,7 @@ for r in R:
     y_values.append(y)
     z_values.append(z)
 
+R        = np.array(R, dtype=FloatType)
 x_values = np.array(x_values, dtype=FloatType)
 y_values = np.array(y_values, dtype=FloatType)
 z_values = np.array(z_values, dtype=FloatType)
@@ -109,15 +110,20 @@ print("Conversion done")
 Boxsize = FloatType(8)
 Pos = np.zeros([N,3],dtype=FloatType)
 
-Pos[:,0] = x_values
-Pos[:,1] = y_values
-Pos[:,2] = z_values
+#sort arrays
+indices = np.argsort(R)        
+r = R[indices]
+x = x_values[indices]
+y = y_values[indices]
+z = z_values[indices]
+
+Pos[:,0] = x
+Pos[:,1] = y
+Pos[:,2] = z
 
 Pos[:,0] += PosBh[0]
 Pos[:,1] += PosBh[1]
 Pos[:,2] += PosBh[2]
-        
-r_sort    = np.sort(R)
 
 #same mass for sph particles
 M, _ = quad(dm, 0.1, 4)
@@ -128,7 +134,7 @@ Pressure = np.zeros(N, dtype=FloatType)
 
 #find pressure from hydrostatic equilibrium
 for i in range(N):
-    Pressure[i], _ = quad(hydro_eqn, r_sort[i], 4, args=(density,dphi_dr))
+    Pressure[i], _ = quad(hydro_eqn, r[i], 4, args=(density,dphi_dr))
 
 gamma = FloatType(5/3) 
 gamma_minus1 = gamma - FloatType(1.0)
@@ -136,13 +142,13 @@ gamma_minus1 = gamma - FloatType(1.0)
 #utherm for perfect gas
 Density=np.zeros(N,dtype=FloatType)
 for i in range(N):
-    Density[i] = density(r_sort[i])
+    Density[i] = density(r[i])
 
 Uthermal = Pressure / gamma_minus1 / Density
 
 #checks
 bins = 100
-count, bin_edges = np.histogram(r_sort, bins=bins)
+count, bin_edges = np.histogram(r, bins=bins)
 bin_edges = np.delete(bin_edges, -1)
 bin_width = bin_edges[1]-bin_edges[0]
 count = np.array(count, dtype=FloatType)
