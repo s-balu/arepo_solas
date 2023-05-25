@@ -170,11 +170,14 @@ void run(void)
           compute_statistics();
 
           flush_everything();
-
+#ifdef BLACKHOLES
 /*create snapshots after feedback injection*/
           if(All.Time >= All.FeedbackTime)
             create_snapshot_if_desired();
-
+#endif
+#ifndef BLACKHOLES
+          create_snapshot_if_desired();
+#endif
           if(All.Ti_Current >= TIMEBASE) /* we reached the final time */
             {
               mpi_printf("\nFinal time=%g reached. Simulation ends.\n", All.TimeMax);
