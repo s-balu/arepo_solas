@@ -171,7 +171,9 @@ void run(void)
 
           flush_everything();
 
-          create_snapshot_if_desired();
+/*create snapshots after feedback injection*/
+          if(All.Time >= All.FeedbackTime)
+            create_snapshot_if_desired();
 
           if(All.Ti_Current >= TIMEBASE) /* we reached the final time */
             {
