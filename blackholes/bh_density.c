@@ -243,7 +243,7 @@ void bh_density(void)
                 }
               } 
 
-            if(BPP(i).NgbMass < (desnumngb - All.BhDesNumNgbDev))
+            if(BhNumNgb[P[i].BhID] < (desnumngb - All.BhDesNumNgbDev))
               Left[P[i].BhID] = dmax(BPP(i).Hsml, Left[P[i].BhID]);
             else
               {
@@ -295,7 +295,7 @@ void bh_density(void)
           iter++;
 
           if(iter > 0)
-            mpi_printf("BH_DENSITY: ngb iteration %3d: need to repeat for %12lld particles. NgbsMass=%g. (took %g sec)\n", iter, ntot, (float)BPP(i).NgbMass,
+            mpi_printf("BH_DENSITY: ngb iteration %3d: need to repeat for %12lld particles. NgbsMass=%g. (took %g sec)\n", iter, ntot,
                        timediff(t0, t1));
 
           if(iter > MAXITER)
