@@ -14,7 +14,7 @@
 static int bh_density_evaluate(int target, int mode, int threadid);
 static int bh_density_isactive(int n);
 
-static MyFloat *BhNumNgb, //*BhDhsmlDensityFactor;
+static MyFloat *BhNumNgb; //*BhDhsmlDensityFactor;
 
 /*! \brief Local data structure for collecting particle/cell data that is sent
  *         to other processors if needed. Type called data_in and static
@@ -227,7 +227,7 @@ void bh_density(void)
             }
           */
 
-          if(BPP(i).NgbMass < (desnumngb - All.BhDesNumNgbDev) || BPP(i).NgbMass > (desnumngb + All.BhDesNumNgbDev))
+          if(BhNumNgb[P[i].BhID] < (desnumngb - All.BhDesNumNgbDev) || BhNumNgb[P[i].BhID] > (desnumngb + All.BhDesNumNgbDev))
           {
                   /* need to redo this particle */
             npleft++;
