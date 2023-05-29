@@ -224,7 +224,7 @@ void move_collisionless_particle(int new_i, int old_i)
       bin    = P[old_i].TimeBinBh;*/
 
 /*here we have to remove the previous particle from the active list*/
-      if(TimeBinSynchronized[bin])
+/*      if(TimeBinSynchronized[bin])
         {
           for(int idxx = 0; idxx < tbData->NActiveParticles; idxx++)
             {
@@ -259,6 +259,6 @@ void move_collisionless_particle(int new_i, int old_i)
           tbData->LastInTimeBin[bin] = new_i;
         }
     }
-#endif
+#endif */
 }
 #endif /* REFINEMENT */
