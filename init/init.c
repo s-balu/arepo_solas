@@ -264,9 +264,6 @@ int init(void)
       for(j = 0; j < 3; j++)
         P[i].GravPM[j] = 0;
 #endif /* #ifdef PMGRID */
-#ifdef BLACKHOLES
-      P[i].TimeBinBh    = 0;
-#endif
       P[i].TimeBinHydro = 0;
       P[i].TimeBinGrav  = 0;
       P[i].OldAcc       = 0; /* Do not zero as masses are stored here */
@@ -565,9 +562,18 @@ int init(void)
 
   free_mesh();
 
-/*initialize bh_feedback variables*/
+/*initialize bh density flag and feedback variables*/
 #ifdef BLACKHOLES
-  reconstruct_bh_timebins();
+  /*for(i = 0; i < NumBh; i++)
+    {
+      BhP[i].TimeBinBh = 0;
+    }
+  reconstruct_bh_timebins();*/
+  for(i=0; i<NumBh; i++)
+  {
+   BhP[i].DensityFlag = 1; /*we dont need to do this as these are set to 0 anyway*/
+  }
+ 
   All.FeedbackFlag = 1;
   All.EnergyExchange[0] = All.EnergyExchange[1] = 0;
   double *exch = All.EnergyExchangeTot;

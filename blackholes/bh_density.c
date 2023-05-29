@@ -108,7 +108,7 @@ static void out2particle(data_out *out, int i, int mode)
  */
 static void kernel_local(void)
 {
-  int idx;
+  int i;
 
   {
     int j, threadid = get_thread_num();
@@ -121,16 +121,13 @@ static void kernel_local(void)
         if(Thread[threadid].ExportSpace < MinSpace)
           break;
 
-        idx = NextParticle++;
+        i = NextParticle++;
 
-        if(idx >= TimeBinsBh.NActiveParticles)
+        if(i >= NumBh)
           break;
 
-        int i = TimeBinsBh.ActiveParticleList[idx];
-        if(i < 0)
-          continue;
-        if(bh_density_isactive(P[i].BhID))
-          bh_density_evaluate(P[i].BhID, MODE_LOCAL_PARTICLES, threadid);
+        if(bh_density_isactive(i))
+          bh_density_evaluate(i, MODE_LOCAL_PARTICLES, threadid);
       }
   }
 }
@@ -175,7 +172,7 @@ static void kernel_imported(void)
 void bh_density(void)
 {
   MyFloat *Left, *Right;
-  int idx, i, npleft, iter = 0;
+  int i, npleft, iter = 0;
   long long ntot;
   double desnumngb, t0, t1;
 
@@ -186,15 +183,11 @@ void bh_density(void)
   Left               = (MyFloat *)mymalloc("Left", NumBh * sizeof(MyFloat));
   Right              = (MyFloat *)mymalloc("Right", NumBh * sizeof(MyFloat));
 
-  for(idx = 0; idx < TimeBinsBh.NActiveParticles; idx++)
+  for(i = 0; i < NumBh; i++)
     {
-      i = TimeBinsBh.ActiveParticleList[idx];
-      if(i < 0)
-        continue;
-
-      if(bh_density_isactive(P[i].BhID))
+      if(bh_density_isactive(i))
         {
-          Left[P[i].BhID] = Right[P[i].BhID] = 0;
+          Left[i] = Right[i] = 0;
         }
     }
 
@@ -207,83 +200,72 @@ void bh_density(void)
     {
       t0 = second();
 
-      generic_comm_pattern(TimeBinsBh.NActiveParticles, kernel_local, kernel_imported);
+      generic_comm_pattern(NumBh, kernel_local, kernel_imported);
 
-      for(idx=0, npleft=0; idx<TimeBinsBh.NActiveParticles; idx++)
+      for(i=0, npleft=0; i<NumBh; i++)
         {
-          i = TimeBinsBh.ActiveParticleList[idx];
-          if(i < 0)
-            continue;
-          if(bh_density_isactive(P[i].BhID))
+          if(bh_density_isactive(i))
             {
-              if(BPP(i).Density > 0)
+              if(BhP[i].Density > 0)
                 {
-                  BhDhsmlDensityFactor[P[i].BhID] *= BPP(i).Hsml / (NUMDIMS * BPP(i).Density);
-                  if(BhDhsmlDensityFactor[P[i].BhID] > -0.9) /* note: this would be -1 if only a single particle at zero lag is found */
-                      BhDhsmlDensityFactor[P[i].BhID] = 1 / (1 + BhDhsmlDensityFactor[P[i].BhID]);
+                  BhDhsmlDensityFactor[i] *= BhP[i].Hsml / (NUMDIMS * BhP[i].Density);
+                  if(BhDhsmlDensityFactor[i] > -0.9) /* note: this would be -1 if only a single particle at zero lag is found */
+                      BhDhsmlDensityFactor[i] = 1 / (1 + BhDhsmlDensityFactor[i]);
                   else
-                      BhDhsmlDensityFactor[P[i].BhID] = 1;
+                      BhDhsmlDensityFactor[i] = 1;
                 }
             } 
         
 
-          if(BhNumNgb[P[i].BhID] < (desnumngb - All.BhMaxNumNgbDeviation) || BhNumNgb[P[i].BhID] > (desnumngb + All.BhMaxNumNgbDeviation))
+          if(BhNumNgb[i] < (desnumngb - All.BhMaxNumNgbDeviation) || BhNumNgb[i] > (desnumngb + All.BhMaxNumNgbDeviation))
           {
                   /* need to redo this particle */
             npleft++;
 
-            if(Left[P[i].BhID] > 0 && Right[P[i].BhID] > 0)
+            if(Left[i] > 0 && Right[i] > 0)
               {
-                if((Right[P[i].BhID] - Left[P[i].BhID]) < 1.0e-3 * Left[P[i].BhID])
+                if((Right[i] - Left[i]) < 1.0e-3 * Left[i])
                   {
                         /* this one should be ok */
                     npleft--;
-                    P[i].TimeBinBh = -P[i].TimeBinBh - 1; /* Mark as inactive */
+                    BhP[i].DensityFlag = -1; /* Mark as inactive */
                     continue;
                 }
               } 
 
-            if(BhNumNgb[P[i].BhID] < (desnumngb - All.BhMaxNumNgbDeviation))
-              Left[P[i].BhID] = dmax(BPP(i).Hsml, Left[P[i].BhID]);
+            if(BhNumNgb[i] < (desnumngb - All.BhMaxNumNgbDeviation))
+              Left[i] = dmax(BhP[i].Hsml, Left[i]);
             else
               {
-                if(Right[P[i].BhID] != 0)
+                if(Right[i] != 0)
                   {
-                    if(BPP(i).Hsml < Right[P[i].BhID])
-                        Right[P[i].BhID] = BPP(i).Hsml;
+                    if(BhP[i].Hsml < Right[i])
+                        Right[i] = BhP[i].Hsml;
                   }
                     else
-                        Right[P[i].BhID] = BPP(i).Hsml;
+                        Right[i] = BhP[i].Hsml;
               }
 
-            if(iter >= MAXITER - 10)
-              {
-                printf("i=%d task=%d ID=%d Hsml=%g Left=%g Right=%g Ngbs=%g Right-Left=%g\n   pos=(%g|%g|%g)\n", i, ThisTask,
-                    (int)P[i].ID, BPP(i).Hsml, Left[P[i].BhID], Right[P[i].BhID], (float)BhNumNgb[P[i].BhID], Right[P[i].BhID] - Left[P[i].BhID], P[i].Pos[0],
-                    P[i].Pos[1], P[i].Pos[2]);
-                myflush(stdout);
-              }
-
-            if(Right[P[i].BhID] > 0 && Left[P[i].BhID] > 0)
-                BPP(i).Hsml = pow(0.5 * (pow(Left[P[i].BhID], 3) + pow(Right[P[i].BhID], 3)), 1.0 / 3);
+            if(Right[i] > 0 && Left[i] > 0)
+                BhP[i].Hsml = pow(0.5 * (pow(Left[i], 3) + pow(Right[i], 3)), 1.0 / 3);
             else
               {
-                if(Right[P[i].BhID] == 0 && Left[P[i].BhID] == 0)
+                if(Right[i] == 0 && Left[i] == 0)
                     terminate("should not occur");
 
-                if(Right[P[i].BhID] == 0 && Left[P[i].BhID] > 0)
+                if(Right[i] == 0 && Left[i] > 0)
                   {
-                    BPP(i).Hsml *= 1.26;
+                    BhP[i].Hsml *= 1.26;
                   }
 
-                if(Right[P[i].BhID] > 0 && Left[P[i].BhID] == 0)
+                if(Right[i] > 0 && Left[i] == 0)
                   {
-                    BPP(i).Hsml /= 1.26;
+                    BhP[i].Hsml /= 1.26;
                   }
               }
           }
         else
-             P[i].TimeBinBh = -P[i].TimeBinBh - 1; /* Mark as inactive */ 
+             BhP[i].DensityFlag = -1; /* Mark as inactive */ 
         }
 
       sumup_large_ints(1, &npleft, &ntot);
@@ -299,7 +281,7 @@ void bh_density(void)
                        timediff(t0, t1));
 
           if(iter > MAXITER)
-            terminate("failed to converge in neighbour iteration in density()\n");
+            terminate("failed to converge in neighbour iteration in bh_density()\n");
         }
     }
   while(ntot > 0);
@@ -311,14 +293,9 @@ void bh_density(void)
   myfree(BhNumNgb);
 
   /* mark as active again */
-for(idx = 0; idx < TimeBinsBh.NActiveParticles; idx++)
+for(i = 0; i < NumBh; i++)
     {
-      i = TimeBinsBh.ActiveParticleList[idx];
-      if(i < 0)
-        continue;
-
-      if(P[i].TimeBinBh < 0)
-        P[i].TimeBinBh = -P[i].TimeBinBh - 1;
+     BhP[i].DensityFlag = 1;
     }
   /* collect some timing information */
   CPU_Step[CPU_INIT] += measure_time();
@@ -471,16 +448,13 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 
 /* \brief Determines if a BhP is active in current timestep.
  *
- *  If the BhP is not active in a timestep, its value in TimeBinBh is
- *  negative.
- *
  *  \param[in] n Index of BhP in Particle array
  *
- *  \return 1: cell active; 0: BhP not active.
+ *  \return 1: BhP active; 0: BhP not active.
  */
 int bh_density_isactive(int n)
 {
-  if(PPB(n).TimeBinBh < 0)
+  if(BhP[n].DensityFlag < 0)
     return 0;
 
   return 1;

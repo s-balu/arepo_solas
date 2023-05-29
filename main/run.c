@@ -397,7 +397,6 @@ void calculate_non_standard_physics_prior_mesh_construction(void)
   bh_density();
   update_bh_accretion_rate();
   update_bh_timesteps();
-  update_list_of_active_bh_particles_prior_mesh();
    if(All.Time >= All.FeedbackTime)
     {   
       bh_ngb_feedback();

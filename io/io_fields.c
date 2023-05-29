@@ -120,6 +120,7 @@ static void io_func_timestep(int particle, int components, void *out_buffer, int
 }
 #endif /* #ifdef OUTPUTTIMESTEP */
 
+/*
 #ifdef BLACKHOLES
 #ifdef OUTPUT_TIMEBIN_BH 
 static void io_func_timebin_bh(int particle, int components, void *out_buffer, int mode)
@@ -135,6 +136,7 @@ static void io_func_timestep_bh(int particle, int components, void *out_buffer, 
 }
 #endif
 #endif
+*/
 
 #ifdef OUTPUT_SOFTENINGS
 /*! \brief Output function of the force softening.
@@ -807,15 +809,9 @@ void init_io_fields()
   init_units(IO_BH_NGBMASS, 0., -1., 0., 1., 0., All.UnitMass_in_g);
   init_snapshot_type(IO_BH_NGBMASS, SN_MINI);
   
-
 #ifdef OUTPUT_TIMEBIN_BH
-  init_field(IO_TIMEBIN_BH, "TBBH", "TimebinBh", MEM_NONE, FILE_INT, FILE_NONE, 1, A_NONE, 0, io_func_timebin_bh, BHS_ONLY);
+  init_field(IO_TIMEBIN_BH, "TBBH", "TimebinBh", MEM_INT, FILE_INT, FILE_NONE, 1, A_BH, &BhP[0].TimeBinBh, 0, BHS_ONLY);
   init_units(IO_TIMEBIN_BH, 0., 0., 0., 0., 0., 0.0);
-#endif 
-
-#ifdef OUTPUTTIMESTEP_BH
-  init_field(IO_TSTP_BH, "TSBH", "TimeStepBh", MEM_NONE, FILE_MY_IO_FLOAT, FILE_NONE, 1, A_NONE, 0, io_func_timestep_bh, BHS_ONLY);
-  init_units(IO_TSTP_BH, 0., -1., 1., 0., -1., All.UnitTime_in_s);
 #endif 
 #endif
 }

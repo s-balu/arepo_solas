@@ -1298,7 +1298,6 @@ extern struct particle_data
   signed char TimeBinGrav;
   signed char TimeBinHydro;
 #ifdef BLACKHOLES
-  signed char TimeBinBh;
   MyIDType BhID;
 #endif
 } * P,              /*!< holds particle data on local processor */
@@ -1470,7 +1469,8 @@ MyDouble NgbMass;
 MyDouble AccretionRate;
 integertime NgbMinStep;
 
-MyDouble AngularMomentum[3];
+int DensityFlag;
+signed char TimeBinBh;
 }  *BhP,          
     *DomainBhBuf; 
 
