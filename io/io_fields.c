@@ -789,6 +789,24 @@ void init_io_fields()
   init_units(IO_BHEF, 0., 0., -1., 1., 3., All.UnitEnergy_in_cgs / All.UnitTime_in_s);
   init_snapshot_type(IO_BHEF, SN_MINI);
   */
+  init_field(IO_BHID, "BhID  ", "BlackholeIDs", MEM_MY_ID_TYPE, FILE_MY_ID_TYPE, FILE_NONE, 1, A_P, &P[0].BhID, 0, BHS_ONLY);
+  init_units(IO_BHID, 0, 0, 0, 0, 0, 0);
+  init_snapshot_type(IO_BHID, SN_MINI);
+
+
+  init_field(IO_BHHSML, "BHHS", "BlackholeHsml", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, FILE_MY_IO_FLOAT, 1, A_BH, &BhP[0].Hsml, 0, BHS_ONLY);
+  init_units(IO_BHHSML, 1., -1., 1., 0., 0., All.UnitLength_in_cm);
+  init_snapshot_type(IO_BHHSML, SN_MINI);
+
+
+  init_field(IO_BHDENSITY, "BHD ", "BlackHoleDensity", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, FILE_NONE, 1, A_BH, &BhP[0].Density, 0, BHS_ONLY);
+  init_units(IO_BHDENSITY, -3., 2., -3., 1., 0., All.UnitDensity_in_cgs);
+  init_snapshot_type(IO_BHDENSITY, SN_MINI);
+
+  init_field(IO_BH_NGBMASS, "BNM ", "BlackHoleNgbMass", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, FILE_NONE, 1, A_BH, &BhP[0].NgbMass, 0, BHS_ONLY);
+  init_units(IO_BH_NGBMASS, 0., -1., 0., 1., 0., All.UnitMass_in_g);
+  init_snapshot_type(IO_BH_NGBMASS, SN_MINI);
+  
 
 #ifdef OUTPUT_TIMEBIN_BH
   init_field(IO_TIMEBIN_BH, "TBBH", "TimebinBh", MEM_NONE, FILE_INT, FILE_NONE, 1, A_NONE, 0, io_func_timebin_bh, BHS_ONLY);
@@ -799,17 +817,5 @@ void init_io_fields()
   init_field(IO_TSTP_BH, "TSBH", "TimeStepBh", MEM_NONE, FILE_MY_IO_FLOAT, FILE_NONE, 1, A_NONE, 0, io_func_timestep_bh, BHS_ONLY);
   init_units(IO_TSTP_BH, 0., -1., 1., 0., -1., All.UnitTime_in_s);
 #endif 
-
-  init_field(IO_BHHSML, "BHHS", "BlackholeHsml", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, FILE_MY_IO_FLOAT, 1, A_BH, &BhP[0].Hsml, 0, BHS_ONLY);
-  init_units(IO_BHHSML, 1., -1., 1., 0., 0., All.UnitLength_in_cm);
-  init_snapshot_type(IO_BHHSML, SN_MINI);
-
-  init_field(IO_BHID, "BhID  ", "BlackholeIDs", MEM_MY_ID_TYPE, FILE_MY_ID_TYPE, FILE_NONE, 1, A_P, &P[0].BhID, 0, BHS_ONLY);
-  init_units(IO_BHID, 0, 0, 0, 0, 0, 0);
-  init_snapshot_type(IO_BHID, SN_MINI);
-  
-  init_field(IO_BHDENSITY, "BHD ", "BlackHoleDensity", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, FILE_NONE, 1, A_BH, &BhP[0].Density, 0, BHS_ONLY);
-  init_units(IO_BHDENSITY, -3., 2., -3., 1., 0., All.UnitDensity_in_cgs);
-  init_snapshot_type(IO_BHDENSITY, SN_MINI);
 #endif
 }

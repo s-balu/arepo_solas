@@ -1224,8 +1224,8 @@ extern struct global_data_all_processes
   int FeedbackFlag;
 
   /*for parameter file*/
-  double BhDesNgbMass;
-  double BhDesNgbMassDev;
+  int BhDesNumNgb;
+  int BhMaxNumNgbDeviation;
   double FeedbackTime;
   double Epsilon_r;
   double Lambda;
@@ -1765,9 +1765,10 @@ enum iofields
   IO_TIMEBIN_HYDRO,
 #ifdef BLACKHOLES
 /*  IO_BHTEMPERATURE,*/
-  IO_BHDENSITY,
   IO_BHID,
   IO_BHHSML,
+  IO_BHDENSITY,
+  IO_BH_NGBMASS,
   IO_TIMEBIN_BH,
   IO_TSTP_BH,
 #endif  
