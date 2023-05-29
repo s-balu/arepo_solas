@@ -14,7 +14,7 @@
 static int bh_density_evaluate(int target, int mode, int threadid);
 static int bh_density_isactive(int n);
 
-static MyFloat /**BhNumNgb,*/ *BhDhsmlDensityFactor;
+static MyFloat *BhNumNgb, *BhDhsmlDensityFactor;
 
 /*! \brief Local data structure for collecting particle/cell data that is sent
  *         to other processors if needed. Type called data_in and static
@@ -58,7 +58,7 @@ static void particle2in(data_in *in, int i, int firstnode)
 typedef struct
 {
   MyDouble DhsmlDensity;
-  /*MyDouble Ngb;*/
+  MyDouble Ngb;
   MyDouble Rho;
   MyDouble Mass;
   integertime NgbMinStep;
@@ -82,7 +82,7 @@ static void out2particle(data_out *out, int i, int mode)
   if(mode == MODE_LOCAL_PARTICLES) /* initial store */
     {
       BhDhsmlDensityFactor[i]          = out->DhsmlDensity;
-      /*BhNumNgb[i]                      = out->Ngb;*/
+      BhNumNgb[i]                      = out->Ngb;
       BhP[i].Density                   = out->Rho;
       BhP[i].NgbMass                   = out->Mass;
       BhP[i].NgbMinStep                = out->NgbMinStep;
@@ -90,7 +90,7 @@ static void out2particle(data_out *out, int i, int mode)
   else /* combine */
     {
       BhDhsmlDensityFactor[i]          += out->DhsmlDensity;
-      /*BhNumNgb[i]                      += out->Ngb;*/
+      BhNumNgb[i]                      += out->Ngb;
       BhP[i].Density                   += out->Rho;
       BhP[i].NgbMass                   += out->Mass;
       if(out->NgbMinStep < BhP[i].NgbMinStep)
@@ -177,11 +177,11 @@ void bh_density(void)
   MyFloat *Left, *Right;
   int idx, i, npleft, iter = 0;
   long long ntot;
-  double desngbmass, t0, t1;
+  double desnumngb, t0, t1;
 
   CPU_Step[CPU_MISC] += measure_time();
 
-  /*BhNumNgb             = (MyFloat *)mymalloc("BhNumNgb", NumBh * sizeof(MyFloat));*/
+  BhNumNgb             = (MyFloat *)mymalloc("BhNumNgb", NumBh * sizeof(MyFloat));
   BhDhsmlDensityFactor = (MyFloat *)mymalloc("BhDhsmlDensityFactor", NumBh * sizeof(MyFloat));
   Left               = (MyFloat *)mymalloc("Left", NumBh * sizeof(MyFloat));
   Right              = (MyFloat *)mymalloc("Right", NumBh * sizeof(MyFloat));
@@ -200,7 +200,7 @@ void bh_density(void)
 
   generic_set_MaxNexport();
 
-  desngbmass = All.BhDesNgbMass;
+  desnumngb = All.BhDesNumNgb;
 
   /* we will repeat the whole thing for those particles where we didn't find enough neighbours */
   do
@@ -219,15 +219,15 @@ void bh_density(void)
               if(BPP(i).Density > 0)
                 {
                   BhDhsmlDensityFactor[P[i].BhID] *= BPP(i).Hsml / (NUMDIMS * BPP(i).Density);
-                  if(BhDhsmlDensityFactor[P[i].BhID] > -0.9)/* note: this would be -1 if only a single particle at zero lag is found */ 
+                  if(BhDhsmlDensityFactor[P[i].BhID] > -0.9) /* note: this would be -1 if only a single particle at zero lag is found */
                       BhDhsmlDensityFactor[P[i].BhID] = 1 / (1 + BhDhsmlDensityFactor[P[i].BhID]);
                   else
                       BhDhsmlDensityFactor[P[i].BhID] = 1;
                 }
-            }
-          
+            } 
+        
 
-          if(BPP(i).NgbMass < (desngbmass - All.BhDesNgbMassDev) || BPP(i).NgbMass > (desngbmass + All.BhDesNgbMassDev))
+          if(BhNumNgb[P[i].BhID] < (desnumngb - All.BhMaxNumNgbDeviation) || BhNumNgb[P[i].BhID] > (desnumngb + All.BhMaxNumNgbDeviation))
           {
                   /* need to redo this particle */
             npleft++;
@@ -243,7 +243,7 @@ void bh_density(void)
                 }
               } 
 
-            if(BPP(i).NgbMass < (desngbmass - All.BhDesNgbMassDev))
+            if(BhNumNgb[P[i].BhID] < (desnumngb - All.BhMaxNumNgbDeviation))
               Left[P[i].BhID] = dmax(BPP(i).Hsml, Left[P[i].BhID]);
             else
               {
@@ -258,8 +258,8 @@ void bh_density(void)
 
             if(iter >= MAXITER - 10)
               {
-                printf("i=%d task=%d ID=%d Hsml=%g Left=%g Right=%g NgbsMass=%g Right-Left=%g\n   pos=(%g|%g|%g)\n", i, ThisTask,
-                    (int)P[i].ID, BPP(i).Hsml, Left[P[i].BhID], Right[P[i].BhID], (float)BPP(i).NgbMass, Right[P[i].BhID] - Left[P[i].BhID], P[i].Pos[0],
+                printf("i=%d task=%d ID=%d Hsml=%g Left=%g Right=%g Ngbs=%g Right-Left=%g\n   pos=(%g|%g|%g)\n", i, ThisTask,
+                    (int)P[i].ID, BPP(i).Hsml, Left[P[i].BhID], Right[P[i].BhID], (float)BhNumNgb[P[i].BhID], Right[P[i].BhID] - Left[P[i].BhID], P[i].Pos[0],
                     P[i].Pos[1], P[i].Pos[2]);
                 myflush(stdout);
               }
@@ -308,7 +308,7 @@ void bh_density(void)
   myfree(Right);
   myfree(Left);
   myfree(BhDhsmlDensityFactor);
-  /*myfree(BhNumNgb);*/
+  myfree(BhNumNgb);
 
   /* mark as active again */
 for(idx = 0; idx < TimeBinsBh.NActiveParticles; idx++)
@@ -344,7 +344,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   double rho;
   double wk, dwk;
   double dx, dy, dz, r, r2, u, mass_j;
-  /*MyFloat weighted_numngb;*/
+  MyFloat weighted_numngb;
   MyFloat dhsmlrho;
   MyDouble *pos;
   MyDouble mass;
@@ -382,7 +382,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   hinv4 = hinv3 * hinv;
 
   numngb = 0;
-  rho = /*weighted_numngb =*/ dhsmlrho = 0;
+  rho = weighted_numngb = dhsmlrho = 0;
   mass = 0;
 
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
@@ -433,7 +433,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
           r = sqrt(r2);
 
           u = r * hinv;
-          
+
           kernel(u, hinv3, hinv4, &wk, &dwk);
 
           mass_j = P[j].Mass;
@@ -441,7 +441,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 /*compute bh density*/
           rho += FLT(mass_j * wk);
 
-          //weighted_numngb += FLT(NORM_COEFF * wk / hinv3); /* 4.0/3 * PI = 4.188790204786 */
+          weighted_numngb += FLT(NORM_COEFF * wk / hinv3); /* 4.0/3 * PI = 4.188790204786 */
 
           dhsmlrho += FLT(-mass_j * (NUMDIMS * hinv * wk + u * dwk));
         }
@@ -454,7 +454,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
     ngb_min_step   = (((integertime)1) << bin);
   
   out.DhsmlDensity            = dhsmlrho;
-  //out.Ngb                     = weighted_numngb;
+  out.Ngb                     = weighted_numngb;
   out.Rho                     = rho;
   out.Mass                    = mass;
   out.NgbMinStep              = ngb_min_step;
