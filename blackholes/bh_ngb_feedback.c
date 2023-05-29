@@ -44,7 +44,7 @@ static void particle2in(data_in *in, int i, int firstnode)
   in->Pos[0]        = PPB(i).Pos[0];
   in->Pos[1]        = PPB(i).Pos[1];
   in->Pos[2]        = PPB(i).Pos[2];
-  in->Bin           = PPB(i).TimeBinBh;
+  in->Bin           = BhP[i].TimeBinBh;
   in->Hsml          = BhP[i].Hsml;
   in->BhRho         = BhP[i].Density;
   in->NgbMass       = BhP[i].NgbMass;

@@ -227,10 +227,10 @@ void update_bh_timesteps(void)
   for(i = 0; i < NumBh; i++)
     { 
       ti_step = get_timestep_bh(i);
-      binold = BhP[i].TimeBinBh;
+      //binold = BhP[i].TimeBinBh;
       bin = get_timestep_bin(ti_step);
 
-      timebin_move_particle(&TimeBinsBh, i, binold, bin);
+      //timebin_move_particle(&TimeBinsBh, i, binold, bin);
       BhP[i].TimeBinBh = bin;
     }
   reconstruct_bh_timebins();

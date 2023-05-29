@@ -217,11 +217,11 @@ void move_collisionless_particle(int new_i, int old_i)
       tbData->LastInTimeBin[bin] = new_i;
     }
 /*same operation for bh lists if the particle moved was a bh-particle*/
-#ifdef BLACKHOLES
+/*#ifdef BLACKHOLES
   if(P[new_i].Type==5)
     {
       tbData = &TimeBinsBh;
-      bin    = P[old_i].TimeBinBh;
+      bin    = P[old_i].TimeBinBh;*/
 
 /*here we have to remove the previous particle from the active list*/
       if(TimeBinSynchronized[bin])
