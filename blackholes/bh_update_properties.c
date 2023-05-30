@@ -221,7 +221,7 @@ integertime get_timestep_bh(int p)
 /*update bh-timestep at prior_mesh_construction*/
 void update_bh_timesteps(void)
 {
-  int i, binold, bin;
+  int i, bin;
   integertime ti_step;
 
   for(i = 0; i < NumBh; i++)
