@@ -118,7 +118,7 @@ while(1)
         int i = TimeBinsBh.ActiveParticleList[idx];
         if(i < 0)
           continue;
-        bh_ngb_feedback_evaluate(P[i].BhID, MODE_LOCAL_PARTICLES, threadid);
+        bh_ngb_feedback_evaluate(i, MODE_LOCAL_PARTICLES, threadid);
       }
   }
 }
