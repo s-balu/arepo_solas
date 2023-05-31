@@ -377,8 +377,8 @@ void perform_end_of_step_bh_physics(void)
 /*accrete mass, angular momentum onto the bh and drain ngb cells*/
   for(i=0; i<NumBh; i++)
     {
-      bin = PPB(i).TimeBinBh;
-      dt    = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
+      bin = BhP[i].TimeBinBh;
+      dt  = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
       
       PPB(i).Mass += (1-All.Epsilon_r) * BhP[i].AccretionRate * dt;
 

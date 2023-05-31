@@ -168,7 +168,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   double dx, dy, dz, r, r2, u;
   double dt; //dtime;
   MyDouble ngbmass, ngbmass_feed, accretion_rate, mass_to_drain; 
-  MyDouble *pos, bh_rho, energy_feed;
+  MyDouble *pos, bh_rho, energyfeed;
 
   data_in local, *target_data;
   /*data_out out;*/
@@ -212,6 +212,15 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   //dtime = All.cf_atime * dt / All.cf_time_hubble_a;
 
   energyfeed = All.Epsilon_f * All.Epsilon_r * accretion_rate * dt * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
+
+/*jet axis and opening angle*/    
+
+/*positive and negative jet axes (no need to be normalized) */
+  double pos_x_axis[3] = {1, 0, 0};
+  double neg_x_axis[3] = {-1, 0, 0};      
+/*jet angle*/
+  double theta = M_PI/4;
+  double vx, vy, vz, pos_x_angle, neg_x_angle; 
 
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
   for(n = 0; n < nfound; n++)
@@ -305,22 +314,22 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 /*set drain mass flag*/
               SphP[j].MassDrain = accretion_rate*dt/ngbmass*P[j].Mass + mass_to_drain/ngbmass*P[j].Mass;
 /*set radial kick direction*/      
-              SphP[i].BhKickVector[0] = vx;
-              SphP[i].BhKickVector[1] = vy;
-              SphP[i].BhKickVector[2] = vz;
+              SphP[j].BhKickVector[0] = -dx;
+              SphP[j].BhKickVector[1] = -dy;
+              SphP[j].BhKickVector[2] = -dz;
             }
           
           if(!isbh) /*particle is a star*/
             {
 /*set radial momentum kick*/
-              SphP[j].MomentumFeed  += All.Lambda/All.Ftherm * energy_feed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
+              SphP[j].MomentumFeed  += All.Lambda/All.Ftherm * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
 /*Epsilon_r terms cancel out in the eddington rate formula*/
 
-              All.EnergyExchange[2] += energy_feed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
+              All.EnergyExchange[2] += energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
 
-              SphP[j].MomentumKickVector[0] = vx;
-              SphP[j].MomentumKickVector[1] = vy;
-              SphP[j].MomentumKickVector[2] = vz;
+              SphP[j].MomentumKickVector[0] = -dx;
+              SphP[j].MomentumKickVector[1] = -dy;
+              SphP[j].MomentumKickVector[2] = -dz;
             }
         }
     }
