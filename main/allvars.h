@@ -1452,7 +1452,11 @@ extern struct sph_particle_data
 #endif /* #ifdef ADDBACKGROUNDGRID */
     
 #ifdef BLACKHOLES
+  int PositiveJet;
+  MyDouble MassDrain;
+  MyDouble ThermalFeed;
   MyDouble KineticFeed;
+  MyDouble MomentumFeed[3];
   MyDouble MomentumKickVector[3];
 #endif
 
@@ -1466,9 +1470,17 @@ MyIDType PID;
 MyDouble Hsml;
 MyDouble Density;
 MyDouble NgbMass;
+MyDouble NgbMassFeed;
+MyDouble VelocityGas[3];
+MyDouble VelocityGasCircular[3];
+MyDouble InternalEnergyGas;
 MyDouble AccretionRate;
+MyDouble MassToDrain;
+MyDouble AngularMomentum[3];
 integertime NgbMinStep;
 
+
+int IsBh;
 int DensityFlag;
 signed char TimeBinBh;
 }  *BhP,          
@@ -1765,6 +1777,7 @@ enum iofields
   IO_TIMEBIN_HYDRO,
 #ifdef BLACKHOLES
 /*  IO_BHTEMPERATURE,*/
+  IO_ISBH,
   IO_BHID,
   IO_BHHSML,
   IO_BHDENSITY,

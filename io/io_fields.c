@@ -791,6 +791,10 @@ void init_io_fields()
   init_units(IO_BHEF, 0., 0., -1., 1., 3., All.UnitEnergy_in_cgs / All.UnitTime_in_s);
   init_snapshot_type(IO_BHEF, SN_MINI);
   */
+  init_field(IO_ISBH, "ISBH", "ISBH", MEM_INT, FILE_NONE , FILE_INT, 1, A_BH, &BhP[0].IsBh, 0, BHS_ONLY);
+  init_units(IO_ISBH, 0, 0, 0, 0, 0, 0);
+ 
+
   init_field(IO_BHID, "BhID  ", "BlackholeIDs", MEM_MY_ID_TYPE, FILE_MY_ID_TYPE, FILE_NONE, 1, A_P, &P[0].BhID, 0, BHS_ONLY);
   init_units(IO_BHID, 0, 0, 0, 0, 0, 0);
   init_snapshot_type(IO_BHID, SN_MINI);

@@ -25,6 +25,7 @@ typedef struct
   MyDouble Pos[3];
   MyDouble Vel[3];
   MyFloat Hsml;
+  int IsBh;
   int Firstnode;
 } data_in;
 
@@ -48,6 +49,7 @@ static void particle2in(data_in *in, int i, int firstnode)
   in->Vel[1]        = PPB(i).Vel[1];
   in->Vel[2]        = PPB(i).Vel[2];
   in->Hsml          = BhP[i].Hsml;
+  in->IsBh          = BhP[i].IsBh;
   in->Firstnode     = firstnode;
 }  
 
@@ -337,7 +339,7 @@ for(i = 0; i < NumBh; i++)
 static int bh_density_evaluate(int target, int mode, int threadid)
 {
   int j, n;
-  int numngb, numnodes, *firstnode;
+  int numngb, numnodes, isbh, *firstnode;
   double h, h2, hinv, hinv3, hinv4;
   double rho;
   double wk, dwk;
@@ -370,9 +372,12 @@ static int bh_density_evaluate(int target, int mode, int threadid)
       generic_get_numnodes(target, &numnodes, &firstnode);
     }
 
-  pos = target_data->Pos;
-  vel = target_data->Vel;
-  h   = target_data->Hsml;
+  pos  = target_data->Pos;
+  vel  = target_data->Vel;
+  h    = target_data->Hsml;
+  isbh = target_data->IsBh;
+
+  
 
   h2   = h * h;
   hinv = 1.0 / h;
@@ -404,21 +409,10 @@ static int bh_density_evaluate(int target, int mode, int threadid)
     {
       j = Thread[threadid].Ngblist[n];
 
- /*compute the min hydro step for neighbors*/     
-      if(bin > P[j].TimeBinHydro)
-        bin = P[j].TimeBinHydro;
-
-/*compute the bh-ngb-mass*/
-      mass += P[j].Mass;
-
-/*compute bh->cell position and velocity vectors: posBhP-posSphP while velSphP-velBhP*/
+/*compute bh->cell position (and velocity for bhs later) vectors: posBhP-posSphP (while velSphP-velBhP)*/
       dx = pos[0] - P[j].Pos[0];
       dy = pos[1] - P[j].Pos[1];
       dz = pos[2] - P[j].Pos[2];
-
-      dvx = P[j].Vel[0] - vel[0]; 
-      dvy = P[j].Vel[1] - vel[1]; 
-      dvz = P[j].Vel[2] - vel[2]; 
 
 /* now find the closest image in the given box size */
 #ifndef REFLECTIVE_X
@@ -453,22 +447,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 
           kernel(u, hinv3, hinv4, &wk, &dwk);
 
-/*compute relative velocities, relative specific angular momenta and internal energy of gas*/
           mass_j = P[j].Mass;
-          if(SphP[j].Density > 0)
-            rho_j  = SphP[j].Density;
-          else
-            rho_j = 1;
-
-          velocity_gas[0] += dvx*mass_j/rho_j*wk;
-          velocity_gas[1] += dvy*mass_j/rho_j*wk;
-          velocity_gas[2] += dvz*mass_j/rho_j*wk;
-
-          velocity_gas_circular[0] -= (dy * dvz - dz * dvy)*mass_j/rho_j*wk;
-          velocity_gas_circular[1] -= (dz * dvx - dx * dvz)*mass_j/rho_j*wk;
-          velocity_gas_circular[2] -= (dx * dvy - dy * dvx)*mass_j/rho_j*wk;
-
-          internal_energy_gas += SphP[j].Utherm*mass_j/rho_j*wk;
 
 /*compute bh density*/
           rho += FLT(mass_j * wk);
@@ -476,24 +455,54 @@ static int bh_density_evaluate(int target, int mode, int threadid)
           weighted_numngb += FLT(NORM_COEFF * wk / hinv3); /* 4.0/3 * PI = 4.188790204786 */
 
           dhsmlrho += FLT(-mass_j * (NUMDIMS * hinv * wk + u * dwk));
-        }
-      
-      if(All.JetFeedback)
-        {
+
+/*compute the min hydro step for neighbors*/     
+          if(bin > P[j].TimeBinHydro)
+            bin = P[j].TimeBinHydro;
+
+/*compute the bh-ngb-mass*/
+          mass += mass_j;
+
+          if(isbh)
+            {
+/*compute relative velocities, relative specific angular momenta and internal energy of gas*/
+              dvx = P[j].Vel[0] - vel[0]; 
+              dvy = P[j].Vel[1] - vel[1]; 
+              dvz = P[j].Vel[2] - vel[2]; 
+
+              if(SphP[j].Density > 0)
+                rho_j  = SphP[j].Density;
+              else
+                rho_j = 1;
+
+              velocity_gas[0] += dvx*mass_j/rho_j*wk;
+              velocity_gas[1] += dvy*mass_j/rho_j*wk;
+              velocity_gas[2] += dvz*mass_j/rho_j*wk;
+
+              velocity_gas_circular[0] -= (dy * dvz - dz * dvy)*mass_j/rho_j*wk;
+              velocity_gas_circular[1] -= (dz * dvx - dx * dvz)*mass_j/rho_j*wk;
+              velocity_gas_circular[2] -= (dx * dvy - dy * dvx)*mass_j/rho_j*wk;
+
+              internal_energy_gas += SphP[j].Utherm*mass_j/rho_j*wk;
+
+              if(All.JetFeedback)
+                {
 /*double cone jet setup*/    
   
 /*calculate vector to cone vertex*/
-          vx = P[j].Pos[0] - pos[0]; // x-component of the vector from the vertex to the point
-          vy = P[j].Pos[1] - pos[1]; // y-component of the vector from the vertex to the point
-          vz = P[j].Pos[2] - pos[2]; // z-component of the vector from the vertex to the point
+                  vx = P[j].Pos[0] - pos[0]; // x-component of the vector from the vertex to the point
+                  vy = P[j].Pos[1] - pos[1]; // y-component of the vector from the vertex to the point
+                  vz = P[j].Pos[2] - pos[2]; // z-component of the vector from the vertex to the point
 /*calculate angles*/    
-          pos_x_angle = acos((vx*pos_x_axis[0] + vy*pos_x_axis[1] + vz*pos_x_axis[2]) / 
-          (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2))));
-          neg_x_angle = acos((vx*neg_x_axis[0] + vy*neg_x_axis[1] + vz*neg_x_axis[2]) / 
-          (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) + pow(neg_x_axis[2], 2))));
+                  pos_x_angle = acos((vx*pos_x_axis[0] + vy*pos_x_axis[1] + vz*pos_x_axis[2]) / 
+                  (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2))));
+                  neg_x_angle = acos((vx*neg_x_axis[0] + vy*neg_x_axis[1] + vz*neg_x_axis[2]) / 
+                  (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) + pow(neg_x_axis[2], 2))));
 /*check if particle is inside the cone*/ 
-          if((pos_x_angle <= theta) || (neg_x_angle <= theta))
-            mass_feed += P[j].Mass;
+                  if((pos_x_angle <= theta) || (neg_x_angle <= theta))
+                    mass_feed += P[j].Mass;
+                }
+            }  
         }
     }
 
