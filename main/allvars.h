@@ -1227,7 +1227,10 @@ extern struct global_data_all_processes
   int BhDesNumNgb;
   int BhMaxNumNgbDeviation;
   double FeedbackTime;
+  double JetFeedback;
+  double Ftherm;
   double Epsilon_r;
+  double Epsilon_f;
   double Lambda;
 #endif
 } All;
@@ -1456,6 +1459,7 @@ extern struct sph_particle_data
   MyDouble MassDrain;
   MyDouble ThermalFeed;
   MyDouble KineticFeed;
+  MyDouble BhKickVector[3];
   MyDouble MomentumFeed[3];
   MyDouble MomentumKickVector[3];
 #endif

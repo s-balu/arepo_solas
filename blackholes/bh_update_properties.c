@@ -192,23 +192,62 @@ void kernel(double u, double hinv3, double hinv4, double *wk, double *dwk)
 
 void update_bh_accretion_rate(void)
 {
+  /*calculate bondi accretion rate*/
   int i;
- 
-  double EddingtonRate;
- /* double acc_rate_for_print;
+  double density, pressure, sound_speed, velocity_gas_norm;
+  double denominator, denominator_inv, BondiRate, EddingtonRate;
+  double accretion_rate, acc_rate_for_print;
 
-  acc_rate_for_print = 0;*/
+  accretion_rate = acc_rate_for_print = 0;
 
   for(i = 0; i < NumBh; i++)
     {
-      EddingtonRate = 4. * M_PI * GRAVITY * (PPB(i).Mass * All.UnitMass_in_g) * PROTONMASS / (All.Epsilon_r * CLIGHT * THOMPSON);
-      EddingtonRate *=  (All.UnitTime_in_s / All.UnitMass_in_g);
+      if(BhP[i].IsBh)/*is bh -> compute accretion rate*/
+        {
+/*get pressure*/
+          if(BhP[i].Density>0)
+            {  
+              density = BhP[i].Density;
+              pressure = GAMMA_MINUS1 * density * BhP[i].InternalEnergyGas;
 
-      BhP[i].AccretionRate  = EddingtonRate; //fix accretion to eddington rate
-    }
+/*get soundspeed*/
+              sound_speed = sqrt(GAMMA * pressure / density);
+      
+              velocity_gas_norm = sqrt(BhP[i].VelocityGas[0]*BhP[i].VelocityGas[0] + 
+              BhP[i].VelocityGas[1]*BhP[i].VelocityGas[1] + BhP[i].VelocityGas[2]*BhP[i].VelocityGas[2]); 
+
+              denominator = (sound_speed*sound_speed + velocity_gas_norm*velocity_gas_norm);
+              if(denominator > 0)
+                {
+                  denominator_inv = 1. / sqrt(denominator);
+                  BondiRate = 4. * M_PI * All.G * All.G * PPB(i).Mass * PPB(i).Mass * density *
+                  denominator_inv * denominator_inv * denominator_inv;
+                }
+              else
+                terminate("Invalid denominator in Bondi Accretion Rate");
+            }
+          else
+            BondiRate = 0;
   
-  /*MPI_Allreduce(&BhP[i].AccretionRate, &acc_rate_for_print, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
-  MPI_Barrier(MPI_COMM_WORLD); // synchronize all tasks
+/*limit by Eddington accretion rate*/
+          EddingtonRate = 4. * M_PI * GRAVITY * (PPB(i).Mass * All.UnitMass_in_g) * PROTONMASS / (All.Epsilon_r * CLIGHT * THOMPSON);
+          EddingtonRate *=  (All.UnitTime_in_s / All.UnitMass_in_g);
+          accretion_rate = fmin(BondiRate, EddingtonRate);
+      
+          BhP[i].AccretionRate  = accretion_rate;
+        }
+      
+      else if(!BhP[i].IsBh)/*is star-> fix accretion to eddington rate*/
+        {
+          EddingtonRate = 4. * M_PI * GRAVITY * (PPB(i).Mass * All.UnitMass_in_g) * PROTONMASS / (All.Epsilon_r * CLIGHT * THOMPSON);
+          EddingtonRate *=  (All.UnitTime_in_s / All.UnitMass_in_g);
+
+          BhP[i].AccretionRate  = EddingtonRate; 
+        }
+    }
+ 
+  /*MPI_Allreduce(&accretion_rate, &acc_rate_for_print, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+  MPI_Barrier(MPI_COMM_WORLD); 
   mpi_printf("BLACK_HOLES: Black hole accretion rate: %e \n", acc_rate_for_print);*/
 }
 
@@ -329,9 +368,59 @@ void update_list_of_active_bh_particles(void)
 
 void perform_end_of_step_bh_physics(void)
 {
+  int idx, i, j, bin;
+  double dt, pj, p0, cos_theta;
+  double kick_vector[3], bh_momentum_kick[3];
+
+  bh_momentum_kick[0] = bh_momentum_kick[1] = bh_momentum_kick[2] = 0;
+
 /*accrete mass, angular momentum onto the bh and drain ngb cells*/
-  int idx, i;
-  double pj;
+  for(i=0; i<NumBh; i++)
+    {
+      bin = PPB(i).TimeBinBh;
+      dt    = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
+      
+      PPB(i).Mass += (1-All.Epsilon_r) * BhP[i].AccretionRate * dt;
+
+      BhP[i].AngularMomentum[0] += BhP[i].AccretionRate * dt * BhP[i].VelocityGasCircular[0];
+      BhP[i].AngularMomentum[1] += BhP[i].AccretionRate * dt * BhP[i].VelocityGasCircular[1];
+      BhP[i].AngularMomentum[2] += BhP[i].AccretionRate * dt * BhP[i].VelocityGasCircular[2];
+    
+      for(j=0; j<NumGas; j++)
+        {
+          if(SphP[j].MassDrain > 0)
+            {
+              if(P[j].Mass - SphP[j].MassDrain < 0.1*P[j].Mass)
+                {
+                  P[j].Mass -= 0.9*P[j].Mass;
+                  BhP[i].MassToDrain += SphP[j].MassDrain - 0.9*P[j].Mass; 
+                  /*we're also losing thermal and kinetic energy & momentum*/
+                
+                  /*update total energy*/
+                  SphP[j].Energy *= 0.1;
+
+                  /*update momentum*/
+                  SphP[j].Momentum[0] *= 0.1;
+                  SphP[j].Momentum[1] *= 0.1;
+                  SphP[j].Momentum[2] *= 0.1;
+                }
+              else
+                {
+                  P[j].Mass -= SphP[j].MassDrain;
+                
+                  /*update total energy*/
+                  SphP[j].Energy *= (P[j].Mass)/(P[j].Mass + SphP[j].MassDrain);
+
+                  /*update momentum*/
+                  SphP[j].Momentum[0] *= (P[j].Mass)/(P[j].Mass + SphP[j].MassDrain);
+                  SphP[j].Momentum[1] *= (P[j].Mass)/(P[j].Mass + SphP[j].MassDrain);
+                  SphP[j].Momentum[2] *= (P[j].Mass)/(P[j].Mass + SphP[j].MassDrain);
+                }
+          
+              SphP[j].MassDrain = 0;
+            }
+        }
+    }
 
 /*inject feedback to ngb cells*/
     if(All.Time >= All.FeedbackTime)
@@ -348,15 +437,56 @@ void perform_end_of_step_bh_physics(void)
           else
             pvd.atime = pvd.hubble_a = pvd.a3inv = 1.0;
 
-          /*radial momentum kick*/
-          double kick_vector[3];
-
           for(idx = 0; idx < TimeBinsHydro.NActiveParticles; idx++)
             {
               i = TimeBinsHydro.ActiveParticleList[idx];
               if(i < 0)
               continue;
 
+/*dump energy and momentum injected by bh*/
+              if(SphP[i].KineticFeed > 0)
+                {
+                  /*calculate momentum feed exactly so energy is conserved*/
+                  /*-> we need to do this here so that particle properties don't change between loading the buffer and emptying it*/
+                  kick_vector[0] = SphP[i].BhKickVector[0];
+                  kick_vector[1] = SphP[i].BhKickVector[1];
+                  kick_vector[2] = SphP[i].BhKickVector[2];
+
+                  p0 = sqrt(pow(SphP[i].Momentum[0], 2) + pow(SphP[i].Momentum[1], 2) + pow(SphP[i].Momentum[2], 2));
+              
+                  if(p0 < pow(10,-10)) //protect against p0 = 0;
+                    cos_theta = 1;
+                  else 
+                    cos_theta = (SphP[i].Momentum[0]*kick_vector[0] + SphP[i].Momentum[1]*kick_vector[1] + SphP[i].Momentum[2]*kick_vector[2]) / 
+                    (p0*sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2)));       
+          
+                  pj = -p0*cos_theta + sqrt(p0*p0 * cos_theta*cos_theta + 2*P[i].Mass*SphP[i].KineticFeed);
+
+                  bh_momentum_kick[0] = kick_vector[0] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
+                  bh_momentum_kick[1] = kick_vector[1] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
+                  bh_momentum_kick[2] = kick_vector[2] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2)); 
+                }
+
+              if(SphP[i].ThermalFeed > 0 || SphP[i].KineticFeed > 0)
+                {
+                  /*update total energy*/
+                  SphP[i].Energy += SphP[i].ThermalFeed + SphP[i].KineticFeed;
+                  All.EnergyExchange[1] += SphP[i].ThermalFeed + SphP[i].KineticFeed;
+                  /*update momentum*/
+                    SphP[i].Momentum[0] += bh_momentum_kick[0];
+                    SphP[i].Momentum[1] += bh_momentum_kick[1];
+                    SphP[i].Momentum[2] += bh_momentum_kick[2];
+                  /*update velocities*/
+                  update_primitive_variables_single(P, SphP, i, &pvd);
+                  /*update internal energy*/
+                  update_internal_energy(P, SphP, i, &pvd);
+                  /*update pressure*/
+                  set_pressure_of_cell_internal(P, SphP, i);
+                  /*set feed flags to zero*/
+                  SphP[i].ThermalFeed = SphP[i].KineticFeed = 0;
+                  bh_momentum_kick[0] = bh_momentum_kick[1] = bh_momentum_kick[2] = 0;
+                }
+            
 /*dump momentum injected by stars*/              
               if(SphP[i].MomentumFeed > 0)
                 {

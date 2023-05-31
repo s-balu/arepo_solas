@@ -253,20 +253,74 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 
           kernel(u, hinv3, hinv4, &wk, &dwk);
 
-          if(isbh)
+          if(isbh)/*particle is a bh*/
             {
+              if(All.JetFeedback)
+                {
+/*double cone jet setup*/
 
+/*calculate vector to cone vertex*/
+                  vx = -dx; // x-component of the vector from the vertex to the point
+                  vy = -dy; // y-component of the vector from the vertex to the point
+                  vz = -dz; // z-component of the vector from the vertex to the point
+/*calculate angles*/    
+                  pos_x_angle = acos((vx*pos_x_axis[0] + vy*pos_x_axis[1] + vz*pos_x_axis[2]) / 
+                  (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2))));
+                  neg_x_angle = acos((vx*neg_x_axis[0] + vy*neg_x_axis[1] + vz*neg_x_axis[2]) / 
+                  (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) + pow(neg_x_axis[2], 2))));
+/*set flag to 1 if gas particle is on the positive side of jet*/
+                  if(pos_x_angle <= theta)
+                    SphP[j].PositiveJet = 1;
+/*check if particle is inside the cone*/ 
+                  if((pos_x_angle <= theta) || (neg_x_angle <= theta))
+                    {
+/*split kinetic and thermal energy feed*/ 
+                      SphP[j].KineticFeed       += (1-All.Ftherm) * energyfeed/ngbmass_feed*P[j].Mass;
+                      All.EnergyExchange[0]     += (1-All.Ftherm) * energyfeed/ngbmass_feed*P[j].Mass;
+
+/*only jet particles injected with thermal feedback if JetFeedback == 2, else isotropic*/             
+                      if(All.JetFeedback == 2)     
+                        {
+                          SphP[j].ThermalFeed   += All.Ftherm * energyfeed/ngbmass_feed*P[j].Mass;
+                          All.EnergyExchange[0] += All.Ftherm * energyfeed/ngbmass_feed*P[j].Mass;
+                        }
+                    }
+              
+                  if(All.JetFeedback == 1)
+                    {
+                      SphP[j].ThermalFeed   += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
+                      All.EnergyExchange[0] += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
+                    } 
+            
+                }
+/*else All.JetFeedback == 0 i.e. isotropic thermal + kinetic injection*/
+              else
+                {
+                  SphP[j].KineticFeed   += (1-All.Ftherm) * energyfeed/ngbmass*P[j].Mass;
+                  All.EnergyExchange[0] += (1-All.Ftherm) * energyfeed/ngbmass*P[j].Mass;
+                  SphP[j].ThermalFeed   += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
+                  All.EnergyExchange[0] += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
+                }
+
+/*set drain mass flag*/
+              SphP[j].MassDrain = accretion_rate*dt/ngbmass*P[j].Mass + mass_to_drain/ngbmass*P[j].Mass;
+/*set radial kick direction*/      
+              SphP[i].BhKickVector[0] = vx;
+              SphP[i].BhKickVector[1] = vy;
+              SphP[i].BhKickVector[2] = vz;
             }
           
-          if(!isbh)
+          if(!isbh) /*particle is a star*/
             {
 /*set radial momentum kick*/
-              SphP[j].MomentumFeed  += energy_feed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
+              SphP[j].MomentumFeed  += All.Lambda/All.Ftherm * energy_feed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
+/*Epsilon_r terms cancel out in the eddington rate formula*/
+
               All.EnergyExchange[2] += energy_feed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
 
-              SphP[j].MomentumKickVector[0] = -dx;
-              SphP[j].MomentumKickVector[1] = -dy;
-              SphP[j].MomentumKickVector[2] = -dz;
+              SphP[j].MomentumKickVector[0] = vx;
+              SphP[j].MomentumKickVector[1] = vy;
+              SphP[j].MomentumKickVector[2] = vz;
             }
         }
     }

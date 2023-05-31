@@ -490,9 +490,9 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 /*double cone jet setup*/    
   
 /*calculate vector to cone vertex*/
-                  vx = P[j].Pos[0] - pos[0]; // x-component of the vector from the vertex to the point
-                  vy = P[j].Pos[1] - pos[1]; // y-component of the vector from the vertex to the point
-                  vz = P[j].Pos[2] - pos[2]; // z-component of the vector from the vertex to the point
+                  vx = -dx; // x-component of the vector from the vertex to the point
+                  vy = -dy; // y-component of the vector from the vertex to the point
+                  vz = -dz; // z-component of the vector from the vertex to the point
 /*calculate angles*/    
                   pos_x_angle = acos((vx*pos_x_axis[0] + vy*pos_x_axis[1] + vz*pos_x_axis[2]) / 
                   (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2))));
