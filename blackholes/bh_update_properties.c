@@ -356,19 +356,21 @@ void perform_end_of_step_bh_physics(void)
               i = TimeBinsHydro.ActiveParticleList[idx];
               if(i < 0)
               continue;
-              if(SphP[i].KineticFeed > 0)
+
+/*dump momentum injected by stars*/              
+              if(SphP[i].MomentumFeed > 0)
                 {
                   kick_vector[0] = SphP[i].MomentumKickVector[0];
                   kick_vector[1] = SphP[i].MomentumKickVector[1];
                   kick_vector[2] = SphP[i].MomentumKickVector[2];
-                  pj = SphP[i].KineticFeed;
+                  pj = SphP[i].MomentumFeed;
 
                   /*update momentum*/
                   SphP[i].Momentum[0] += kick_vector[0] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
                   SphP[i].Momentum[1] += kick_vector[1] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
                   SphP[i].Momentum[2] += kick_vector[2] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));  
 
-                  All.EnergyExchange[1] += SphP[i].KineticFeed;     
+                  All.EnergyExchange[3] += SphP[i].MomentumFeed;     
                  
                   /*update velocities*/
                   update_primitive_variables_single(P, SphP, i, &pvd);  
@@ -380,7 +382,7 @@ void perform_end_of_step_bh_physics(void)
                   /*update pressure*/
                   set_pressure_of_cell_internal(P, SphP, i);
                   /*set feed flag to zero*/
-                  SphP[i].KineticFeed = 0;
+                  SphP[i].MomentumFeed = 0;
                 }
             }
 #ifdef BURST_MODE
@@ -388,9 +390,10 @@ void perform_end_of_step_bh_physics(void)
 #endif      
         }
     }
-  MPI_Allreduce(&All.EnergyExchange, &All.EnergyExchangeTot, 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Allreduce(&All.EnergyExchange, &All.EnergyExchangeTot, 4, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
   MPI_Barrier(MPI_COMM_WORLD); // synchronize all tasks
-  mpi_printf("BLACK_HOLES: Momentum given by StarPart = %e, Momentum taken up by gas particles = %e \n", All.EnergyExchangeTot[0], All.EnergyExchangeTot[1]);
+  mpi_printf("BLACK_HOLES: Energy given by BH = %e, Energy taken up by gas particles = %e \n", All.EnergyExchangeTot[0], All.EnergyExchangeTot[1]);
+  mpi_printf("STARS: Momentum given by StarParts = %e, Momentum taken up by gas particles = %e \n", All.EnergyExchangeTot[2], All.EnergyExchangeTot[3]);
 
 #ifdef BURST_MODE
   if(All.EnergyExchangeTot[0] - All.EnergyExchangeTot[1] > 10)  

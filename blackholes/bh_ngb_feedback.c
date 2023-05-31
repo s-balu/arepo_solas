@@ -21,11 +21,14 @@ typedef struct
 {
   MyDouble Pos[3];
   MyFloat Hsml;
-  int Firstnode;
   int Bin;
+  int IsBh;
   MyDouble BhRho;
   MyDouble NgbMass;
+  MyDouble NgbMassFeed;
   MyDouble AccretionRate;
+  MyDouble MassToDrain;
+  int Firstnode;
 } data_in;
 
 static data_in *DataIn, *DataGet;
@@ -44,12 +47,14 @@ static void particle2in(data_in *in, int i, int firstnode)
   in->Pos[0]        = PPB(i).Pos[0];
   in->Pos[1]        = PPB(i).Pos[1];
   in->Pos[2]        = PPB(i).Pos[2];
-  in->Bin           = BhP[i].TimeBinBh;
   in->Hsml          = BhP[i].Hsml;
+  in->Bin           = BhP[i].TimeBinBh;
+  in->IsBh          = BhP[i].IsBh;
   in->BhRho         = BhP[i].Density;
   in->NgbMass       = BhP[i].NgbMass;
+  in->NgbMassFeed   = BhP[i].NgbMassFeed;
   in->AccretionRate = BhP[i].AccretionRate;
-
+  in->MassToDrain   = BhP[i].MassToDrain;
   in->Firstnode     = firstnode;
 }
 
@@ -105,7 +110,7 @@ static void kernel_local(void)
     for(j = 0; j < NTask; j++)
       Thread[threadid].Exportflag[j] = -1;
 
-while(1)
+    while(1)
       {
         if(Thread[threadid].ExportSpace < MinSpace)
           break;
@@ -157,13 +162,13 @@ void bh_ngb_feedback(void)
 
 static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 {
-  int j, n, bin;
+  int j, n, bin, isbh;
   int numnodes, *firstnode;
   double h, h2, hinv, hinv3, hinv4, wk, dwk;
   double dx, dy, dz, r, r2, u;
-  double dt, dtime;
-  MyDouble bh_rho, ngbmass, accretion_rate; 
-  MyDouble *pos;
+  double dt; //dtime;
+  MyDouble ngbmass, ngbmass_feed, accretion_rate, mass_to_drain; 
+  MyDouble *pos, bh_rho, energy_feed;
 
   data_in local, *target_data;
   /*data_out out;*/
@@ -185,10 +190,13 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 
   pos            = target_data->Pos;
   h              = target_data->Hsml;
+  isbh           = target_data->IsBh;
   bin            = target_data->Bin;
   bh_rho         = target_data->BhRho;
   ngbmass        = target_data->NgbMass;
-  accretion_rate = target_data->AccretionRate; 
+  ngbmass_feed   = target_data->NgbMassFeed;
+  accretion_rate = target_data->AccretionRate;
+  mass_to_drain  = target_data->MassToDrain; 
 
   h2   = h * h;
   hinv = 1.0 / h;
@@ -201,7 +209,9 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
  
 /*bh timestep*/
   dt    = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
-  dtime = All.cf_atime * dt / All.cf_time_hubble_a;
+  //dtime = All.cf_atime * dt / All.cf_time_hubble_a;
+
+  energyfeed = All.Epsilon_f * All.Epsilon_r * accretion_rate * dt * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
 
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
   for(n = 0; n < nfound; n++)
@@ -243,15 +253,22 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 
           kernel(u, hinv3, hinv4, &wk, &dwk);
 
-/*set radial momentum kick*/
-          SphP[j].KineticFeed   += All.Lambda * accretion_rate * dt * (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
-          All.EnergyExchange[0] += All.Lambda * accretion_rate * dt * (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
+          if(isbh)
+            {
 
-          SphP[j].MomentumKickVector[0] = -dx;
-          SphP[j].MomentumKickVector[1] = -dy;
-          SphP[j].MomentumKickVector[2] = -dz;
+            }
+          
+          if(!isbh)
+            {
+/*set radial momentum kick*/
+              SphP[j].MomentumFeed  += energy_feed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
+              All.EnergyExchange[2] += energy_feed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
+
+              SphP[j].MomentumKickVector[0] = -dx;
+              SphP[j].MomentumKickVector[1] = -dy;
+              SphP[j].MomentumKickVector[2] = -dz;
+            }
         }
-  
     }
   return 0;
 }

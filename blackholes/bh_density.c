@@ -338,8 +338,8 @@ for(i = 0; i < NumBh; i++)
  */
 static int bh_density_evaluate(int target, int mode, int threadid)
 {
-  int j, n;
-  int numngb, numnodes, isbh, *firstnode;
+  int j, n, isbh;
+  int numngb, numnodes, *firstnode;
   double h, h2, hinv, hinv3, hinv4;
   double rho;
   double wk, dwk;
