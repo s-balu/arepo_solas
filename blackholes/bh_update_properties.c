@@ -309,33 +309,6 @@ void reconstruct_bh_timebins(void)
     }
 }
 
-/*call this function after reconstruct_bh_timebins*/
-/*void update_list_of_active_bh_particles(void)
-{
-  int i, n;
-  TimeBinsBh.NActiveParticles = 0;
-  for(n = 0; n < TIMEBINS; n++)
-    {
-      for(i = TimeBinsBh.FirstInTimeBin[n]; i >= 0; i = TimeBinsBh.NextInTimeBin[i])
-        {
-          TimeBinsBh.ActiveParticleList[TimeBinsBh.NActiveParticles] = i;
-          TimeBinsBh.NActiveParticles++;
-        }
-    }
-
-    mysort(TimeBinsBh.ActiveParticleList, TimeBinsBh.NActiveParticles, sizeof(int), int_compare);
-
-  n = 1;
-  int in;
-  long long out;
-
-  in = TimeBinsBh.NActiveParticles;
-
-  sumup_large_ints(n, &in, &out);
-
-  TimeBinsBh.GlobalNActiveParticles = out;
-}*/
-
 /*call this function after updating the bh-timebin to the ngb condition*/
 void update_list_of_active_bh_particles(void)
 {
@@ -485,6 +458,8 @@ void perform_end_of_step_bh_physics(void)
                   /*set feed flags to zero*/
                   SphP[i].ThermalFeed = SphP[i].KineticFeed = 0;
                   bh_momentum_kick[0] = bh_momentum_kick[1] = bh_momentum_kick[2] = 0;
+
+                  SphP[i].JetMass = P[i].Mass;
                 }
             
 /*dump momentum injected by stars*/              
