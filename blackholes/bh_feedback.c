@@ -26,8 +26,13 @@ typedef struct
   MyDouble BhRho;
   MyDouble NgbMass;
   MyDouble NgbMassFeed;
+#ifdef BONDI_ACCRETION
   MyDouble AccretionRate;
   MyDouble MassToDrain;
+#endif
+#ifdef INFALL_ACCRETION
+  MyDouble Accretion;
+#endif
   int Firstnode;
 } data_in;
 
@@ -53,8 +58,13 @@ static void particle2in(data_in *in, int i, int firstnode)
   in->BhRho         = BhP[i].Density;
   in->NgbMass       = BhP[i].NgbMass;
   in->NgbMassFeed   = BhP[i].NgbMassFeed;
+#ifdef BONDI_ACCRETION 
   in->AccretionRate = BhP[i].AccretionRate;
   in->MassToDrain   = BhP[i].MassToDrain;
+#endif
+#ifdef INFALL_ACCRETION
+  in->Accretion     = BhP[i].Accretion;
+#endif
   in->Firstnode     = firstnode;
 }
 
@@ -167,7 +177,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   double h, h2, hinv, hinv3, hinv4, wk, dwk;
   double dx, dy, dz, r, r2, u;
   double dt; //dtime;
-  MyDouble ngbmass, ngbmass_feed, accretion_rate, mass_to_drain; 
+  MyDouble ngbmass, ngbmass_feed; 
   MyDouble *pos, bh_rho, energyfeed;
 
   data_in local, *target_data;
@@ -195,8 +205,15 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   bh_rho         = target_data->BhRho;
   ngbmass        = target_data->NgbMass;
   ngbmass_feed   = target_data->NgbMassFeed;
+#ifdef BONDI_ACCRETION
+  MyDouble accretion_rate, mass_to_drain;
   accretion_rate = target_data->AccretionRate;
   mass_to_drain  = target_data->MassToDrain; 
+#endif
+#ifdef INFALL_ACCRETION
+  MyDouble accretion;
+  accretion      = target_data->Accretion;
+#endif
 
   h2   = h * h;
   hinv = 1.0 / h;
@@ -207,12 +224,15 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 #endif /* #ifndef  TWODIMS #else */
   hinv4 = hinv3 * hinv;
  
+#ifdef BONDI_ACCRETION
 /*bh timestep*/
   dt    = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
   //dtime = All.cf_atime * dt / All.cf_time_hubble_a;
-
   energyfeed = All.Epsilon_f * All.Epsilon_r * accretion_rate * dt * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
-
+#endif
+#ifdef INFALL_ACCRETION  
+  energyfeed = All.Epsilon_f * All.Epsilon_r * accretion * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
+#endif
 /*jet axis and opening angle*/    
 
 /*positive and negative jet axes (no need to be normalized) */
@@ -310,9 +330,13 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
                   SphP[j].ThermalFeed   += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
                   All.EnergyExchange[0] += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
                 }
-
+#ifdef BONDI_ACCRETION
 /*set drain mass flag*/
               SphP[j].MassDrain = accretion_rate*dt/ngbmass*P[j].Mass + mass_to_drain/ngbmass*P[j].Mass;
+#endif
+#ifdef INFALL_ACCRETION 
+              SphP[j].MassDrain = -1; //set this to -1 in infall_accretion for ngbs we have already swallowed but weren't able to derefine
+#endif
 /*set radial kick direction*/      
               SphP[j].BhKickVector[0] = -dx;
               SphP[j].BhKickVector[1] = -dy;

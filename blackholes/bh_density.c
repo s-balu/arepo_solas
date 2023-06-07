@@ -464,11 +464,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 
           r = sqrt(r2);
 
-          u = r * hinv;1. (Military) an attack upon or incursion into; invasion
-2. (Physical Geography) the place where a path or stream meets another; junction
-3. (Physical Geography) the falling of a stream of water into a body of water
-4. (Astronomy) astronomy the falling of matter to a celestial body from space under the influence of the body's gravity
-5. (Astronomy) astronomy the matter which thus falls to a celestial body
+          u = r * hinv;
 
           kernel(u, hinv3, hinv4, &wk, &dwk);
 
@@ -514,8 +510,11 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 #ifdef INFALL_ACCRETION
               if(r2 < h2/25)
                 {
-                  accretion    += 0.9*mass_j;
-                  SphP[j].Mass *= 0.1;
+                  if(SphP[j].MassDrain >= 0)
+                    {
+                      accretion    += 0.9*mass_j;
+                      SphP[j].Mass *= 0.1;
+                    }
                 }
 #endif
               if(All.JetFeedback)

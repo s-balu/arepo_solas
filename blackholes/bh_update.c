@@ -341,12 +341,15 @@ void update_list_of_active_bh_particles(void)
 
 void perform_end_of_step_bh_physics(void)
 {
-  int idx, i, j, bin;
-  double dt, pj, p0, cos_theta;
+  int idx, i;
+  double pj, p0, cos_theta;
   double kick_vector[3], bh_momentum_kick[3];
 
   bh_momentum_kick[0] = bh_momentum_kick[1] = bh_momentum_kick[2] = 0;
 
+#ifdef BONDI_ACCRETION
+  int j, bin;
+  double dt;
 /*accrete mass, angular momentum onto the bh and drain ngb cells*/
   for(i=0; i<NumBh; i++)
     {
@@ -394,6 +397,11 @@ void perform_end_of_step_bh_physics(void)
             }
         }
     }
+#endif
+#ifdef INFALL_ACCRETION
+  for(i=0; i<NumBh; i++)
+    PPB(i).Mass += (1-All.Epsilon_r) * BhP[i].Accretion;
+#endif
 
 /*inject feedback to ngb cells*/
     if(All.Time >= All.FeedbackTime)
