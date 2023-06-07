@@ -224,15 +224,26 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 #endif /* #ifndef  TWODIMS #else */
   hinv4 = hinv3 * hinv;
  
-#ifdef BONDI_ACCRETION
 /*bh timestep*/
-  dt    = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
-  //dtime = All.cf_atime * dt / All.cf_time_hubble_a;
-  energyfeed = All.Epsilon_f * All.Epsilon_r * accretion_rate * dt * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
+      dt    = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
+    //dtime = All.cf_atime * dt / All.cf_time_hubble_a;
+
+  if(isbh)/*is bh->*/
+    {
+#ifdef BONDI_ACCRETION
+      energyfeed = All.Epsilon_f * All.Epsilon_r * accretion_rate * dt * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
 #endif
 #ifdef INFALL_ACCRETION  
-  energyfeed = All.Epsilon_f * All.Epsilon_r * accretion * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
+      energyfeed = All.Epsilon_f * All.Epsilon_r * accretion * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
 #endif
+    }
+  else if(!isbh)/*is star->*/
+    {
+      double EddingtonLuminosity = 4. * M_PI * GRAVITY * (PPB(i).Mass * All.UnitMass_in_g) * PROTONMASS * CLIGHT / THOMPSON;
+      EddingtonLuminosity *=  (All.UnitTime_in_s / (All.UnitMass_in_g*pow(All.UnitVelocity_in_cm_per_s,2)));
+      energyfeed = EddingtonLuminosity * dt;
+    }
+
 /*jet axis and opening angle*/    
 
 /*positive and negative jet axes (no need to be normalized) */
@@ -346,7 +357,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
           if(!isbh) /*particle is a star*/
             {
 /*set radial momentum kick*/
-              SphP[j].MomentumFeed  += All.Lambda/All.Ftherm * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
+              SphP[j].MomentumFeed  += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
 /*Epsilon_r terms cancel out in the eddington rate formula*/
 
               All.EnergyExchange[2] += energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;

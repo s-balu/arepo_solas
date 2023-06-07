@@ -236,14 +236,6 @@ void update_bh_accretion_rate(void)
       
           BhP[i].AccretionRate  = accretion_rate;
         }
-      
-      else if(!BhP[i].IsBh)/*is star-> fix accretion to eddington rate*/
-        {
-          EddingtonRate = 4. * M_PI * GRAVITY * (PPB(i).Mass * All.UnitMass_in_g) * PROTONMASS / (All.Epsilon_r * CLIGHT * THOMPSON);
-          EddingtonRate *=  (All.UnitTime_in_s / All.UnitMass_in_g);
-
-          BhP[i].AccretionRate  = EddingtonRate; 
-        }
     }
  
   /*MPI_Allreduce(&accretion_rate, &acc_rate_for_print, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
