@@ -190,6 +190,10 @@ void kernel(double u, double hinv3, double hinv4, double *wk, double *dwk)
 }
 /*THIS PART ADAPTED FROM GADGET4*/
 
+#ifdef INFALL_ACCRETION
+#endif
+
+#ifdef BONDI_ACCRETION
 void update_bh_accretion_rate(void)
 {
   /*calculate bondi accretion rate*/
@@ -242,6 +246,7 @@ void update_bh_accretion_rate(void)
   MPI_Barrier(MPI_COMM_WORLD); 
   mpi_printf("BLACK_HOLES: Black hole accretion rate: %e \n", acc_rate_for_print);*/
 }
+#endif
 
 /*get timestep for bh based on smallest between ngbs*/
 integertime get_timestep_bh(int p)
