@@ -208,6 +208,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   bh_mass        = target_data->BhMass;
   ngbmass        = target_data->NgbMass;
   ngbmass_feed   = target_data->NgbMassFeed;
+
 #ifdef BONDI_ACCRETION
   MyDouble accretion_rate, mass_to_drain;
   accretion_rate = target_data->AccretionRate;

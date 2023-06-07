@@ -359,22 +359,12 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   double rho;
   double wk, dwk;
   double dx, dy, dz, r, r2, u, mass_j;
-  double dvx, dvy, dvz, rho_j;
   MyFloat weighted_numngb;
   MyFloat dhsmlrho;
-  MyDouble *pos, *vel;
+  MyDouble *pos;
   MyDouble mass, mass_feed;
   integertime ngb_min_step;
   int bin = TIMEBINS;
-#ifdef BONDI_ACCRETION
-  MyDouble internal_energy_gas = 0;
-  MyDouble velocity_gas[3], velocity_gas_circular[3];
-  velocity_gas[0] = velocity_gas[1] = velocity_gas[2] = 0;
-  velocity_gas_circular[0] = velocity_gas_circular[1] = velocity_gas_circular[2] = 0;
-#endif
-#ifdef INFALL_ACCRETION
-  double accretion = 0;
-#endif 
 
   data_in local, *target_data;
   data_out out;
@@ -395,11 +385,21 @@ static int bh_density_evaluate(int target, int mode, int threadid)
     }
 
   pos  = target_data->Pos;
-  vel  = target_data->Vel;
   h    = target_data->Hsml;
   isbh = target_data->IsBh;
 
-  
+#ifdef BONDI_ACCRETION
+  MyDouble *vel;
+  vel  = target_data->Vel;
+  double dvx, dvy, dvz, rho_j;
+  MyDouble internal_energy_gas = 0;
+  MyDouble velocity_gas[3], velocity_gas_circular[3];
+  velocity_gas[0] = velocity_gas[1] = velocity_gas[2] = 0;
+  velocity_gas_circular[0] = velocity_gas_circular[1] = velocity_gas_circular[2] = 0;
+#endif
+#ifdef INFALL_ACCRETION
+  double accretion = 0;
+#endif 
 
   h2   = h * h;
   hinv = 1.0 / h;
@@ -512,8 +512,8 @@ static int bh_density_evaluate(int target, int mode, int threadid)
                 {
                   if(SphP[j].MassDrain >= 0)
                     {
-                      accretion    += 0.9*mass_j;
-                      SphP[j].Mass *= 0.1;
+                      accretion += 0.9*mass_j;
+                      P[j].Mass *= 0.1;
                     }
                 }
 #endif
