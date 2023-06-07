@@ -559,7 +559,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   out.VelocityGasCircular[2]  = velocity_gas_circular[2];
   out.InternalEnergyGas       = internal_energy_gas;
 #endif
-#ifdef ACCRETION
+#ifdef INFALL_ACCRETION
   out.Accretion               = accretion;
 #endif
   /* now collect the result at the right place */
