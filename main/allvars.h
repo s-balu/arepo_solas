@@ -1472,23 +1472,26 @@ extern struct sph_particle_data
 #ifdef BLACKHOLES
 extern struct bh_particle_data
 {
-MyIDType PID;
-MyDouble Hsml;
-MyDouble Density;
-MyDouble NgbMass;
-MyDouble NgbMassFeed;
-MyDouble VelocityGas[3];
-MyDouble VelocityGasCircular[3];
-MyDouble InternalEnergyGas;
-MyDouble AccretionRate;
-MyDouble MassToDrain;
-MyDouble AngularMomentum[3];
-integertime NgbMinStep;
-
-
-int IsBh;
-int DensityFlag;
-signed char TimeBinBh;
+  MyIDType PID;
+  MyDouble Hsml;
+  MyDouble Density;
+  MyDouble NgbMass;
+  MyDouble NgbMassFeed;
+#ifdef BONDI_ACCRETION
+  MyDouble VelocityGas[3];
+  MyDouble VelocityGasCircular[3];
+  MyDouble InternalEnergyGas;
+  MyDouble AccretionRate;
+  MyDouble MassToDrain;
+  MyDouble AngularMomentum[3];
+#endif
+#ifdef INFALL_ACCRETION
+  MyDouble Accretion;
+#endif
+  integertime NgbMinStep;
+  int IsBh;
+  int DensityFlag;
+  signed char TimeBinBh;
 }  *BhP,          
     *DomainBhBuf; 
 

@@ -65,9 +65,14 @@ typedef struct
   MyDouble Mass;
   MyDouble MassFeed;
   integertime NgbMinStep;
+#ifdef BONDI_ACCRETION
   MyDouble VelocityGas[3];
   MyDouble VelocityGasCircular[3];
   MyDouble InternalEnergyGas;
+#endif
+#ifdef INFALL_ACCRETION
+  MyDouble Accretion;
+#endif
 } data_out;
 
 static data_out *DataResult, *DataOut;
@@ -93,6 +98,7 @@ static void out2particle(data_out *out, int i, int mode)
       BhP[i].NgbMass                   = out->Mass;
       BhP[i].NgbMassFeed               = out->MassFeed;
       BhP[i].NgbMinStep                = out->NgbMinStep;
+#ifdef BONDI_ACCRETION
       BhP[i].VelocityGas[0]            = out->VelocityGas[0];
       BhP[i].VelocityGas[1]            = out->VelocityGas[1];
       BhP[i].VelocityGas[2]            = out->VelocityGas[2];
@@ -100,6 +106,10 @@ static void out2particle(data_out *out, int i, int mode)
       BhP[i].VelocityGasCircular[1]    = out->VelocityGasCircular[1];
       BhP[i].VelocityGasCircular[2]    = out->VelocityGasCircular[2];
       BhP[i].InternalEnergyGas         = out->InternalEnergyGas;
+#endif
+#ifdef INFALL_ACCRETION
+      BhP[i].Accretion                 = out->Accretion;
+#endif
     }
   else /* combine */
     {
@@ -110,6 +120,7 @@ static void out2particle(data_out *out, int i, int mode)
       BhP[i].NgbMassFeed               += out->MassFeed;
       if(out->NgbMinStep < BhP[i].NgbMinStep)
         BhP[i].NgbMinStep               = out->NgbMinStep;
+#ifdef BONDI_ACCRETION
       BhP[i].VelocityGas[0]            += out->VelocityGas[0];
       BhP[i].VelocityGas[1]            += out->VelocityGas[1];
       BhP[i].VelocityGas[2]            += out->VelocityGas[2];
@@ -117,6 +128,10 @@ static void out2particle(data_out *out, int i, int mode)
       BhP[i].VelocityGasCircular[1]    += out->VelocityGasCircular[1];
       BhP[i].VelocityGasCircular[2]    += out->VelocityGasCircular[2];
       BhP[i].InternalEnergyGas         += out->InternalEnergyGas;
+#endif
+#ifdef INFALL_ACCRETION
+      BhP[i].Accretion                 += out->Accretion;
+#endif
     }
 }
 
@@ -348,11 +363,18 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   MyFloat weighted_numngb;
   MyFloat dhsmlrho;
   MyDouble *pos, *vel;
-  MyDouble velocity_gas[3], velocity_gas_circular[3];
-  MyDouble mass, mass_feed, internal_energy_gas;
+  MyDouble mass, mass_feed;
   integertime ngb_min_step;
   int bin = TIMEBINS;
-   
+#ifdef BONDI_ACCRETION
+  MyDouble internal_energy_gas = 0;
+  MyDouble velocity_gas[3], velocity_gas_circular[3];
+  velocity_gas[0] = velocity_gas[1] = velocity_gas[2] = 0;
+  velocity_gas_circular[0] = velocity_gas_circular[1] = velocity_gas_circular[2] = 0;
+#endif
+#ifdef INFALL_ACCRETION
+  double accretion = 0;
+#endif 
 
   data_in local, *target_data;
   data_out out;
@@ -390,9 +412,8 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 
   numngb = 0;
   rho = weighted_numngb = dhsmlrho = 0;
-  mass = mass_feed = internal_energy_gas = 0;
-  velocity_gas[0] = velocity_gas[1] = velocity_gas[2] = 0;
-  velocity_gas_circular[0] = velocity_gas_circular[1] = velocity_gas_circular[2] = 0;
+  mass = mass_feed = 0;
+
 
 /*jet axis and opening angle*/    
 
@@ -443,7 +464,11 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 
           r = sqrt(r2);
 
-          u = r * hinv;
+          u = r * hinv;1. (Military) an attack upon or incursion into; invasion
+2. (Physical Geography) the place where a path or stream meets another; junction
+3. (Physical Geography) the falling of a stream of water into a body of water
+4. (Astronomy) astronomy the falling of matter to a celestial body from space under the influence of the body's gravity
+5. (Astronomy) astronomy the matter which thus falls to a celestial body
 
           kernel(u, hinv3, hinv4, &wk, &dwk);
 
@@ -465,6 +490,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 
           if(isbh)
             {
+#ifdef BONDI_ACCRETION
 /*compute relative velocities, relative specific angular momenta and internal energy of gas*/
               dvx = P[j].Vel[0] - vel[0]; 
               dvy = P[j].Vel[1] - vel[1]; 
@@ -484,7 +510,14 @@ static int bh_density_evaluate(int target, int mode, int threadid)
               velocity_gas_circular[2] -= (dx * dvy - dy * dvx)*mass_j/rho_j*wk;
 
               internal_energy_gas += SphP[j].Utherm*mass_j/rho_j*wk;
-
+#endif
+#ifdef INFALL_ACCRETION
+              if(r2 < h2/25)
+                {
+                  accretion    += 0.9*mass_j;
+                  SphP[j].Mass *= 0.1;
+                }
+#endif
               if(All.JetFeedback)
                 {
 /*double cone jet setup*/    
@@ -518,6 +551,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   out.Mass                    = mass;
   out.MassFeed                = mass_feed;
   out.NgbMinStep              = ngb_min_step;
+#ifdef BONDI_ACCRETION
   out.VelocityGas[0]          = velocity_gas[0];
   out.VelocityGas[1]          = velocity_gas[1];
   out.VelocityGas[2]          = velocity_gas[2];
@@ -525,7 +559,10 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   out.VelocityGasCircular[1]  = velocity_gas_circular[1];
   out.VelocityGasCircular[2]  = velocity_gas_circular[2];
   out.InternalEnergyGas       = internal_energy_gas;
-
+#endif
+#ifdef ACCRETION
+  out.Accretion               = accretion;
+#endif
   /* now collect the result at the right place */
   if(mode == MODE_LOCAL_PARTICLES)
     out2particle(&out, target, MODE_LOCAL_PARTICLES);
