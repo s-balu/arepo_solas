@@ -238,7 +238,7 @@ void update_bh_accretion_rate(void)
         }
     }
  
-  /*MPI_Allreduce(&accretion_rate, &acc_rate_for_print, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(&accretion_rate, &acc_rate_for_print, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
   MPI_Barrier(MPI_COMM_WORLD); 
   mpi_printf("BLACK_HOLES: Black hole accretion rate: %e \n", acc_rate_for_print);*/
 }
