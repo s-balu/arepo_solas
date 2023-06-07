@@ -24,6 +24,7 @@ typedef struct
   int Bin;
   int IsBh;
   MyDouble BhRho;
+  MyDouble BhMass;
   MyDouble NgbMass;
   MyDouble NgbMassFeed;
 #ifdef BONDI_ACCRETION
@@ -56,6 +57,7 @@ static void particle2in(data_in *in, int i, int firstnode)
   in->Bin           = BhP[i].TimeBinBh;
   in->IsBh          = BhP[i].IsBh;
   in->BhRho         = BhP[i].Density;
+  in->BhMass        = PPB(i).Mass;
   in->NgbMass       = BhP[i].NgbMass;
   in->NgbMassFeed   = BhP[i].NgbMassFeed;
 #ifdef BONDI_ACCRETION 
@@ -177,7 +179,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   double h, h2, hinv, hinv3, hinv4, wk, dwk;
   double dx, dy, dz, r, r2, u;
   double dt; //dtime;
-  MyDouble ngbmass, ngbmass_feed; 
+  MyDouble bh_mass, ngbmass, ngbmass_feed; 
   MyDouble *pos, bh_rho, energyfeed;
 
   data_in local, *target_data;
@@ -203,6 +205,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   isbh           = target_data->IsBh;
   bin            = target_data->Bin;
   bh_rho         = target_data->BhRho;
+  bh_mass        = target_data->BhMass;
   ngbmass        = target_data->NgbMass;
   ngbmass_feed   = target_data->NgbMassFeed;
 #ifdef BONDI_ACCRETION
@@ -239,7 +242,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
     }
   else if(!isbh)/*is star->*/
     {
-      double EddingtonLuminosity = 4. * M_PI * GRAVITY * (PPB(i).Mass * All.UnitMass_in_g) * PROTONMASS * CLIGHT / THOMPSON;
+      double EddingtonLuminosity = 4. * M_PI * GRAVITY * (bh_mass * All.UnitMass_in_g) * PROTONMASS * CLIGHT / THOMPSON;
       EddingtonLuminosity *=  (All.UnitTime_in_s / (All.UnitMass_in_g*pow(All.UnitVelocity_in_cm_per_s,2)));
       energyfeed = EddingtonLuminosity * dt;
     }
