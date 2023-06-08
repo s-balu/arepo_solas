@@ -190,9 +190,6 @@ void kernel(double u, double hinv3, double hinv4, double *wk, double *dwk)
 }
 /*THIS PART ADAPTED FROM GADGET4*/
 
-#ifdef INFALL_ACCRETION
-#endif
-
 #ifdef BONDI_ACCRETION
 void update_bh_accretion_rate(void)
 {

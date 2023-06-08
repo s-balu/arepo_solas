@@ -349,9 +349,6 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 /*set drain mass flag*/
               SphP[j].MassDrain = accretion_rate*dt/ngbmass*P[j].Mass + mass_to_drain/ngbmass*P[j].Mass;
 #endif
-#ifdef INFALL_ACCRETION 
-              SphP[j].MassDrain = -1; //set this to -1 in infall_accretion for ngbs we have already swallowed but weren't able to derefine
-#endif
 /*set radial kick direction*/      
               SphP[j].BhKickVector[0] = -dx;
               SphP[j].BhKickVector[1] = -dy;

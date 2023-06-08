@@ -393,6 +393,7 @@ void calculate_non_standard_physics_prior_mesh_construction(void)
 #if defined(COOLING) && defined(USE_SFR)
   sfr_create_star_particles();
 #endif /* #if defined(COOLING) && defined(USE_SFR) */
+
 #ifdef BLACKHOLES
   bh_density();
 
@@ -400,13 +401,8 @@ void calculate_non_standard_physics_prior_mesh_construction(void)
   update_bh_accretion_rate();
 #endif
 
-#ifdef INFALL_ACCRETION
-#ifdef REFINEMENT
-  do_derefinements_and_refinements();
-#endif /* #ifdef REFINEMENT */
-#endif
-
   update_bh_timesteps();
+   
    if(All.Time >= All.FeedbackTime)
     {   
       bh_ngb_feedback();

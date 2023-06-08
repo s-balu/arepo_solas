@@ -508,14 +508,18 @@ static int bh_density_evaluate(int target, int mode, int threadid)
               internal_energy_gas += SphP[j].Utherm*mass_j/rho_j*wk;
 #endif
 #ifdef INFALL_ACCRETION
-              if(r2 < h2/25)
+              /*if(r2 < 0.00001)
                 {
                   if(SphP[j].MassDrain >= 0)
                     {
+                      
                       accretion += 0.9*mass_j;
-                      P[j].Mass *= 0.1;
+                      
                     }
-                }
+                }*/
+             
+              P[j].Mass -= P[j].Mass * exp(-r2);
+              accretion += P[j].Mass * exp(-r2);
 #endif
               if(All.JetFeedback)
                 {
