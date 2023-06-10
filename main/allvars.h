@@ -1462,8 +1462,6 @@ extern struct sph_particle_data
   MyDouble BhKickVector[3];
   MyDouble MomentumFeed;
   MyDouble MomentumKickVector[3];
-
-  MyDouble JetMass;
 #endif
 
 } * SphP,          /*!< holds SPH particle data on local processor */

@@ -460,8 +460,10 @@ void perform_end_of_step_bh_physics(void)
                   /*set feed flags to zero*/
                   SphP[i].ThermalFeed = SphP[i].KineticFeed = 0;
                   bh_momentum_kick[0] = bh_momentum_kick[1] = bh_momentum_kick[2] = 0;
-
-                  SphP[i].JetMass = P[i].Mass;
+                  
+                  /*tracer field advected passively*/
+                  SphP[i].PScalars[0] = 1;
+                  SphP[i].PConservedScalars[0] = P[i].Mass;
                 }
             
 /*dump momentum injected by stars*/              

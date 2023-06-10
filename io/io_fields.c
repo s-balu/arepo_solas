@@ -744,7 +744,7 @@ void init_io_fields()
 #ifdef PASSIVE_SCALARS
   init_field(IO_PASS, "PASS", "PassiveScalars", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, FILE_MY_IO_FLOAT, PASSIVE_SCALARS, A_SPHP,
              &SphP[0].PScalars[0], 0, GAS_ONLY);
-  init_units(IO_PASS, 0., 0., 0., 0., 0., 0.0);
+  init_units(IO_PASS, 0., -1., 0., 1., 0., All.UnitMass_in_g);
 #endif /* #ifdef PASSIVE_SCALARS */
 
   /* OTHER */
