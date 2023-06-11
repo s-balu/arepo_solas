@@ -394,7 +394,10 @@ void perform_end_of_step_bh_physics(void)
 #endif
 #ifdef INFALL_ACCRETION
   for(i=0; i<NumBh; i++)
-    PPB(i).Mass += (1-All.Epsilon_r) * BhP[i].Accretion;
+    {
+      PPB(i).Mass += (1-All.Epsilon_r) * BhP[i].Accretion;
+      BhP[i].Accretion = 0;
+    }
 #endif
 
 /*inject feedback to ngb cells*/
