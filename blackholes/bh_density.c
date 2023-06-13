@@ -422,7 +422,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   double pos_x_axis[3] = {1, 0, 0};
   double neg_x_axis[3] = {-1, 0, 0};      
 /*jet angle*/
-  double theta = M_PI/4;
+  double theta = 0.35;
   double vx, vy, vz, pos_x_angle, neg_x_angle; 
 
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
