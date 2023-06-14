@@ -509,11 +509,11 @@ void read_parameter_file(char *fname)
 #ifdef BLACKHOLES
       strcpy(tag[nt], "BhDesNumNgb");
       addr[nt] = &All.BhDesNumNgb;
-      id[nt++] = INT;
+      id[nt++] = REAL;
       
       strcpy(tag[nt], "BhMaxNumNgbDeviation");
       addr[nt] = &All.BhMaxNumNgbDeviation;
-      id[nt++] = INT;
+      id[nt++] = REAL;
 
       strcpy(tag[nt], "FeedbackTime");
       addr[nt] = &All.FeedbackTime;

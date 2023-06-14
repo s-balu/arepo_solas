@@ -255,7 +255,7 @@ void bh_density(void)
             } 
         
 
-          if(BhNumNgb[i] < (desnumngb - All.BhMaxNumNgbDeviation) || BhNumNgb[i] > (desnumngb + All.BhMaxNumNgbDeviation))
+          if(BhP[i].NgbMass < (desnumngb - All.BhMaxNumNgbDeviation) || BhP[i].NgbMass > (desnumngb + All.BhMaxNumNgbDeviation))
           {
                   /* need to redo this particle */
             npleft++;
@@ -271,7 +271,7 @@ void bh_density(void)
                 }
               } 
 
-            if(BhNumNgb[i] < (desnumngb - All.BhMaxNumNgbDeviation))
+            if(BhP[i].NgbMass < (desnumngb - All.BhMaxNumNgbDeviation))
               Left[i] = dmax(BhP[i].Hsml, Left[i]);
             else
               {

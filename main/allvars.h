@@ -950,7 +950,7 @@ extern struct global_data_all_processes
 
   /* some SPH parameters */
 
-  int DesNumNgb; /*!< Desired number of SPH neighbours */
+  double DesNumNgb; /*!< Desired number of SPH neighbours */
 
 #ifdef SUBFIND
   int DesLinkNgb;
