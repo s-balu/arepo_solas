@@ -950,7 +950,7 @@ extern struct global_data_all_processes
 
   /* some SPH parameters */
 
-  double DesNumNgb; /*!< Desired number of SPH neighbours */
+  int DesNumNgb; /*!< Desired number of SPH neighbours */
 
 #ifdef SUBFIND
   int DesLinkNgb;
@@ -1224,8 +1224,8 @@ extern struct global_data_all_processes
   int FeedbackFlag;
 
   /*for parameter file*/
-  int BhDesNumNgb;
-  int BhMaxNumNgbDeviation;
+  double BhDesNumNgb;
+  double BhMaxNumNgbDeviation;
   double FeedbackTime;
   double JetFeedback;
   double Ftherm;
