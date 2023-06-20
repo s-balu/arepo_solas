@@ -496,6 +496,11 @@ void perform_end_of_step_bh_physics(void)
                   set_pressure_of_cell_internal(P, SphP, i);
                   /*set feed flag to zero*/
                   SphP[i].MomentumFeed = 0;
+#ifdef PASSIVE_SCALARS                 
+                  /*tracer field advected passively*/
+                  SphP[i].PScalars[0] = 1;
+                  SphP[i].PConservedScalars[0] = P[i].Mass;
+#endif
                 }
             }
 #ifdef BURST_MODE
