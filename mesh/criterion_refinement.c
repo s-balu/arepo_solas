@@ -76,6 +76,11 @@ int should_this_cell_be_split(int i)
   if(P[i].Mass == 0 && P[i].ID == 0) /* skip cells that have been swallowed or dissolved */
     return 0;
 
+#ifdef REFINEMENT_AROUND_BH
+  if(P[i].Mass < All.RefBHMinCellMass)
+    return 0;
+#endif
+
 #if defined(REFINEMENT_VOLUME_LIMIT)
   double maxvolume = All.MaxVolume;
   double minvolume = All.MinVolume;
@@ -91,6 +96,38 @@ int should_this_cell_be_split(int i)
     if(can_this_cell_be_split(i))
       return 1;
 #endif /* #if defined(REFINEMENT_VOLUME_LIMIT) */
+
+#ifdef REFINEMENT_AROUND_BH
+  if(SphP[i].RefBHFlag)
+    {
+#if defined(BH_JET_FEEDBACK) && defined(BH_JET_REFINEMENT)
+      if(SphP[i].RefBHMaxMass < P[i].Mass && P[i].Mass > All.RefBHMinCellMass)
+        {
+#if(REFINEMENT_AROUND_BH == 0)
+          if(can_this_cell_be_split(i))
+            return 1;
+#endif
+#if(REFINEMENT_AROUND_BH == 1)
+          return 1;
+#endif
+        }
+#endif
+      if(SphP[i].RefBHMaxRad < get_cell_radius(i))
+        {
+          if(P[i].Mass < All.RefBHMinCellMass)
+            {
+              return 0;
+            }
+#if(REFINEMENT_AROUND_BH == 0)
+          if(can_this_cell_be_split(i))
+            return 1;
+#endif
+#if(REFINEMENT_AROUND_BH == 1)
+          return 1;
+#endif
+        }
+    }
+#endif
 
   switch(All.RefinementCriterion) /* select the function that evaluates the refinement criterion */
     {

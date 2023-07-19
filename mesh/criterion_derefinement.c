@@ -88,6 +88,17 @@ int derefine_should_this_cell_be_merged(int i, int flag)
     return 0;
 #endif /* #if defined(REFINEMENT_VOLUME_LIMIT) */
 
+#ifdef REFINEMENT_AROUND_BH
+  if(P[i].Mass < All.RefBHMinCellMass / 2)
+    return 1;
+  if(SphP[i].RefBHFlag)
+    {
+      if(SphP[i].RefBHMaxRad / All.RefBHLowerFactorC > get_cell_radius(i))
+        return 1;
+      return 0; /* We are in refining region, but the correct size */
+    }
+#endif
+
   if(flag)
     return flag;
 

@@ -539,6 +539,41 @@ void read_parameter_file(char *fname)
       strcpy(tag[nt], "Lambda");
       addr[nt] = &All.Lambda;
       id[nt++] = REAL;
+
+#ifdef REFINEMENT_AROUND_BH
+#ifdef REFINEMENT_AROUND_BH_FIXED
+      strcpy(tag[nt], "RefBHRadius");
+      addr[nt] = &All.RefBHRadius;
+      id[nt++] = PARAM_REAL;
+
+      strcpy(tag[nt], "RefBHMinCellRadius");
+      addr[nt] = &All.RefBHMinCellRadius;
+      id[nt++] = PARAM_REAL;
+
+      strcpy(tag[nt], "RefBHMaxCellRadius");
+      addr[nt] = &All.RefBHMaxCellRadius;
+      id[nt++] = PARAM_REAL;
+#else
+      strcpy(tag[nt], "RefBHRadiusHSML");
+      addr[nt] = &All.RefBHRadiusHSML;
+      id[nt++] = PARAM_REAL;
+
+      strcpy(tag[nt], "RefBHMinCellRadiusRBondi");
+      addr[nt] = &All.RefBHMinCellRadiusRBondi;
+      id[nt++] = PARAM_REAL;
+
+      strcpy(tag[nt], "RefBHMaxCellRadiusHSML");
+      addr[nt] = &All.RefBHMaxCellRadiusHSML;
+      id[nt++] = PARAM_REAL;
+#endif
+      strcpy(tag[nt], "RefBHMinCellMass");
+      addr[nt] = &All.RefBHMinCellMass;
+      id[nt++] = PARAM_REAL;
+
+      strcpy(tag[nt], "RefBHLowerFactorC");
+      addr[nt] = &All.RefBHLowerFactorC;
+      id[nt++] = PARAM_REAL;
+#endif
 #endif
 
       if((fd = fopen(fname, "r")))

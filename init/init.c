@@ -279,6 +279,16 @@ int init(void)
       if(RestartFlag == 0 && P[i].Type == 0)
         SphP[i].Sfr = 0;
 #endif /* #ifdef USE_SFR */
+
+#ifdef REFINEMENT_AROUND_BH
+      if(P[i].Type == 0)
+        {
+          SphP[i].RefBHFlag = 0;
+#ifdef OUTPUT_REFBHCOUNTER
+          SphP[i].RefBHCounter = 0;
+#endif
+        }
+#endif
     }
 
   for(i = 0; i < TIMEBINS; i++)

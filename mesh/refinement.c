@@ -134,6 +134,10 @@ void refinement_prepare()
     }
 #endif /* #ifdef REFINEMENT_VOLUME_LIMIT */
 
+#ifdef REFINEMENT_AROUND_BH
+  blackhole_mark_cells_for_refinement();
+#endif
+
   TIMER_STOP(CPU_REFINE);
 }
 

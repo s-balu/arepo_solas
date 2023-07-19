@@ -1397,6 +1397,11 @@ extern struct sph_particle_data
   MyFloat HighResDensity;
 #endif /* #if defined(REFINEMENT_HIGH_RES_GAS) */
 
+#ifdef REFINEMENT_AROUND_BH
+  char RefBHFlag;
+  MyFloat RefBHMaxRad;
+#endif
+
 #ifdef MHD
   MyFloat B[3];
   MyFloat BConserved[3];
@@ -1447,6 +1452,20 @@ extern struct sph_particle_data
 #ifdef REFINEMENT_VOLUME_LIMIT
   MyFloat MinNgbVolume;
 #endif /* #ifdef REFINEMENT_VOLUME_LIMIT */
+
+#ifdef REFINEMENT_AROUND_BH
+#ifdef REFINEMENT_AROUND_BH_FIXED
+  double RefBHRadius;        /* refinement region in code units */
+  double RefBHMaxCellRadius; /* in code units */
+  double RefBHMinCellRadius; /* in code units */
+#else
+  double RefBHRadiusHSML;          /* refinement region in units of hsml */
+  double RefBHMaxCellRadiusHSML;   /* in units of hsml */
+  double RefBHMinCellRadiusRBondi; /* in units of rbondi */
+#endif
+  double RefBHMinCellMass;  /* do not refine below this mass */
+  double RefBHLowerFactorC; /* provides lower bound for refined cell sizes */
+#endif
 
   double TimeLastPrimUpdate;
 
