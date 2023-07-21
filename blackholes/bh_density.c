@@ -485,7 +485,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 /*compute the bh-ngb-mass*/
           mass += mass_j;
 
-          if(isbh==0) //for star runs we need the internal energy of gas to use in bondi radius calculation in refinement
+          if(isbh==0)// for star runs do the full density loop 
             {
 #ifdef BONDI_ACCRETION
 /*compute relative velocities, relative specific angular momenta and internal energy of gas*/
