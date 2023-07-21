@@ -73,7 +73,7 @@ static data_out *DataResult;
 /* routine to store or combine result data */
 static void out2particle(data_out *out, int i, int mode) {}
 
-#include "../generic_comm_helpers2.h"
+#include "../utils/generic_comm_helpers2.h"
 
 static void kernel_local(void)
 {
