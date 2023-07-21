@@ -31,6 +31,7 @@
 
 #if defined(BLACKHOLES) && defined(REFINEMENT_AROUND_BH)
 
+int can_this_cell_be_split(int i);
 static int blackhole_mark_cells_for_refinement_evaluate(int target, int mode, int threadid);
 
 /* local data structure for collecting particle/cell data that is sent to other processors if needed */
@@ -43,7 +44,7 @@ typedef struct
   int Firstnode;
 } data_in;
 
-static data_in *DataGet;
+static data_in *DataIn, *DataGet;
 
 /* routine that fills the relevant particle/cell data into the input structure defined above */
 static void particle2in(data_in *in, int i, int firstnode)
@@ -68,7 +69,7 @@ typedef struct
 {
 } data_out;
 
-static data_out *DataResult;
+static data_out *DataResult, *DataOut;
 
 /* routine to store or combine result data */
 static void out2particle(data_out *out, int i, int mode) {}

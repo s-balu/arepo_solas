@@ -44,7 +44,7 @@
 #include "../main/proto.h"
 
 #if defined(REFINEMENT_SPLIT_CELLS) && !defined(ONEDIMS)
-static int can_this_cell_be_split(int i);
+int can_this_cell_be_split(int i);
 static int refine_criterion_default(int i);
 static int refine_criterion_jeans_ref(int i);
 static int jeans_refinement_criteria(int i);
@@ -165,7 +165,7 @@ int should_this_cell_be_split(int i)
  *
  *  \return Flag if this cell is allowed to be refined.
  */
-static int can_this_cell_be_split(int i)
+int can_this_cell_be_split(int i)
 {
 #ifdef REGULARIZE_MESH_FACE_ANGLE
   if(SphP[i].MaxFaceAngle < 1.5 * All.CellMaxAngleFactor)
