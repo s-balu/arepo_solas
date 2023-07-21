@@ -26,8 +26,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../allvars.h"
-#include "../proto.h"
+#include "../main/allvars.h"
+#include "../main/proto.h"
 
 #if defined(BLACKHOLES) && defined(REFINEMENT_AROUND_BH)
 
