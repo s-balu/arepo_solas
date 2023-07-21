@@ -29,7 +29,7 @@
 #include "../allvars.h"
 #include "../proto.h"
 
-#if defined(BLACK_HOLES) && defined(REFINEMENT_AROUND_BH)
+#if defined(BLACKHOLES) && defined(REFINEMENT_AROUND_BH)
 
 static int blackhole_mark_cells_for_refinement_evaluate(int target, int mode, int threadid);
 
@@ -53,11 +53,11 @@ static void particle2in(data_in *in, int i, int firstnode)
       in->Pos[s] = P[i].Pos[s];
       in->Vel[s] = P[i].Vel[s];
     }
-  in->BH_Hsml = BPP(i).BH_Hsml;
+  in->BH_Hsml = BPP(i).Hsml;
 
-  double soundspeed = sqrt(GAMMA * GAMMA_MINUS1 * BPP(i).BH_U);
+  double soundspeed = sqrt(GAMMA * GAMMA_MINUS1 * BPP(i).InternalEnergyGas);
   in->Rbondi        = 50.0 * (PARSEC / All.UnitLength_in_cm) *
-               ((BPP(i).BH_Mass * All.UnitMass_in_g / All.HubbleParam) / (1.e7 * SOLAR_MASS)) *
+               ((P[i].Mass * All.UnitMass_in_g / All.HubbleParam) / (1.e7 * SOLAR_MASS)) *
                pow(((soundspeed * All.UnitVelocity_in_cm_per_s) / (30.0 * 1.e5)), -2);
 
   in->Firstnode = firstnode;
@@ -93,15 +93,11 @@ static void kernel_local(void)
 #pragma omp atomic capture
         idx = NextParticle++;
 
-        if(idx >= TimeBinsBHAccretion.NActiveParticles)
+        if(idx >= NumBh)
           break;
 
-        int i = TimeBinsBHAccretion.ActiveParticleList[idx];
-        if(i < 0)
-          continue;
-
-        if(BPP(i).SwallowID == 0)
-          blackhole_mark_cells_for_refinement_evaluate(i, MODE_LOCAL_PARTICLES, threadid);
+        //if(BPP(idx).SwallowID == 0)
+          blackhole_mark_cells_for_refinement_evaluate(idx, MODE_LOCAL_PARTICLES, threadid);
       }
   }
 }
@@ -123,7 +119,7 @@ static void kernel_imported(void)
           break;
 
 #ifdef MIN_REFINEMENT_BH_MASS
-        if(BPP(i).BH_Mass < All.RefBHMinBHMass)
+        if(BPP(i).Mass < All.RefBHMinBHMass)
           continue;
 #endif
 
@@ -145,7 +141,7 @@ void blackhole_mark_cells_for_refinement(void)
     }
 
   generic_set_MaxNexport();
-  generic_comm_pattern(TimeBinsBHAccretion.NActiveParticles, kernel_local, kernel_imported);
+  generic_comm_pattern(NumBh, kernel_local, kernel_imported);
 
   int refcount_can = 0, refcount = 0;
   long long totrefcount = 0, totrefcount_can = 0;
