@@ -16,3 +16,5 @@ void update_list_of_active_bh_particles(void);
 
 void perform_end_of_step_bh_physics(void);
 
+void blackhole_mark_cells_for_refinement(void);
+
