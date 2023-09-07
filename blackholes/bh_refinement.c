@@ -220,19 +220,19 @@ int blackhole_mark_cells_for_refinement_evaluate(int target, int mode, int threa
   hsml   = in->BH_Hsml;
   rbondi = in->Rbondi;
 
-#ifdef REFINEMENT_AROUND_BH_FIXED
+#if defined(REFINEMENT_AROUND_BH_FIXED)
   double refinement_radius = All.RefBHRadius;
-#elif REFINEMENT_AROUND_BH_HYBRID
+#elif defined(REFINEMENT_AROUND_BH_HYBRID)
   double refinement_radius = All.RefBHRadiusHSML * hsml;
 #else
   double refinement_radius = All.RefBHRadiusHSML * hsml;
 #endif
   int nfound = ngb_treefind_variable_threads(pos, refinement_radius, target, mode, threadid, numnodes, firstnode);
 
-#ifdef REFINEMENT_AROUND_BH_FIXED
+#if defined(REFINEMENT_AROUND_BH_FIXED)
   MyFloat max_rad = All.RefBHMaxCellRadius;
   MyFloat min_rad = All.RefBHMinCellRadius;
-#elif REFINEMENT_AROUND_BH_HYBRID
+#elif defined(REFINEMENT_AROUND_BH_HYBRID)
   MyFloat max_rad = All.RefBHMaxCellRadius;
   MyFloat min_rad = All.RefBHMinCellRadius;
 #else

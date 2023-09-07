@@ -541,7 +541,7 @@ void read_parameter_file(char *fname)
       id[nt++] = REAL;
 
 #ifdef REFINEMENT_AROUND_BH
-#ifdef REFINEMENT_AROUND_BH_FIXED
+#if defined(REFINEMENT_AROUND_BH_FIXED)
       strcpy(tag[nt], "RefBHRadius");
       addr[nt] = &All.RefBHRadius;
       id[nt++] = REAL;
@@ -553,7 +553,7 @@ void read_parameter_file(char *fname)
       strcpy(tag[nt], "RefBHMaxCellRadius");
       addr[nt] = &All.RefBHMaxCellRadius;
       id[nt++] = REAL;
-#elif REFINEMENT_AROUND_BH_HYBRID
+#elif defined(REFINEMENT_AROUND_BH_HYBRID)
       strcpy(tag[nt], "RefBHRadiusHSML");
       addr[nt] = &All.RefBHRadius;
       id[nt++] = REAL;
