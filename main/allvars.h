@@ -1199,8 +1199,12 @@ extern struct global_data_all_processes
 #endif /* #ifdef REFINEMENT_VOLUME_LIMIT */
 
 #ifdef REFINEMENT_AROUND_BH
-#ifdef REFINEMENT_AROUND_BH_FIXED
+#if defined(REFINEMENT_AROUND_BH_FIXED)
   double RefBHRadius;        /* refinement region in code units */
+  double RefBHMaxCellRadius; /* in code units */
+  double RefBHMinCellRadius; /* in code units */
+#elif defined(REFINEMENT_AROUND_BH_HYBRID)
+  double RefBHRadiusHSML;          /* refinement region in units of hsml */
   double RefBHMaxCellRadius; /* in code units */
   double RefBHMinCellRadius; /* in code units */
 #else
