@@ -555,7 +555,7 @@ void read_parameter_file(char *fname)
       id[nt++] = REAL;
 #elif defined(REFINEMENT_AROUND_BH_HYBRID)
       strcpy(tag[nt], "RefBHRadiusHSML");
-      addr[nt] = &All.RefBHRadius;
+      addr[nt] = &All.RefBHRadiusHSML;
       id[nt++] = REAL;
 
       strcpy(tag[nt], "RefBHMinCellRadius");
