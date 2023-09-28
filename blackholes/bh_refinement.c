@@ -51,8 +51,8 @@ static void particle2in(data_in *in, int i, int firstnode)
 {
   for(int s = 0; s < 3; s++)
     {
-      in->Pos[s] = P[i].Pos[s];
-      in->Vel[s] = P[i].Vel[s];
+      in->Pos[s] = PPB(i).Pos[s];
+      in->Vel[s] = PPB(i).Vel[s];
     }
   in->BH_Hsml = BPP(i).Hsml;
 
