@@ -54,7 +54,7 @@ static void particle2in(data_in *in, int i, int firstnode)
       in->Pos[s] = PPB(i).Pos[s];
       in->Vel[s] = PPB(i).Vel[s];
     }
-  in->BH_Hsml = BPP(i).Hsml;
+  in->BH_Hsml = BhP[i].Hsml;
 
   double soundspeed = sqrt(GAMMA * GAMMA_MINUS1 * BPP(i).InternalEnergyGas);
   in->Rbondi        = 50.0 * (PARSEC / All.UnitLength_in_cm) *
