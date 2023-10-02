@@ -520,12 +520,23 @@ double CoolingRate(double logT, double rho, double *nelec)
 
   gs.nHcgs = gs.XH * rho / PROTONMASS; /* hydrogen number dens in cgs units */
 
-  if(logT < Tmax)
+  if(logT < Tmax)  
     {
       find_abundances_and_rates(logT, rho, nelec);
 
       /* Compute cooling and heating rate (cf KWH Table 1) in units of nH**2 */
       T = pow(10.0, logT);
+
+#ifdef LOW_TEMP_COOLING
+      if(logT <= 4.1) 
+        {
+          double logZ = -1;
+
+          double a=-24.81, b=2.928, c=-0.6982, d=logZ, x=log10(log10(logT));
+
+          return -pow(10.,a+b*x+c*x*x+d);
+        }
+#endif
 
       LambdaExcH0   = gs.bH0 * gs.ne * gs.nH0;
       LambdaExcHep  = gs.bHep * gs.ne * gs.nHep;
