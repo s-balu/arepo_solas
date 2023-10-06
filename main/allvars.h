@@ -1812,8 +1812,12 @@ enum iofields
   IO_BHHSML,
   IO_BHDENSITY,
   IO_BH_NGBMASS,
+#ifdef BONDI_ACCRETION
   IO_ACCRETION_RATE,
+#endif
+#ifdef OUTPUT_TIMEBIN_BH
   IO_TIMEBIN_BH,
+#endif
 #endif  
   IO_LASTENTRY /* This should be kept - it signals the end of the list */
 };

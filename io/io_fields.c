@@ -813,9 +813,11 @@ void init_io_fields()
   init_units(IO_BH_NGBMASS, 0., 0., 0., 0., 0., All.UnitMass_in_g);
   init_snapshot_type(IO_BH_NGBMASS, SN_MINI);
 
+#ifdef BBONDI_ACCRETION
   init_field(IO_ACCRETION_RATE, "ACR ", "AccretionRate", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, FILE_NONE, 1, A_BH, &BhP[0].AccretionRate, 0, BHS_ONLY);
   init_units(IO_ACCRETION_RATE, 0., 0., 0., 0., 0., All.UnitMass_in_g / All.UnitTime_in_s);
   init_snapshot_type(IO_ACCRETION_RATE, SN_MINI);
+#endif
  
 #ifdef OUTPUT_TIMEBIN_BH
   init_field(IO_TIMEBIN_BH, "TBBH", "TimebinBh", MEM_INT, FILE_INT, FILE_NONE, 1, A_BH, &BhP[0].TimeBinBh, 0, BHS_ONLY);
