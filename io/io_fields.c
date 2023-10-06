@@ -801,21 +801,26 @@ void init_io_fields()
 
 
   init_field(IO_BHHSML, "BHHS", "BlackholeHsml", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, FILE_MY_IO_FLOAT, 1, A_BH, &BhP[0].Hsml, 0, BHS_ONLY);
-  init_units(IO_BHHSML, 1., -1., 1., 0., 0., All.UnitLength_in_cm);
+  init_units(IO_BHHSML, 0., 0., 0., 0., 0., All.UnitLength_in_cm);
   init_snapshot_type(IO_BHHSML, SN_MINI);
 
 
   init_field(IO_BHDENSITY, "BHD ", "BlackHoleDensity", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, FILE_NONE, 1, A_BH, &BhP[0].Density, 0, BHS_ONLY);
-  init_units(IO_BHDENSITY, -3., 2., -3., 1., 0., All.UnitDensity_in_cgs);
+  init_units(IO_BHDENSITY, 0., 0., 0., 0., 0., All.UnitDensity_in_cgs);
   init_snapshot_type(IO_BHDENSITY, SN_MINI);
 
   init_field(IO_BH_NGBMASS, "BNM ", "BlackHoleNgbMass", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, FILE_NONE, 1, A_BH, &BhP[0].NgbMass, 0, BHS_ONLY);
-  init_units(IO_BH_NGBMASS, 0., -1., 0., 1., 0., All.UnitMass_in_g);
+  init_units(IO_BH_NGBMASS, 0., 0., 0., 0., 0., All.UnitMass_in_g);
   init_snapshot_type(IO_BH_NGBMASS, SN_MINI);
-  
+
+  init_field(IO_ACCRETION_RATE, "ACR ", "AccretionRate", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, FILE_NONE, 1, A_BH, &BhP[0].AccretionRate, 0, BHS_ONLY);
+  init_units(IO_ACCRETION_RATE, 0., 0., 0., 0., 0., All.UnitMass_in_g / All.UnitTime_in_s);
+  init_snapshot_type(IO_ACCRETION_RATE, SN_MINI);
+ 
 #ifdef OUTPUT_TIMEBIN_BH
   init_field(IO_TIMEBIN_BH, "TBBH", "TimebinBh", MEM_INT, FILE_INT, FILE_NONE, 1, A_BH, &BhP[0].TimeBinBh, 0, BHS_ONLY);
   init_units(IO_TIMEBIN_BH, 0., 0., 0., 0., 0., 0.0);
+  init_snapshot_type(IO_TIMEBIN_BH, SN_MINI);
 #endif 
 #endif
 }

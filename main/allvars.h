@@ -1812,8 +1812,8 @@ enum iofields
   IO_BHHSML,
   IO_BHDENSITY,
   IO_BH_NGBMASS,
+  IO_ACCRETION_RATE,
   IO_TIMEBIN_BH,
-  IO_TSTP_BH,
 #endif  
   IO_LASTENTRY /* This should be kept - it signals the end of the list */
 };
