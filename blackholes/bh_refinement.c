@@ -56,7 +56,7 @@ static void particle2in(data_in *in, int i, int firstnode)
     }
   in->BH_Hsml = BhP[i].Hsml;
 
-  double soundspeed = sqrt(GAMMA * GAMMA_MINUS1 * BPP(i).InternalEnergyGas);
+  double soundspeed = sqrt(GAMMA * GAMMA_MINUS1 * BhP[i].InternalEnergyGas);
   in->Rbondi        = 50.0 * (PARSEC / All.UnitLength_in_cm) *
                ((PPB(i).Mass * All.UnitMass_in_g / All.HubbleParam) / (1.e7 * SOLAR_MASS)) *
                pow(((soundspeed * All.UnitVelocity_in_cm_per_s) / (30.0 * 1.e5)), -2);
