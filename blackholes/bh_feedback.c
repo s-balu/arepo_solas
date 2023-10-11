@@ -355,7 +355,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
               SphP[j].BhKickVector[2] = -dz;
             }
           
-          if(!isbh) /*particle is a star*/
+          else /*particle is a star*/
             {
 /*set radial momentum kick*/
 /*uncomment for kernel*/ //SphP[j].MomentumFeed  += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;

@@ -485,7 +485,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 /*compute the bh-ngb-mass*/
           mass += mass_j;
 
-          if(isbh==1)// for bh runs do the full density loop 
+          if(isbh)// for bh particles do the full density loop 
             {
 #ifdef BONDI_ACCRETION
 /*compute relative velocities, relative specific angular momenta and internal energy of gas*/
