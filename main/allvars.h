@@ -1483,6 +1483,7 @@ extern struct sph_particle_data
   MyDouble ThermalFeed;
   MyDouble KineticFeed;
   MyDouble BhKickVector[3];
+  MyDouble EnergyFeed;
   MyDouble MomentumFeed;
   MyDouble MomentumKickVector[3];
 #endif
