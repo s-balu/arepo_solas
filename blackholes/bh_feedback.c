@@ -232,7 +232,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
       dt    = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
     //dtime = All.cf_atime * dt / All.cf_time_hubble_a;
 
-  if(isbh)/*is bh->*/
+  if(isbh) /*is bh->*/
     {
 #ifdef BONDI_ACCRETION
       energyfeed = All.Epsilon_f * All.Epsilon_r * accretion_rate * dt * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
@@ -241,7 +241,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
       energyfeed = All.Epsilon_f * All.Epsilon_r * accretion * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
 #endif
     }
-  else if(!isbh)/*is star->*/
+  else /*is star->*/
     {
       double EddingtonLuminosity = 4. * M_PI * GRAVITY * (bh_mass * All.UnitMass_in_g) * PROTONMASS * CLIGHT / THOMPSON;
       EddingtonLuminosity *=  (All.UnitTime_in_s / (All.UnitMass_in_g*pow(All.UnitVelocity_in_cm_per_s,2)));
