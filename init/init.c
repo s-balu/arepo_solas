@@ -580,13 +580,15 @@ int init(void)
     }
   reconstruct_bh_timebins();*/
   for(i=0; i<NumBh; i++)
-    BhP[i].DensityFlag = 1; /*we dont need to do this as these are set to 0 anyway*/
+    BhP[i].DensityFlag = 1; /*we dont really need to do this as these are set to 0 anyway*/
 
   All.FeedbackFlag = 1;
   All.EnergyExchange[0] = All.EnergyExchange[1] = 0;
   All.EnergyExchange[2] = All.EnergyExchange[3] = 0;
+  All.EnergyExchange[4] = All.EnergyExchange[5] = 0;
+
   double *exch = All.EnergyExchangeTot;
-  exch = malloc(4 * sizeof(double));
+  exch = malloc(6 * sizeof(double));
 #endif
 
   return -1;  // return -1 means we ran to completion, i.e. not an endrun code

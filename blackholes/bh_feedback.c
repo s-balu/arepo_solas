@@ -361,10 +361,11 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 /*uncomment for kernel*/ //SphP[j].MomentumFeed  += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
                          //All.EnergyExchange[2] += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
 
-              SphP[j].EnergyFeed    += All.Lambda * energyfeed * P[j].Mass / ngbmass;
-
               SphP[j].MomentumFeed  += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass;
               All.EnergyExchange[2] += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass;
+
+              SphP[j].EnergyFeed    += All.Lambda * energyfeed * P[j].Mass / ngbmass;
+              All.EnergyExchange[4] += All.Lambda * energyfeed * P[j].Mass / ngbmass;
               
               SphP[j].MomentumKickVector[0] = -dx;
               SphP[j].MomentumKickVector[1] = -dy;

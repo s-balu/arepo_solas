@@ -1237,8 +1237,8 @@ extern struct global_data_all_processes
   double GlobalDisplacementVector[3];
 
 #ifdef BLACKHOLES
-  double EnergyExchange[4];
-  double EnergyExchangeTot[4];
+  double EnergyExchange[6];
+  double EnergyExchangeTot[6];
   int FeedbackFlag;
 
   /*for parameter file*/
