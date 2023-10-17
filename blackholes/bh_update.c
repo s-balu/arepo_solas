@@ -86,6 +86,9 @@
 #endif /* WENDLAND_C6_KERNEL */
 
 static int int_compare(const void *a, const void *b);
+static int solve_quadratic_eq(void); 
+static double f(double x);
+static double trapezoidal_integral(double a, double b, int n);
 
 /*sph loop kernel function -> u < 1 */
 void kernel(double u, double hinv3, double hinv4, double *wk, double *dwk)
@@ -532,3 +535,64 @@ static int int_compare(const void *a, const void *b)
 
   return 0;
 }
+
+static int solve_quadratic_eq(void) 
+{
+  double a, b, c, discriminant, root1, root2;
+
+  a = 1;
+  b = 1;
+  c = 1;
+
+  // Calculate the discriminant
+  discriminant = b * b - 4 * a * c;
+
+  if (discriminant > 0) 
+    {
+      // Two real and distinct roots
+      root1 = (-b + sqrt(discriminant)) / (2 * a);
+      root2 = (-b - sqrt(discriminant)) / (2 * a);
+      if(root1 > 0) 
+        return root1;
+      else if(root2 > 0)
+        return root2;
+      else
+        terminate("WRONG ROOT IN STELLAR EVOLUTION");
+    } 
+
+  else if (discriminant == 0)
+    {
+      root1 = -b / (2 * a);
+      if(root1 > 0) 
+        return root1;
+      else
+        terminate("WRONG ROOT IN STELLAR EVOLUTION");
+    }
+  else
+    terminate("WRONG ROOT IN STELLAR EVOLUTION");
+}
+
+static double f(double x) 
+{
+  // Kroupa(2001) IMF
+  if(x >= 0.1 && x <= 0.5)
+    return 2*pow(x,-1.3)
+  else if(x > 0.5 && x < 100)
+    return pow(x,-2.3)
+}
+
+static double trapezoidal_integral(double a, double b, int n) 
+{
+  double h = (b - a) / n;
+  double integral = (f(a) + f(b)) / 2.0;
+
+  for (int i = 1; i < n; i++) 
+  {
+    double x = a + i * h;
+    integral += f(x);
+  }
+
+  return integral * h;
+}
+
+
