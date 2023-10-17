@@ -86,7 +86,7 @@
 #endif /* WENDLAND_C6_KERNEL */
 
 static int int_compare(const void *a, const void *b);
-static int solve_quadratic_eq(void); 
+static int solve_quadratic_eq(double t); 
 static double f(double x);
 static double trapezoidal_integral(double a, double b, int n);
 
@@ -536,13 +536,19 @@ static int int_compare(const void *a, const void *b)
   return 0;
 }
 
-static int solve_quadratic_eq(void) 
+static int solve_quadratic_eq(double t) 
 {
-  double a, b, c, discriminant, root1, root2;
+  double a0, a1, a2, a, b, c, discriminant, root1, root2;
+  double logZ = -1;
+  
+  a0 = 10 + 0.07 * logZ - 0.008 * logZ * logZ;
+  a1 = -4.4 - 0.79 * logZ - 0.11 * logZ * logZ;
+  a2 = 1.2 + 0.3 * logZ + 0.05 * logZ * logZ;
 
-  a = 1;
-  b = 1;
-  c = 1;
+  
+  a = a2;
+  b = a1;
+  c = a0 - log10(t);
 
   // Calculate the discriminant
   discriminant = b * b - 4 * a * c;
@@ -574,11 +580,14 @@ static int solve_quadratic_eq(void)
 
 static double f(double x) 
 {
+  double A  = 0.3;
+  double Ms = 2200;
+  
   // Kroupa(2001) IMF
   if(x >= 0.1 && x <= 0.5)
-    return 2*pow(x,-1.3)
+    return A*Ms*2*pow(x,-1.3);
   else if(x > 0.5 && x < 100)
-    return pow(x,-2.3)
+    return A*Ms*pow(x,-2.3);
 }
 
 static double trapezoidal_integral(double a, double b, int n) 
