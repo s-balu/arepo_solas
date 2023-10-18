@@ -536,8 +536,8 @@ void stellar_feedback(void)
   time    *= All.UnitTime_in_Megayears / pow(10,6);
   
   //find stellar mass limits
-  Mlow  = solve_quadratic_eq(timeold);
-  Mhigh = solve_quadratic_eq(time);
+  double Mlow  = solve_quadratic_eq(timeold);
+  double Mhigh = solve_quadratic_eq(time);
 
   //bracket in the mass range for SN 
   if(Mlow < 8) 
@@ -546,7 +546,7 @@ void stellar_feedback(void)
     Mhigh = 40;
 
   //integrate the IMF 
-  return trapezoidal_integral(Mlow, Mhigh, 1000);
+  double SN_events = trapezoidal_integral(Mlow, Mhigh, 1000);
 }
 
 
