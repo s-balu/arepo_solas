@@ -558,7 +558,7 @@ double SN_events(void)
   else if(Mlow > 8)
     {
       if(Mhigh <= 40)
-        continue;
+        ;
       else if(Mhigh > 40)
         Mhigh = 40;
     }
