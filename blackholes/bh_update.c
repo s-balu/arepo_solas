@@ -539,8 +539,11 @@ void stellar_feedback(void)
   double Mlow  = solve_quadratic_eq(timeold);
   double Mhigh = solve_quadratic_eq(time);
 
-  //bracket in the mass range for SN 
-  if(Mlow < 8) 
+  //bracket in the mass range for SN
+  if((Mlow > 8 && Mlow < 40) || (Mhigh > 8 && Mhigh < 40))
+    {
+
+    }   if(Mlow < 8) 
     Mlow = 8;
   if(Mhigh > 40)
     Mhigh = 40;
@@ -570,7 +573,6 @@ static double solve_quadratic_eq(double t)
   a1 = -4.4 - 0.79 * logZ - 0.11 * logZ * logZ;
   a2 = 1.2 + 0.3 * logZ + 0.05 * logZ * logZ;
 
-  
   a = a2;
   b = a1;
   c = a0 - log10(t);
@@ -587,8 +589,8 @@ static double solve_quadratic_eq(double t)
         return root1;
       else if(root2 > 0)
         return root2;
-      else
-        terminate("WRONG ROOT IN STELLAR EVOLUTION");
+      else 
+        return 0;
     } 
 
   else if (discriminant == 0)
@@ -597,10 +599,10 @@ static double solve_quadratic_eq(double t)
       if(root1 > 0) 
         return root1;
       else
-        terminate("WRONG ROOT IN STELLAR EVOLUTION");
+        return 0;
     }
   else
-    terminate("WRONG ROOT IN STELLAR EVOLUTION");
+    return 0;
 }
 
 static double f(double x) 
