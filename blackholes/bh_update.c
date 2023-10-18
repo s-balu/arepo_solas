@@ -525,10 +525,9 @@ void perform_end_of_step_bh_physics(void)
 #endif   
 }
 
-void stellar_feedback(void)
+/*estimate # of SN events*/
+double SN_events(void)
 {
-  //#SN events 
-
   //convert time to yrs
   double timeold = All.Time - All.TimeStep;
   double time    = All.Time;
@@ -540,16 +539,32 @@ void stellar_feedback(void)
   double Mhigh = solve_quadratic_eq(time);
 
   //bracket in the mass range for SN
-  if((Mlow > 8 && Mlow < 40) || (Mhigh > 8 && Mhigh < 40))
-    {
+  if(Mhigh < 8)
+    return 0;
+  if(Mlow > 40)
+    return 0;
 
-    }   if(Mlow < 8) 
-    Mlow = 8;
-  if(Mhigh > 40)
-    Mhigh = 40;
+  if(Mlow <= 8)//&& Mhigh > 8)
+    {
+      if(Mhigh <= 40)
+        Mlow = 8;
+      else if(Mhigh > 40)
+        {
+          Mlow  = 8;
+          Mhigh = 40;
+        }
+    } 
+  
+  else if(Mlow > 8)
+    {
+      if(Mhigh <= 40)
+        continue;
+      else if(Mhigh > 40)
+        Mhigh = 40;
+    }
 
   //integrate the IMF 
-  double SN_events = trapezoidal_integral(Mlow, Mhigh, 1000);
+  return trapezoidal_integral(Mlow, Mhigh, 1000);
 }
 
 
