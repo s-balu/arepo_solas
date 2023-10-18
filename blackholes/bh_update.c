@@ -86,7 +86,7 @@
 #endif /* WENDLAND_C6_KERNEL */
 
 static int int_compare(const void *a, const void *b);
-static int solve_quadratic_eq(double t); 
+static double solve_quadratic_eq(double t); 
 static double f(double x);
 static double trapezoidal_integral(double a, double b, int n);
 
@@ -528,8 +528,27 @@ void perform_end_of_step_bh_physics(void)
 void stellar_feedback(void)
 {
   //#SN events 
+
+  //convert time to yrs
   double timeold = All.Time - All.TimeStep;
+  double time    = All.Time;
+  timeold *= All.UnitTime_in_Megayears / pow(10,6);
+  time    *= All.UnitTime_in_Megayears / pow(10,6);
+  
+  //find stellar mass limits
+  Mlow  = solve_quadratic_eq(timeold);
+  Mhigh = solve_quadratic_eq(time);
+
+  //bracket in the mass range for SN 
+  if(Mlow < 8) 
+    Mlow = 8;
+  if(Mhigh > 40)
+    Mhigh = 40;
+
+  //integrate the IMF 
+  return trapezoidal_integral(Mlow, Mhigh, 1000);
 }
+
 
 static int int_compare(const void *a, const void *b)
 {
@@ -542,7 +561,7 @@ static int int_compare(const void *a, const void *b)
   return 0;
 }
 
-static int solve_quadratic_eq(double t) 
+static double solve_quadratic_eq(double t) 
 {
   double a0, a1, a2, a, b, c, discriminant, root1, root2;
   double logZ = -1;
