@@ -525,6 +525,12 @@ void perform_end_of_step_bh_physics(void)
 #endif   
 }
 
+void stellar_feedback(void)
+{
+  //#SN events 
+  double timeold = All.Time - All.TimeStep;
+}
+
 static int int_compare(const void *a, const void *b)
 {
   if(*((int *)a) < *((int *)b))
@@ -580,10 +586,10 @@ static int solve_quadratic_eq(double t)
 
 static double f(double x) 
 {
+  // Kroupa(2001) IMF
   double A  = 0.3;
   double Ms = 2200;
   
-  // Kroupa(2001) IMF
   if(x >= 0.1 && x <= 0.5)
     return A*Ms*2*pow(x,-1.3);
   else if(x > 0.5 && x < 100)
