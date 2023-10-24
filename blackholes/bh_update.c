@@ -630,6 +630,8 @@ static double f(double x)
     return A*Ms*2*pow(x,-1.3);
   else if(x > 0.5 && x < 100)
     return A*Ms*pow(x,-2.3);
+
+  return 0;
 }
 
 static double trapezoidal_integral(double a, double b, int n) 
