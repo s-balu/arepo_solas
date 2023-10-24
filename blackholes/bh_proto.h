@@ -8,6 +8,8 @@ void bh_density(void);
 void update_bh_accretion_rate(void);
 void bh_ngb_feedback(void);
 
+double SN_events(void);
+
 integertime get_timestep_bh(int p);
 void update_bh_timesteps(void);
 void reconstruct_bh_timebins(void);
