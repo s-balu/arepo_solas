@@ -399,7 +399,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 #endif
 #ifdef INFALL_ACCRETION
   double accretion = 0;
-  double rbh2 = 0.25;
+  double rbh = h;
 #endif 
 
   h2   = h * h;
@@ -509,15 +509,10 @@ static int bh_density_evaluate(int target, int mode, int threadid)
               internal_energy_gas += SphP[j].Utherm*mass_j/rho_j*wk;
 #endif
 #ifdef INFALL_ACCRETION
-              if(r2 < 0.01) /*cell swallowed ->should be tagged?*/
+              if(r < 2*rbh) /*cell nibbled*/
                 {
-                  P[j].Mass *= 0.01;
-                  accretion += 0.99*P[j].Mass;
-                }
-              else if(r2 < 0.25) /*cell nibbled*/
-                {
-                  P[j].Mass -= P[j].Mass * exp(-r2/(2*rbh2));
-                  accretion += P[j].Mass * exp(-r2/(2*rbh2));
+                  accretion += P[j].Mass * exp(-r2/(2*rbh**2));
+                  P[j].Mass -= P[j].Mass * exp(-r2/(2*rbh**2));  
                 }
 #endif
               if(All.JetFeedback)
