@@ -194,7 +194,7 @@ int blackhole_mark_cells_for_refinement_evaluate(int target, int mode, int threa
 {
   int numnodes, *firstnode, j, n;
 
-  MyDouble dx, dy, dz, r2;
+  MyDouble dx, dy, dz, r2, xtmp, ytmp, ztmp;
 
   // for data in from BH
   MyDouble *pos;
