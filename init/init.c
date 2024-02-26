@@ -45,6 +45,7 @@
 
 #include "../domain/domain.h"
 #include "../mesh/voronoi/voronoi.h"
+#include "../celib/src/config.h"
 
 /*! \brief Prepares the loaded initial conditions for the run.
  *
@@ -589,6 +590,12 @@ int init(void)
 
   double *exch = All.EnergyExchangeTot;
   exch = malloc(6 * sizeof(double));
+  
+  //celib init
+  CELibInitLifeTime();
+
+  CELibInitSNIIYields();
+
 #endif
 
   return -1;  // return -1 means we ran to completion, i.e. not an endrun code

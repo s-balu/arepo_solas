@@ -29,6 +29,7 @@
  */
 
 #include "../main/allvars.h"
+#include "../celib/src/config.h"
 
 struct data_nodelist *DataNodeList; /* to be deleted */
 
@@ -341,3 +342,14 @@ int MaxThreads = 1;
 IO_Field *IO_Fields;
 int N_IO_Fields   = 0;
 int Max_IO_Fields = 0;
+
+#ifdef BLACKHOLES
+//celib struct
+struct CELibStructRunParameters CELibRunParameters = {
+    .IntegrationSteps = 10000,
+    .LifeTimeType = 1,
+
+    /* Parameters for SNeII */
+    .SNIIYieldsTableID = CELibSNIIYieldsTableID_P98
+};
+#endif
