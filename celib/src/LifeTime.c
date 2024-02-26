@@ -335,44 +335,6 @@ double CELibGetLifeTimeofStarLSF(const double Mass, const double Metallicity){
 }
 
 /*!
- * This function writes lifetimes of stars for given masses based on data
- * obtained by the least square fitting. 
- */
-static void pCELibStellarLifeTimeDumpInterpolatedValuesLSF(const char OutDir[]){
-
-    const int NMetal = 10;
-    const int NMass = 1000;
-    MakeDir(OutDir);
-    
-    double Zmin = CELibLifeTimeLogZ[0];  
-    double Zmax = CELibLifeTimeLogZ[CELibLifeTime_Metallicity-1];  
-    double dMetal = (Zmax-Zmin)/NMetal;
-
-    double Mmax = 1000;
-    double Mmin = 0.1;
-    double dMass = (Mmax-Mmin)/NMass;
-
-    FILE *fp;
-    char fname[MaxCharactersInLine];
-
-    for(int i=0;i<NMetal;i++){
-        double Metallicity = pow(10.0,dMetal*i+CELibLifeTimeLogZ[0]);
-
-        Snprintf(fname,"%s/CELibLifeTimeLSF.%02d",OutDir,i);
-        FileOpen(fp,fname,"w");
-        fprintf(fp,"#%g\n",Metallicity);
-        fprintf(fp,"#Mass #Age\n");
-        for(int k=0;k<NMass;k++){
-            double Mass = dMass*k+Mmin;
-            fprintf(fp,"%g %g\n",Mass,CELibGetLifeTimeofStarLSF(Mass,Metallicity));
-        }
-        fclose(fp);
-    }
-
-    return ;
-}
-
-/*!
  * This function returns an interpolated value of the mass whose lifetime is
  * just finished at a given age of a SSP particle. The parameter "LifeTime", which
  * represents the age of the SSP particle, should be in the unit of "year".
