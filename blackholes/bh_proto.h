@@ -6,6 +6,7 @@ void domain_resize_storage_bh(int count_get_bh);
 void kernel(double u, double hinv3, double hinv4, double *wk, double *dwk);
 void bh_density(void);
 void update_bh_accretion_rate(void);
+void update_SNII(void);
 void bh_ngb_feedback(void);
 
 double SN_events(void);

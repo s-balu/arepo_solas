@@ -248,6 +248,20 @@ void update_bh_accretion_rate(void)
 }
 #endif
 
+/*update the SNII flag*/
+void update_SNII(void)
+{
+  int i;
+  
+  for(i=0; i<NumBh; i++)
+    {
+      if(BhP[i].SNIIFlag > 0)
+        continue;
+      if(All.Time > BhP[i].SNIITime)
+        BhP[i].SNIIFlag = 1; 
+    } 
+}
+
 /*get timestep for bh based on smallest between ngbs*/
 integertime get_timestep_bh(int p)
 {
