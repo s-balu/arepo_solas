@@ -79,7 +79,7 @@ static void particle2in(data_in *in, int i, int firstnode)
 
 typedef struct
 {
-
+  MyDouble SNIIRemnantMass;
 } data_out;
 
 static data_out *DataResult, *DataOut;
@@ -99,11 +99,11 @@ static void out2particle(data_out *out, int i, int mode)
 {
   if(mode == MODE_LOCAL_PARTICLES) /* initial store */
     {
-      return;
+      BhP[i].SNIIRemnantMass = out->SNIIRemnantMass;
     }
   else /* combine */
     {
-      return;
+      BhP[i].SNIIRemnantMass = out->SNIIRemnantMass;
     }
 }
 
@@ -183,7 +183,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   double dx, dy, dz, r, r2, u;
   double dt; //dtime;
   MyDouble bh_mass, ngbmass, ngbmass_feed; 
-  MyDouble *pos, bh_rho, energyfeed;
+  MyDouble *pos, bh_rho, energyfeed, snIIremnantmass;
 
   data_in local, *target_data;
   /*data_out out;*/
@@ -231,6 +231,8 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   hinv3 = hinv * hinv / boxSize_Z;
 #endif /* #ifndef  TWODIMS #else */
   hinv4 = hinv3 * hinv;
+
+  snIIremnantmass = 0;
  
 /*bh timestep*/
       dt    = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
@@ -395,20 +397,25 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
                   //SphP[j].MomentumFeed  -= All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass;
                   //All.EnergyExchange[2] -= All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass; 
 
-                  SphP[j].EnergyFeed    +=  Output.Energy / All.UnitEnergy_in_cgs * P[j].Mass / ngbmass;
-                  All.EnergyExchange[4] +=  Output.Energy / All.UnitEnergy_in_cgs * P[j].Mass / ngbmass;
+                  SphP[j].EnergyFeed    += Output.Energy / All.UnitEnergy_in_cgs * P[j].Mass / ngbmass;
+                  All.EnergyExchange[4] += Output.Energy / All.UnitEnergy_in_cgs * P[j].Mass / ngbmass;
+
+                  SphP[j].MassFeed      += Output.EjectaMass * P[j].Mass / ngbmass;
+
+                  snIIremnantmass        = Output.RemnantMass;
                 }
             }
         }
     }
-  return 0;
-}
-  /* Now collect the result at the right place 
+
+  out.SNIIRemnantMass = snIIremnantmass;
+
+   /*Now collect the result at the right place*/
   if(mode == MODE_LOCAL_PARTICLES)
     out2particle(&out, target, MODE_LOCAL_PARTICLES);
   else
     DataResult[target] = out;
 
   return 0;
-}*/
+}
 

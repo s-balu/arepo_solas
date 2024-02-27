@@ -1483,6 +1483,7 @@ extern struct sph_particle_data
   MyDouble ThermalFeed;
   MyDouble KineticFeed;
   MyDouble BhKickVector[3];
+  MyDouble MassFeed;
   MyDouble EnergyFeed;
   MyDouble MomentumFeed;
   MyDouble MomentumKickVector[3];
@@ -1516,6 +1517,7 @@ extern struct bh_particle_data
   signed char TimeBinBh;
 
   MyDouble SNIITime;
+  MyDouble SNIIRemnantMass;
   int SNIIFlag; //=0 before SNII, =1 during SNII (do supernova feedback), =2 after SNII (pause winds)
 }  *BhP,          
     *DomainBhBuf; 

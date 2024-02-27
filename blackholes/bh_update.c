@@ -255,8 +255,15 @@ void update_SNII(void)
   
   for(i=0; i<NumBh; i++)
     {
-      if(BhP[i].SNIIFlag > 0)
+      if(BhP[i].SNIIFlag == 1)
+        {
+          BhP[i].SNIIFlag = 2;
+          continue;
+        }       
+      
+      if(BhP[i].SNIIFlag == 2)
         continue;
+
       if(All.Time > BhP[i].SNIITime / All.UnitTime_in_Megayears)
         BhP[i].SNIIFlag = 1; 
     } 
@@ -416,6 +423,24 @@ void perform_end_of_step_bh_physics(void)
       BhP[i].Accretion = 0;
     }
 #endif
+
+/*for SNII*/
+  for(i=0; i<NumBh; i++)
+    {
+      if(BhP[i].SNIIRemnantMass > 0)
+        PPB(i).Mass = BhP[i].SNIIRemnantMass;
+        BhP[i].SNIIRemnantMass = 0;
+    }
+
+  for(i=0; i<NumGas; i++)
+    {
+      if(SphP[i].MassFeed > 0)
+       {
+        P[i].Mass += MassFeed;
+
+        SphP[i].MassFeed = 0;
+       }  
+    }
 
 /*inject feedback to ngb cells*/
     if(All.Time >= All.FeedbackTime)
