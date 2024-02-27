@@ -186,7 +186,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   MyDouble *pos, bh_rho, energyfeed, snIIremnantmass;
 
   data_in local, *target_data;
-  /*data_out out;*/
+  data_out out;
 
   if(mode == MODE_LOCAL_PARTICLES)
     {
@@ -382,7 +382,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 
               if (snIIflag == 1)
                 {
-                  double elements[13] = {0,0,0,0,0,0,0,0,0,0,0,0,0}
+                  double elements[13] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
                   struct CELibStructFeedbackStarbyStarInput Input = 
                     {
                       .Mass = bh_mass,                 
