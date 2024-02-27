@@ -402,15 +402,11 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
                   struct CELibStructFeedbackStarbyStarOutput Output = 
                   CELibGetFeedbackStarbyStar(Input, CELibFeedbackType_SNII);
 
-                  SphP[j].MomentumFeed  += 0;
-                  All.EnergyExchange[2] += 0; 
+                  //SphP[j].MomentumFeed  -= All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass;
+                  //All.EnergyExchange[2] -= All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass; 
 
                   SphP[j].EnergyFeed    +=  Output.Energy / All.UnitEnergy_in_cgs * P[j].Mass / ngbmass;
                   All.EnergyExchange[4] +=  Output.Energy / All.UnitEnergy_in_cgs * P[j].Mass / ngbmass;
-              
-                  SphP[j].MomentumKickVector[0] = -dx;
-                  SphP[j].MomentumKickVector[1] = -dy;
-                  SphP[j].MomentumKickVector[2] = -dz;
                 }
             }
         }
