@@ -34,6 +34,7 @@ typedef struct
 #ifdef INFALL_ACCRETION
   MyDouble Accretion;
 #endif
+  int SNIIFlag;
   int Firstnode;
 } data_in;
 
@@ -67,6 +68,7 @@ static void particle2in(data_in *in, int i, int firstnode)
 #ifdef INFALL_ACCRETION
   in->Accretion     = BhP[i].Accretion;
 #endif
+  in->SNIIFlag      = BhP[i].SNIIFlag;
   in->Firstnode     = firstnode;
 }
 
@@ -174,7 +176,7 @@ void bh_ngb_feedback(void)
 
 static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 {
-  int j, n, bin, isbh;
+  int j, n, bin, isbh, snIIflag;
   int numnodes, *firstnode;
   double h, h2, hinv, hinv3, hinv4, wk, dwk;
   double dx, dy, dz, r, r2, u;
@@ -204,6 +206,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   h              = target_data->Hsml;
   isbh           = target_data->IsBh;
   bin            = target_data->Bin;
+  snIIflag       = target_data->SNIIFlag;
   bh_rho         = target_data->BhRho;
   bh_mass        = target_data->BhMass;
   ngbmass        = target_data->NgbMass;
@@ -246,6 +249,9 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
       double EddingtonLuminosity = 4. * M_PI * GRAVITY * (bh_mass * All.UnitMass_in_g) * PROTONMASS * CLIGHT / THOMPSON;
       EddingtonLuminosity *=  (All.UnitTime_in_s / (All.UnitMass_in_g*pow(All.UnitVelocity_in_cm_per_s,2)));
       energyfeed = EddingtonLuminosity * dt;
+      
+      if(snIIflag == 2)
+        energyfeed = 0;
     }
 
 /*jet axis and opening angle*/    
@@ -360,25 +366,52 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 /*set radial momentum kick*/
 /*uncomment for kernel*/ //SphP[j].MomentumFeed  += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
                          //All.EnergyExchange[2] += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
-              if (flag == 1)
-                {
-                  struct CELibStructFeedbackStarbyStarInput Input = {}
-
-                  CELibGetFeedbackStarbyStar(struct CELibStructFeedbackStarbyStarInput Input, CELibFeedbackType_SNII)
-
-                }
-
-
 
               SphP[j].MomentumFeed  += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass;
               All.EnergyExchange[2] += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass;
 
-              SphP[j].EnergyFeed    += All.Lambda * energyfeed * P[j].Mass / ngbmass;
-              All.EnergyExchange[4] += All.Lambda * energyfeed * P[j].Mass / ngbmass;
+              SphP[j].EnergyFeed    += 0;
+              All.EnergyExchange[4] += 0;
               
               SphP[j].MomentumKickVector[0] = -dx;
               SphP[j].MomentumKickVector[1] = -dy;
               SphP[j].MomentumKickVector[2] = -dz;
+
+              if (flag == 1)
+                {
+                  struct CELibStructFeedbackStarbyStarInput Input = 
+                    {
+                      .Mass = bh_mass,                 
+                      .Metallicity = 0.0004,          
+                      .MassConversionFactor = 1, 
+                      .Elements[0] = 0,
+                      .Elements[1] = 0,
+                      .Elements[2] = 0,
+                      .Elements[3] = 0,
+                      .Elements[4] = 0,
+                      .Elements[5] = 0,
+                      .Elements[6] = 0,
+                      .Elements[7] = 0,
+                      .Elements[8] = 0,
+                      .Elements[9] = 0,
+                      .Elements[10] = 0,
+                      .Elements[11] = 0,
+                      .Elements[12] = 0, 
+                    };
+
+                  struct CELibStructFeedbackStarbyStarOutput Output = 
+                  CELibGetFeedbackStarbyStar(Input, CELibFeedbackType_SNII);
+
+                  SphP[j].MomentumFeed  += 0;
+                  All.EnergyExchange[2] += 0; 
+
+                  SphP[j].EnergyFeed    +=  Output.Energy * P[j].Mass / ngbmass;
+                  All.EnergyExchange[4] +=  Output.Energy * P[j].Mass / ngbmass;
+              
+                  SphP[j].MomentumKickVector[0] = -dx;
+                  SphP[j].MomentumKickVector[1] = -dy;
+                  SphP[j].MomentumKickVector[2] = -dz;
+                }
             }
         }
     }
