@@ -380,12 +380,13 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 
               if (snIIflag == 1)
                 {
+                  double elements[13] = {0,0,0,0,0,0,0,0,0,0,0,0,0}
                   struct CELibStructFeedbackStarbyStarInput Input = 
                     {
                       .Mass = bh_mass,                 
                       .Metallicity = 0.0004,          
                       .MassConversionFactor = 1, 
-                      .Elements = NULL,
+                      .Elements = elements,
                     };
 
                   struct CELibStructFeedbackStarbyStarOutput Output = 
