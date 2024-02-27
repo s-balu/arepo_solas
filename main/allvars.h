@@ -1514,6 +1514,8 @@ extern struct bh_particle_data
   int IsBh;
   int DensityFlag;
   signed char TimeBinBh;
+
+  MyDouble SNIITime;
 }  *BhP,          
     *DomainBhBuf; 
 

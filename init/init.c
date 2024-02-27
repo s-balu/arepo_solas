@@ -595,6 +595,18 @@ int init(void)
   CELibInitLifeTime();
 
   CELibInitSNIIYields();
+  
+  for(i=0; i<NumBh; i++)
+    {
+      struct CELibStructNextEventTimeStarbyStarInput Input = 
+      {
+        .InitialMass_in_Msun = PPB(i).Mass,
+        .Metallicity = 0.0004
+      };
+      
+      BhP[i].SNIITime = CELibGetNextEventTimeStarbyStar(Input, CELibFeedbackType_SNII); 
+    }
+
 
 #endif
 
