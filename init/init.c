@@ -604,7 +604,7 @@ int init(void)
         .Metallicity = 0.0004
       };
       
-      BhP[i].SNIITime = CELibGetNextEventTimeStarbyStar(Input, CELibFeedbackType_SNII); 
+      BhP[i].SNIITime = CELibGetNextEventTimeStarbyStar(Input, CELibFeedbackType_SNII) / pow(10,6) / UnitTime_in_Megayears; 
     }
 
 

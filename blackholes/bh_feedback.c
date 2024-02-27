@@ -9,6 +9,7 @@
 #include "../main/proto.h"
 
 #include "../domain/domain.h"
+#include "../celib/src/config.h"
 
 
 static int bh_ngb_feedback_evaluate(int target, int mode, int threadid);
@@ -377,7 +378,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
               SphP[j].MomentumKickVector[1] = -dy;
               SphP[j].MomentumKickVector[2] = -dz;
 
-              if (flag == 1)
+              if (snIIflag == 1)
                 {
                   struct CELibStructFeedbackStarbyStarInput Input = 
                     {
