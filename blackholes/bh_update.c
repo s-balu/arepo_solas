@@ -428,16 +428,17 @@ void perform_end_of_step_bh_physics(void)
   for(i=0; i<NumBh; i++)
     {
       if(BhP[i].SNIIRemnantMass > 0)
-        PPB(i).Mass = BhP[i].SNIIRemnantMass;
-        BhP[i].SNIIRemnantMass = 0;
+        {
+          PPB(i).Mass = BhP[i].SNIIRemnantMass;
+          BhP[i].SNIIRemnantMass = 0;
+        }
     }
 
   for(i=0; i<NumGas; i++)
     {
       if(SphP[i].MassFeed > 0)
        {
-        P[i].Mass += MassFeed;
-
+        P[i].Mass += SphP[i].MassFeed;
         SphP[i].MassFeed = 0;
        }  
     }
