@@ -257,7 +257,7 @@ void update_SNII(void)
     {
       if(BhP[i].SNIIFlag > 0)
         continue;
-      if(All.Time > BhP[i].SNIITime)
+      if(All.Time > BhP[i].SNIITime / All.UnitTime_in_Megayears)
         BhP[i].SNIIFlag = 1; 
     } 
 }
