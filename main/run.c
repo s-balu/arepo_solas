@@ -401,6 +401,8 @@ void calculate_non_standard_physics_prior_mesh_construction(void)
   update_bh_accretion_rate();
 #endif
 
+  update_SNII();
+
   update_bh_timesteps();
    
    if(All.Time >= All.FeedbackTime)

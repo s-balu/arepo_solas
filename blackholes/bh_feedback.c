@@ -385,19 +385,7 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
                       .Mass = bh_mass,                 
                       .Metallicity = 0.0004,          
                       .MassConversionFactor = 1, 
-                      .Elements[0] = 0,
-                      .Elements[1] = 0,
-                      .Elements[2] = 0,
-                      .Elements[3] = 0,
-                      .Elements[4] = 0,
-                      .Elements[5] = 0,
-                      .Elements[6] = 0,
-                      .Elements[7] = 0,
-                      .Elements[8] = 0,
-                      .Elements[9] = 0,
-                      .Elements[10] = 0,
-                      .Elements[11] = 0,
-                      .Elements[12] = 0, 
+                      .Elements = NULL,
                     };
 
                   struct CELibStructFeedbackStarbyStarOutput Output = 
