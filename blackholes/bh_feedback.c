@@ -405,8 +405,8 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
                   SphP[j].MomentumFeed  += 0;
                   All.EnergyExchange[2] += 0; 
 
-                  SphP[j].EnergyFeed    +=  Output.Energy * P[j].Mass / ngbmass;
-                  All.EnergyExchange[4] +=  Output.Energy * P[j].Mass / ngbmass;
+                  SphP[j].EnergyFeed    +=  Output.Energy / All.UnitEnergy_in_cgs * P[j].Mass / ngbmass;
+                  All.EnergyExchange[4] +=  Output.Energy / All.UnitEnergy_in_cgs * P[j].Mass / ngbmass;
               
                   SphP[j].MomentumKickVector[0] = -dx;
                   SphP[j].MomentumKickVector[1] = -dy;
