@@ -1516,6 +1516,7 @@ extern struct bh_particle_data
   signed char TimeBinBh;
 
   MyDouble SNIITime;
+  int SNIIFlag; //=0 before SNII, =1 during SNII (do supernova feedback), =2 after SNII (pause winds)
 }  *BhP,          
     *DomainBhBuf; 
 
