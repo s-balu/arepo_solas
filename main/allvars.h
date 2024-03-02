@@ -1511,14 +1511,14 @@ extern struct bh_particle_data
 #ifdef INFALL_ACCRETION
   MyDouble Accretion;
 #endif
+  MyDouble SNIITime;
+  MyDouble SNIIRemnantMass;
+  int SNIIFlag; //=0 before SNII, =1 during SNII (do supernova feedback), =2 after SNII (pause winds)
+  
   integertime NgbMinStep;
   int IsBh;
   int DensityFlag;
   signed char TimeBinBh;
-
-  MyDouble SNIITime;
-  MyDouble SNIIRemnantMass;
-  int SNIIFlag; //=0 before SNII, =1 during SNII (do supernova feedback), =2 after SNII (pause winds)
 }  *BhP,          
     *DomainBhBuf; 
 
