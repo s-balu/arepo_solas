@@ -255,12 +255,14 @@ void update_SNII(void)
   
   for(i=0; i<NumBh; i++)
     {
-      if(BhP[i].SNIIFlag == 1)
+      if(BhP[i].SNIIRemnantMass) //change this for appropriate flag
         {
+          PPB(i).Mass = BhP[i].SNIIRemnantMass;
+          BhP[i].SNIIRemnantMass = 0;
           BhP[i].SNIIFlag = 2;
           continue;
-        }       
-      
+        }
+
       if(BhP[i].SNIIFlag == 2)
         continue;
 
@@ -425,15 +427,6 @@ void perform_end_of_step_bh_physics(void)
 #endif
 
 /*for SNII*/
-  for(i=0; i<NumBh; i++)
-    {
-      if(BhP[i].SNIIRemnantMass > 0)
-        {
-          PPB(i).Mass = BhP[i].SNIIRemnantMass;
-          BhP[i].SNIIRemnantMass = 0;
-        }
-    }
-
   for(i=0; i<NumGas; i++)
     {
       if(SphP[i].MassFeed > 0)
