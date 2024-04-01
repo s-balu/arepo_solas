@@ -21,7 +21,7 @@ Arepo was written by Volker Springel (vspringel@mpa-garching.mpg.de)
 with further development by Rüdiger Pakmor
 (rpakmor@mpa-garching.mpg.de) and contributions by many other authors
 (www.arepo-code.org/people).  The public version of the code was
-compiled by Rainer Weinberger (rainer.weinberger@cfa.harvard.edu).
+compiled by Rainer Weinberger (rweinberger@aip.de).
 
 Overview
 ========

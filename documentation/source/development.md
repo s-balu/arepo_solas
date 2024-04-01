@@ -37,25 +37,7 @@ users to report all issues they have, including things that remain
 unclear after reading the documentation. This way we hope to
 constantly improve the qualtiy of the code in all its aspects.
  
-To organize this, we set up a code support forum
-(www.arepo-code.org/forums/forum/arepo-forum) which is publicly
-visible. To create posts on this forum, a registration with
-admin-approval is required. We encourage users to sign up under
-www.arepo-code.org/register and make use of the forum whenever they
-have problems.
-
-Issues reported in the forum will then be confirmed by one of the
-authors and added to the repository issue tracker, which serves as a
-to-do list for bug fixes and improvements to the code. Therefore, if a
-problem occurs, the first thing to check is whether there already
-exists an open issue, i.e. whether this is a known and confirmed
-problem.
-
-**Please whenever possible use the support forum instead of**
-  **contacting the authors by email.**
-
-**We encourage experienced users to provide help and answer some**
-  **of the open questions on this forum.**
+**Please contact Rainer Weinberger by email via rweinberger@aip.de for any issues.**
 
 
 Code extensions 
