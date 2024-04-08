@@ -247,7 +247,7 @@ void bh_density(void)
 
       generic_comm_pattern(TimeBinsBh.NActiveParticles, kernel_local, kernel_imported);
 
-      for(idx=0, npleft=0; idx<TimeBinsBh.NActiveParticles; i++)
+      for(idx=0, npleft=0; idx<TimeBinsBh.NActiveParticles; idx++)
         {
           i = TimeBinsBh.ActiveParticleList[idx];
           if(bh_density_isactive(i))
