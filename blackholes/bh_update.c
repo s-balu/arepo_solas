@@ -315,6 +315,8 @@ void reconstruct_bh_timebins(void)
     {
       
       bin = BhP[i].TimeBinBh;
+      if(bin >= TIMEBINS)
+        continue;
 
       if(TimeBinsBh.TimeBinCount[bin] > 0)
         {
