@@ -274,6 +274,9 @@ void update_SNII(void)
 /*get timestep for bh based on smallest between ngbs*/
 integertime get_timestep_bh(int p)
 {
+  if(PPB(p).Mass < 5)
+    return All.TimeMax / All.Timebase_interval;
+  
   return BhP[p].NgbMinStep;
 }
 
