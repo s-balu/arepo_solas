@@ -530,7 +530,8 @@ void perform_end_of_step_bh_physics(void)
                   update_primitive_variables_single(P, SphP, i, &pvd);  
 
                   /*update total energy*/
-                  SphP[i].Energy = SphP[i].Utherm * P[i].Mass + SphP[i].EnergyFeed + 0.5 * P[i].Mass * (pow(P[i].Vel[0], 2) + pow(P[i].Vel[1], 2) + pow(P[i].Vel[2], 2));
+                  SphP[i].Energy = SphP[i].Utherm * P[i].Mass + SphP[i].EnergyFeed + 
+                    0.5 * P[i].Mass * (pow(P[i].Vel[0], 2) + pow(P[i].Vel[1], 2) + pow(P[i].Vel[2], 2));
                   All.EnergyExchange[5] += SphP[i].EnergyFeed;               
                   /*update internal energy*/
                   update_internal_energy(P, SphP, i, &pvd);
@@ -553,9 +554,13 @@ void perform_end_of_step_bh_physics(void)
     }
   MPI_Allreduce(&All.EnergyExchange, &All.EnergyExchangeTot, 6, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
   MPI_Barrier(MPI_COMM_WORLD); // synchronize all tasks
-  mpi_printf("BLACK_HOLES: Energy given by BH = %e, Energy taken up by gas particles = %e \n", All.EnergyExchangeTot[0], All.EnergyExchangeTot[1]);
-  mpi_printf("STARS: Momentum given by StarParts = %e, Momentum taken up by gas particles = %e \n", All.EnergyExchangeTot[2], All.EnergyExchangeTot[3]);
-  mpi_printf("STARS: Energy given by StarParts = %e, Energy taken up by gas particles = %e \n", All.EnergyExchangeTot[4], All.EnergyExchangeTot[5]);
+  mpi_printf("BLACK_HOLES: Energy given by BH = %e, Energy taken up by gas particles = %e \n", 
+    All.EnergyExchangeTot[0] * All.UnitEnergy_in_cgs, All.EnergyExchangeTot[1] * All.UnitEnergy_in_cgs);
+  mpi_printf("STARS: Momentum given by StarParts = %e, Momentum taken up by gas particles = %e \n", 
+    All.EnergyExchangeTot[2] * All.UnitMass_in_g * All.UnitVelocity_in_cm_per_s, 
+      All.EnergyExchangeTot[3] * All.UnitMass_in_g * All.UnitVelocity_in_cm_per_s);
+  mpi_printf("STARS: Energy given by StarParts = %e, Energy taken up by gas particles = %e \n", 
+    All.EnergyExchangeTot[4] * All.UnitEnergy_in_cgs, All.EnergyExchangeTot[5] * All.UnitEnergy_in_cgs);
 
 #ifdef BURST_MODE
   if(All.EnergyExchangeTot[0] - All.EnergyExchangeTot[1] > 10)  
