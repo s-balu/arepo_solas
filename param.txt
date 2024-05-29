@@ -42,9 +42,9 @@ TimeMax                                   0.01
 TimeBetSnapshot                           1e-4
 
 %% Units changed for LR
-UnitVelocity_in_cm_per_s                  1e4   1km/s
-UnitLength_in_cm                          3e18  1pc
-UnitMass_in_g                             2e33  1solar
+UnitVelocity_in_cm_per_s                  1.e4      1km/s
+UnitLength_in_cm                          3.086e18  1pc
+UnitMass_in_g                             1.989e33  1solar
 GravityConstantInternal                   0.0
 
 %% settings for gravity
