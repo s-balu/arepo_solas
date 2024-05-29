@@ -1,0 +1,129 @@
+%% system options
+MaxMemSize                                3000
+CpuTimeBetRestartFile                     9000
+TimeLimitCPU                              90000
+
+%% initial conditions
+InitCondFile                              ./IC
+ICFormat                                  3
+
+%% output options
+OutputDir                                 ./output
+SnapshotFileBase                          snap
+SnapFormat                                3
+NumFilesPerSnapshot                       1
+NumFilesWrittenInParallel                 1
+
+%% resubmit opitions
+ResubmitOn                                0
+ResubmitCommand                           my-scriptfile
+OutputListFilename                        ol
+OutputListOn                              0
+
+%% simulation mode
+CoolingOn                                 0
+StarformationOn                           0
+PeriodicBoundariesOn                      0
+ComovingIntegrationOn                     0
+%TreecoolFile                          TREECOOL_ep
+
+%% Cosmological parameters
+Omega0                                    0.0
+OmegaBaryon                               0.0
+OmegaLambda                               0.0
+HubbleParam                               1.0
+
+%% Simulation parameters
+BoxSize                                   160
+TimeOfFirstSnapshot                       0.0
+TimeBetStatistics                         0.01
+TimeBegin                                 0.0
+TimeMax                                   0.01
+TimeBetSnapshot                           1e-4
+
+%% Units changed for LR
+UnitVelocity_in_cm_per_s                  1e4   1km/s
+UnitLength_in_cm                          3e18  1pc
+UnitMass_in_g                             2e33  1solar
+GravityConstantInternal                   0.0
+
+%% settings for gravity
+ErrTolIntAccuracy                         0.1
+ErrTolTheta                               0.1
+ErrTolForceAcc                            0.1
+
+%% timestepping
+MaxSizeTimestep                           1e-5
+MinSizeTimestep                           0
+TypeOfTimestepCriterion                   0
+
+%% moving mesh
+CellShapingSpeed                          0.5
+CellMaxAngleFactor                        2.25
+TypeOfOpeningCriterion                    1
+
+%% hydrodynamics
+CourantFac                                0.3
+LimitUBelowThisDensity                    0.0
+LimitUBelowCertainDensityToThisValue      0.0
+DesNumNgb                                 64
+MaxNumNgbDeviation                        2
+InitGasTemp                               0.0
+MinGasTemp                                0.0
+MinEgySpec                                0.0
+MinimumDensityOnStartUp                   0.0
+
+%% domain decomposition
+MultipleDomains                           2
+TopNodeFactor                             4
+ActivePartFracForNewDomainDecomp          0.01
+
+%ReferenceGasPartMass                      0.043
+%TargetGasMassFactor                       1
+%RefinementCriterion                       1
+%DerefinementCriterion                     1
+%MaxVolumeDiff                             8
+%MinVolume                                 1e-18
+%MaxVolume                                 100
+
+%MeanVolume                                0.3
+
+%% gravitational softening
+MinimumComovingHydroSoftening             0.01
+AdaptiveHydroSofteningSpacing             1.2
+GasSoftFactor                             2.5
+SofteningComovingType0                    0.01
+SofteningComovingType1                    0.1
+SofteningComovingType2                    0.1
+SofteningComovingType3                    0.1
+SofteningComovingType4                    0.1
+SofteningComovingType5                    0.1
+SofteningMaxPhysType0                     0.1
+SofteningMaxPhysType1                     0.1
+SofteningMaxPhysType2                     0.1
+SofteningMaxPhysType3                     0.1
+SofteningMaxPhysType4                     0.1
+SofteningMaxPhysType5                     0.1
+SofteningTypeOfPartType0                  0
+SofteningTypeOfPartType1                  1
+SofteningTypeOfPartType2                  2
+SofteningTypeOfPartType3                  3
+SofteningTypeOfPartType4                  4
+SofteningTypeOfPartType5                  5
+BhDesNumNgb                               4.3
+BhMaxNumNgbDeviation                      0.1
+FeedbackTime                              0
+JetFeedback                               0
+Ftherm                                    1
+Epsilon_f                                 0
+Epsilon_r                                 0.1
+Lambda                                    0.05
+%RefBHRadius                               0.1
+%RefBHMinCellRadius                        1e-8
+%RefBHMaxCellRadius                        1e-4
+%RefBHRadiusHSML                           1
+%RefBHMinCellRadiusRBondi                  0.2
+%RefBHMaxCellRadiusHSML                    0.2
+%RefBHMinCellMass                          1e-12
+%RefBHLowerFactorC                         2
+%GridSize                                 16
