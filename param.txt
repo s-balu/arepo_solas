@@ -39,7 +39,7 @@ TimeOfFirstSnapshot                       0.0
 TimeBetStatistics                         0.01
 TimeBegin                                 0.0
 TimeMax                                   0.01
-TimeBetSnapshot                           1e-4
+TimeBetSnapshot                           5e-4
 
 %% Units changed for LR
 UnitVelocity_in_cm_per_s                  1.e4      1km/s
