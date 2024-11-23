@@ -713,9 +713,11 @@ extern int FlagNyt;
 extern int NumPart; /*!< number of particles on the LOCAL processor */
 extern int NumGas;  /*!< number of gas particles on the LOCAL processor  */
 #ifdef BLACKHOLES
-extern int NumBh;
+extern int NumBhs;
 #endif
-
+#ifdef STARS
+extern int NumStars;
+#endif
 
 extern gsl_rng *random_generator;     /*!< a random number generator  */
 extern gsl_rng *random_generator_aux; /*!< an auxialiary random number generator for use if one doesn't want to influence the main
@@ -885,7 +887,10 @@ extern struct global_data_all_processes
   long long TotNumPart; /*!<  total particle numbers (global value) */
   long long TotNumGas;  /*!<  total gas particle number (global value) */
 #ifdef BLACKHOLES
-  long long TotNumBh;
+  long long TotNumBhs;
+#endif
+#ifdef STARS
+  long long TotNumStars;
 #endif
 
   int MaxPart;    /*!< This gives the maxmimum number of particles that can be stored on one
@@ -893,7 +898,11 @@ extern struct global_data_all_processes
   int MaxPartSph; /*!< This gives the maxmimum number of SPH particles that can be stored on one
                      processor. */
 #ifdef BLACKHOLES
-  int MaxPartBh;
+  int MaxPartBhs;
+#endif
+
+#ifdef STARS
+  int MaxPartStars;
 #endif
 
 #if defined(COOLING)
@@ -1321,6 +1330,9 @@ extern struct particle_data
 #ifdef BLACKHOLES
   MyIDType BhID;
 #endif
+#ifdef STARS
+  MyIDType SID;
+#endif
 } * P,              /*!< holds particle data on local processor */
     *DomainPartBuf; /*!< buffer for particle data used in domain decomposition */
 
@@ -1519,12 +1531,24 @@ extern struct bh_particle_data
   int IsBh;
   int DensityFlag;
   signed char TimeBinBh;
-}  *BhP,          
-    *DomainBhBuf; 
+}  *BhP
 
 #define BPP(i) BhP[P[i].BhID]
 #define PPB(i) P[BhP[i].PID]
 #endif 
+
+#ifdef STARS 
+extern struct star_particle_data
+{
+  MyIDType PID;
+  MyDouble Hsml;
+  MyDouble Density;
+  MyDouble NgbMass;
+}  *SP
+
+#define SPP(i) SP[P[i].SID]
+#define PPS(i) P[SP[i].PID]
+#endif
 
 #ifdef EXACT_GRAVITY_FOR_PARTICLE_TYPE
 extern struct special_particle_data
@@ -1812,8 +1836,6 @@ enum iofields
   IO_TASK,
   IO_TIMEBIN_HYDRO,
 #ifdef BLACKHOLES
-/*  IO_BHTEMPERATURE,*/
-  IO_ISBH,
   IO_BHID,
   IO_BHHSML,
   IO_BHDENSITY,
@@ -1824,6 +1846,8 @@ enum iofields
 #ifdef OUTPUT_TIMEBIN_BH
   IO_TIMEBIN_BH,
 #endif
+#endif
+#ifdef STARS
 #endif  
   IO_LASTENTRY /* This should be kept - it signals the end of the list */
 };
@@ -1836,8 +1860,10 @@ enum arrays
 #ifdef BLACKHOLES
   A_BH,
 #endif
+#ifdef STARS
+  A_S,
+#endif
   A_PS
-
 };
 
 enum types_in_file

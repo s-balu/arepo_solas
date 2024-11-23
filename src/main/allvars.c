@@ -134,7 +134,10 @@ double EgyInjection;
 int NumPart; /*!< number of particles on the LOCAL processor */
 int NumGas;  /*!< number of gas particles on the LOCAL processor  */
 #ifdef BLACKHOLES
-int NumBh;
+int NumBhs;
+#endif
+#ifdef STARS
+int NumStars;
 #endif
 
 gsl_rng *random_generator;     /*!< a random number generator  */
@@ -239,10 +242,12 @@ struct sph_particle_data *SphP, /*!< holds SPH particle data on local processor 
     *DomainSphBuf;              /*!< buffer for SPH particle data in domain decomposition */
 
 #ifdef BLACKHOLES
-struct bh_particle_data *BhP,
-    *DomainBhBuf;
+struct bh_particle_data *BhP
 #endif 
 
+#ifdef STARS
+struct star_particle_data *SP
+#endif
 
 #ifdef EXACT_GRAVITY_FOR_PARTICLE_TYPE
 struct special_particle_data *PartSpecialListGlobal;
@@ -343,7 +348,7 @@ IO_Field *IO_Fields;
 int N_IO_Fields   = 0;
 int Max_IO_Fields = 0;
 
-#ifdef BLACKHOLES
+#ifdef STARS
 //celib struct
 struct CELibStructRunParameters CELibRunParameters = {
     .IntegrationSteps = 10000,
