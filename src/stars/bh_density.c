@@ -10,10 +10,11 @@
 
 #include "../domain/domain.h"
 
+
 static int bh_density_evaluate(int target, int mode, int threadid);
 static int bh_density_isactive(int n);
 
-static MyFloat *BhNumNgb;
+static MyFloat *BhNumNgb, *BhDhsmlDensityFactor;
 
 /*! \brief Local data structure for collecting particle/cell data that is sent
  *         to other processors if needed. Type called data_in and static
@@ -22,10 +23,9 @@ static MyFloat *BhNumNgb;
 typedef struct
 {
   MyDouble Pos[3];
-#ifdef BONDI_ACCRETION
   MyDouble Vel[3];
-#endif
   MyFloat Hsml;
+  int IsBh;
   int Firstnode;
 } data_in;
 
@@ -45,12 +45,11 @@ static void particle2in(data_in *in, int i, int firstnode)
   in->Pos[0]        = PPB(i).Pos[0];
   in->Pos[1]        = PPB(i).Pos[1];
   in->Pos[2]        = PPB(i).Pos[2];
-#ifdef BONDI_ACCRETION
   in->Vel[0]        = PPB(i).Vel[0];
   in->Vel[1]        = PPB(i).Vel[1];
   in->Vel[2]        = PPB(i).Vel[2];
-#endif
   in->Hsml          = BhP[i].Hsml;
+  in->IsBh          = BhP[i].IsBh;
   in->Firstnode     = firstnode;
 }  
 
@@ -60,6 +59,7 @@ static void particle2in(data_in *in, int i, int firstnode)
  */
 typedef struct
 {
+  MyDouble DhsmlDensity;
   MyDouble Ngb;
   MyDouble Rho;
   MyDouble Mass;
@@ -92,6 +92,7 @@ static void out2particle(data_out *out, int i, int mode)
 {
   if(mode == MODE_LOCAL_PARTICLES) /* initial store */
     {
+      BhDhsmlDensityFactor[i]          = out->DhsmlDensity;
       BhNumNgb[i]                      = out->Ngb;
       BhP[i].Density                   = out->Rho;
       BhP[i].NgbMass                   = out->Mass;
@@ -112,6 +113,7 @@ static void out2particle(data_out *out, int i, int mode)
     }
   else /* combine */
     {
+      BhDhsmlDensityFactor[i]          += out->DhsmlDensity;
       BhNumNgb[i]                      += out->Ngb;
       BhP[i].Density                   += out->Rho;
       BhP[i].NgbMass                   += out->Mass;
@@ -159,7 +161,7 @@ static void kernel_local(void)
 
         //i = NextParticle++;
 
-        //if(i >= NumBhs)
+        //if(i >= NumBh)
         //  break;
         
         idx = NextParticle++;
@@ -221,11 +223,12 @@ void bh_density(void)
 
   CPU_Step[CPU_MISC] += measure_time();
 
-  BhNumNgb           = (MyFloat *)mymalloc("BhNumNgb", NumBhs * sizeof(MyFloat));
-  Left               = (MyFloat *)mymalloc("Left", NumBhs * sizeof(MyFloat));
-  Right              = (MyFloat *)mymalloc("Right", NumBhs * sizeof(MyFloat));
+  BhNumNgb             = (MyFloat *)mymalloc("BhNumNgb", NumBh * sizeof(MyFloat));
+  BhDhsmlDensityFactor = (MyFloat *)mymalloc("BhDhsmlDensityFactor", NumBh * sizeof(MyFloat));
+  Left               = (MyFloat *)mymalloc("Left", NumBh * sizeof(MyFloat));
+  Right              = (MyFloat *)mymalloc("Right", NumBh * sizeof(MyFloat));
 
-  for(i = 0; i < NumBhs; i++)
+  for(i = 0; i < NumBh; i++)
     {
       if(bh_density_isactive(i))
         {
@@ -247,6 +250,18 @@ void bh_density(void)
       for(idx=0, npleft=0; idx<TimeBinsBh.NActiveParticles; idx++)
         {
           i = TimeBinsBh.ActiveParticleList[idx];
+          if(bh_density_isactive(i))
+            {
+              if(BhP[i].Density > 0)
+                {
+                  BhDhsmlDensityFactor[i] *= BhP[i].Hsml / (NUMDIMS * BhP[i].Density);
+                  if(BhDhsmlDensityFactor[i] > -0.9) /* note: this would be -1 if only a single particle at zero lag is found */
+                      BhDhsmlDensityFactor[i] = 1 / (1 + BhDhsmlDensityFactor[i]);
+                  else
+                      BhDhsmlDensityFactor[i] = 1;
+                }
+            } 
+        
 
           if(BhP[i].NgbMass < (desnumngb - All.BhMaxNumNgbDeviation) || BhP[i].NgbMass > (desnumngb + All.BhMaxNumNgbDeviation))
           {
@@ -320,14 +335,14 @@ void bh_density(void)
 
   myfree(Right);
   myfree(Left);
+  myfree(BhDhsmlDensityFactor);
   myfree(BhNumNgb);
 
   /* mark as active again */
-  for(i = 0; i < NumBhs; i++)
+for(i = 0; i < NumBh; i++)
     {
      BhP[i].DensityFlag = 1;
     }
-  
   /* collect some timing information */
   CPU_Step[CPU_INIT] += measure_time();
 }
@@ -346,12 +361,14 @@ void bh_density(void)
  */
 static int bh_density_evaluate(int target, int mode, int threadid)
 {
-  int j, n;
+  int j, n, isbh;
   int numngb, numnodes, *firstnode;
   double h, h2, hinv, hinv3, hinv4;
-  double rho, wk, dwk;
+  double rho;
+  double wk, dwk;
   double dx, dy, dz, r, r2, u, mass_j;
   MyFloat weighted_numngb;
+  MyFloat dhsmlrho;
   MyDouble *pos;
   MyDouble mass, mass_feed;
   integertime ngb_min_step;
@@ -377,6 +394,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 
   pos  = target_data->Pos;
   h    = target_data->Hsml;
+  isbh = target_data->IsBh;
 
 #ifdef BONDI_ACCRETION
   MyDouble *vel;
@@ -405,6 +423,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   numngb = 0;
   rho = weighted_numngb = dhsmlrho = 0;
   mass = mass_feed = 0;
+
 
 /*jet axis and opening angle*/    
 
@@ -475,6 +494,8 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 /*compute the bh-ngb-mass*/
           mass += mass_j;
 
+          if(isbh)// for bh particles do the full density loop 
+            {
 #ifdef BONDI_ACCRETION
 /*compute relative velocities, relative specific angular momenta and internal energy of gas*/
               dvx = P[j].Vel[0] - vel[0]; 
@@ -520,6 +541,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
                   if((pos_x_angle <= theta) || (neg_x_angle <= theta))
                     mass_feed += P[j].Mass;
                 }
+            }  
         }
     }
 
