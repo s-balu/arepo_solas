@@ -63,7 +63,10 @@ int Nbranch;
 int *toGo, *toGoSph;
 int *toGet, *toGetSph;
 #ifdef BLACKHOLES
-int *toGoBh, *toGetBh;
+int *toGoBhs, *toGetBhs;
+#endif
+#ifdef STARS
+int *toGoStars, *toGetStars;
 #endif
 int *list_NumPart;
 int *list_NumGas;
@@ -87,8 +90,12 @@ void domain_allocate_lists(void)
   toGet           = (int *)mymalloc_movable(&toGet, "toGet", (sizeof(int) * NTask));
   toGetSph        = (int *)mymalloc_movable(&toGetSph, "toGetSph", (sizeof(int) * NTask));
 #ifdef BLACKHOLES
-  toGoBh          = (int *)mymalloc_movable(&toGoBh, "toGoBh", (sizeof(int) * NTask));
-  toGetBh         = (int *)mymalloc_movable(&toGetBh, "toGetBh", (sizeof(int) * NTask));
+  toGoBhs          = (int *)mymalloc_movable(&toGoBhs, "toGoBhs", (sizeof(int) * NTask));
+  toGetBhs         = (int *)mymalloc_movable(&toGetBhs, "toGetBhs", (sizeof(int) * NTask));
+#endif
+#ifdef STARS
+  toGoStars          = (int *)mymalloc_movable(&toGoStars, "toGoStars", (sizeof(int) * NTask));
+  toGetStars         = (int *)mymalloc_movable(&toGetStars, "toGetStars", (sizeof(int) * NTask));
 #endif
   list_NumPart    = (int *)mymalloc_movable(&list_NumPart, "list_NumPart", (sizeof(int) * NTask));
   list_NumGas     = (int *)mymalloc_movable(&list_NumGas, "list_NumGas", (sizeof(int) * NTask));
@@ -118,8 +125,12 @@ void domain_free_lists(void)
   myfree(list_NumGas);
   myfree(list_NumPart);
 #ifdef BLACKHOLES
-  myfree(toGetBh);
-  myfree(toGoBh);
+  myfree(toGetBhs);
+  myfree(toGoBhs);
+#endif
+#ifdef STARS
+  myfree(toGetStars);
+  myfree(toGoStars);
 #endif
   myfree(toGetSph);
   myfree(toGet);
