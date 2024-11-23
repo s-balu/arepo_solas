@@ -92,8 +92,13 @@ void allocate_memory(void)
   SphP = (struct sph_particle_data *)mymalloc_movable(&SphP, "SphP", All.MaxPartSph * sizeof(struct sph_particle_data));
 
 #ifdef BLACKHOLES
-  mpi_printf("ALLOCATE: initial allocation for MaxPartBh = %d\n", All.MaxPartBh);
-  BhP=(struct bh_particle_data *)mymalloc_movable(&BhP, "BhP", All.MaxPartBh*sizeof(struct bh_particle_data));
+  mpi_printf("ALLOCATE: initial allocation for MaxPartBhs = %d\n", All.MaxPartBhs);
+  BhP=(struct bh_particle_data *)mymalloc_movable(&BhP, "BhP", All.MaxPartBhs*sizeof(struct bh_particle_data));
+#endif
+
+#ifdef STARS
+  mpi_printf("ALLOCATE: initial allocation for MaxPartStars = %d\n", All.MaxPartStars);
+  SP=(struct star_particle_data *)mymalloc_movable(&SP, "SP", All.MaxPartStars*sizeof(struct star_particle_data));
 #endif
 
   
@@ -112,8 +117,11 @@ void allocate_memory(void)
   memset(P, 0, All.MaxPart * sizeof(struct particle_data));
   memset(SphP, 0, All.MaxPartSph * sizeof(struct sph_particle_data));
 #ifdef BLACKHOLES
-  memset(BhP, 0, All.MaxPartBh * sizeof(struct bh_particle_data));
+  memset(BhP, 0, All.MaxPartBhs * sizeof(struct bh_particle_data));
 #endif   
+#ifdef STARS
+  memset(SP, 0, All.MaxPartStars * sizeof(struct star_particle_data));
+#endif  
 }
 
 /*! \brief Reallocates memory for particle data.
@@ -145,11 +153,21 @@ void reallocate_memory_maxpartsph(void)
 }
 
 #ifdef BLACKHOLES
-void reallocate_memory_maxpartbh(void)
+void reallocate_memory_maxpartbhs(void)
 {
-  mpi_printf("ALLOCATE: Changing to MaxPartBh= %d\n", All.MaxPartBh);
+  mpi_printf("ALLOCATE: Changing to MaxPartBhs= %d\n", All.MaxPartBhs);
 
-  BhP = (struct bh_particle_data *)myrealloc_movable(BhP, All.MaxPartBh * sizeof(struct bh_particle_data));
+  BhP = (struct bh_particle_data *)myrealloc_movable(BhP, All.MaxPartBhs * sizeof(struct bh_particle_data));
+  timebins_reallocate(&TimeBinsBh);
+}
+#endif
+
+#ifdef STARS
+void reallocate_memory_maxpartstars(void)
+{
+  mpi_printf("ALLOCATE: Changing to MaxPartStars= %d\n", All.MaxPartStars);
+
+  SP = (struct star_particle_data *)myrealloc_movable(SP, All.MaxPartStars * sizeof(struct stat_particle_data));
   timebins_reallocate(&TimeBinsBh);
 }
 #endif
