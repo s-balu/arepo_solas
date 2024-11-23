@@ -527,7 +527,8 @@ double CoolingRate(double logT, double rho, double *nelec)
       /* Compute cooling and heating rate (cf KWH Table 1) in units of nH**2 */
       T = pow(10.0, logT);
 
-#ifdef LOW_TEMP_COOLING
+/* Maschenko et al. 2008 */
+#ifdef LOW_TEMP_COOLING 
       if(logT <= 4.1) 
         {
           double logZ = -1;

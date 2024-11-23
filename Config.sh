@@ -3,12 +3,13 @@
 ##################################################
 #  Enable/Disable compile-time options as needed #
 ##################################################
+STARS
 BLACKHOLES
-WENDLAND_C2_KERNEL
+#BURST_MODE
 BONDI_ACCRETION
+WENDLAND_C2_KERNEL
 #REFINEMENT_AROUND_BH=0
 #REFINEMENT_AROUND_BH_FIXED
-#BURST_MODE
 #--------------------------------------- Basic operation mode of code; default: 3d with 6 particle types; type 0: gas >0: only gravitationally interacting
 #NTYPES=6                      # number of particle types
 #TWODIMS                       # 2d simulation
@@ -27,7 +28,7 @@ BONDI_ACCRETION
 #NOHYDRO                       # No hydrodynamics calculation
 #GAMMA=1.4                     # Adiabatic index of gas; 5/3 if not set
 #ISOTHERM_EQS                  # Isothermal gas
-PASSIVE_SCALARS=1             # number of passive scalar fields advected with fluid (default: 0)
+PASSIVE_SCALARS=1              # number of passive scalar fields advected with fluid (default: 0)
 #NO_SCALAR_GRADIENTS           # disables time and spatial extrapolation for passive scalar fields (use only if you know why you're doing this)
 
 #--------------------------------------- Magnetohydrodynamics
@@ -43,9 +44,9 @@ PASSIVE_SCALARS=1             # number of passive scalar fields advected with fl
 #--------------------------------------- Mesh motion and regularization; default: moving mesh
 #VORONOI_STATIC_MESH           # static mesh
 #VORONOI_STATIC_MESH_DO_DOMAIN_DECOMPOSITION  # for VORONOI_STATIC_MESH force domain decomposition if there exist non-gas particles
-REGULARIZE_MESH_CM_DRIFT      # Mesh regularization; Move mesh generating point towards center of mass to make cells rounder.
+REGULARIZE_MESH_CM_DRIFT       # Mesh regularization; Move mesh generating point towards center of mass to make cells rounder.
 REGULARIZE_MESH_CM_DRIFT_USE_SOUNDSPEED  # Limit mesh regularization speed by local sound speed
-REGULARIZE_MESH_FACE_ANGLE    # Use maximum face angle as roundness criterion in mesh regularization
+REGULARIZE_MESH_FACE_ANGLE     # Use maximum face angle as roundness criterion in mesh regularization
 
 #--------------------------------------- Refinement and derefinement; default: no refinement/derefinement; criterion: target mass
 #REFINEMENT_SPLIT_CELLS        # Refinement
@@ -58,7 +59,7 @@ REGULARIZE_MESH_FACE_ANGLE    # Use maximum face angle as roundness criterion in
 
 #--------------------------------------- non-standard phyiscs
 #COOLING                       # Simple primordial cooling
-#LOW_TEMP_COOLING
+#LOW_TEMP_COOLING              # Maschenko et al. 2008
 #ENFORCE_JEANS_STABILITY_OF_CELLS  # this imposes an adaptive floor for the temperature
 #USE_SFR                       # Star formation model, turning dense gas into collisionless partices
 #SFR_KEEP_CELLS                # Do not distroy cell out of which a star has formed
@@ -68,7 +69,7 @@ REGULARIZE_MESH_FACE_ANGLE    # Use maximum face angle as roundness criterion in
 #HIERARCHICAL_GRAVITY          # use hierarchical splitting of the time integration of the gravity
 #CELL_CENTER_GRAVITY           # uses geometric centers to calculate gravity of cells, only possible with HIERARCHICAL_GRAVITY
 #NO_GAS_SELFGRAVITY            # switch off gas self-gravity in tree
-GRAVITY_NOT_PERIODIC          # gravity is not treated periodically
+GRAVITY_NOT_PERIODIC           # gravity is not treated periodically
 #ALLOW_DIRECT_SUMMATION        # Performed direct summation instead of tree-based gravity if number of active particles < DIRECT_SUMMATION_THRESHOLD (= 3000 unless specified differently here)
 #DIRECT_SUMMATION_THRESHOLD=1000  # Overrides maximum number of active particles for which direct summation is performed instead of tree based calculation
 #EXACT_GRAVITY_FOR_PARTICLE_TYPE=4  #N-squared fashion gravity for a small number of particles of the given type
@@ -86,19 +87,19 @@ GRAVITY_NOT_PERIODIC          # gravity is not treated periodically
 
 #--------------------------------------- Gravity softening
 #NSOFTTYPES=4                  # Number of different softening values to which particle types can be mapped.
-MULTIPLE_NODE_SOFTENING       # If a tree node is to be used which is softened, this is done with the softenings of its different mass components
+MULTIPLE_NODE_SOFTENING        # If a tree node is to be used which is softened, this is done with the softenings of its different mass components
 #INDIVIDUAL_GRAVITY_SOFTENING=2+4  # bitmask with particle types where the softenig type should be chosen with that of parttype 1 as a reference type
-ADAPTIVE_HYDRO_SOFTENING      # Adaptive softening of gas cells depending on their size
+ADAPTIVE_HYDRO_SOFTENING       # Adaptive softening of gas cells depending on their size
 #NSOFTTYPES_HYDRO=64           # Overrides number of discrete softening values for gas cellls when ADAPTIVE_HYDRO_SOFTENING (default is 64)
 
 #--------------------------------------- External gravity; default: no external potential
-EXTERNALGRAVITY               # master switch for external potential
+#EXTERNALGRAVITY               # master switch for external potential
 #EXTERNALGY=0.0                # constant external gravity in y direction
 
 #--------------------------------------- Static NFW Potential
 #STATICNFW                     # static gravitational Navarro-Frenk-White (NFW) potential
 #NFW_C=12                      # concentration parameter of NFW potential
-#NFW_M200=1000.0                # mass causing the NFW potential
+#NFW_M200=1000.0               # mass causing the NFW potential
 #NFW_Eps=0.01                  # softening of NFW potential
 #NFW_DARKFRACTION=0.87         # fraction in dark matter in NFW potential
 
@@ -109,11 +110,11 @@ EXTERNALGRAVITY               # master switch for external potential
 #ISO_Eps=0.1                   # softening of isothermal sphere potential
 #ISO_FRACTION=0.9              # fraction in dark matter in isothermal sphere potential
 
-#--------------------------------------- Static Hernquist Potential
-STATICHQ                      # static gravitational Hernquist potential
-HQ_M200=1e10                 # mass causing the Hernquist potential
-HQ_C=7670                     # concentration parameter of Hernquist potential
-HQ_DARKFRACTION=1             # fraction in dark matter in Hernquist potential
+#--------------------------------------- Static Hernquist Potential (This is setup for the nuclear star cluster)
+#STATICHQ                      # static gravitational Hernquist potential
+#HQ_M200=1e10                  # mass causing the Hernquist potential
+#HQ_C=7670                     # concentration parameter of Hernquist potential
+#HQ_DARKFRACTION=1             # fraction in dark matter in Hernquist potential
 
 #--------------------------------------- Time integration options
 #FORCE_EQUAL_TIMESTEPS         # variable but global timestep
@@ -128,7 +129,7 @@ HQ_DARKFRACTION=1             # fraction in dark matter in Hernquist potential
 
 #--------------------------------------- Single/Double Precision
 DOUBLEPRECISION=1             # Mode of double precision: not defined: single; 1: full double precision 2: mixed, 3: mixed, fewer single precisions; unless short of memory, use 1.
-#DOUBLEPRECISION_FFTW          # FFTW calculation in double precision
+#DOUBLEPRECISION_FFTW         # FFTW calculation in double precision
 OUTPUT_IN_DOUBLEPRECISION     # snapshot files will be written in double precision
 INPUT_IN_DOUBLEPRECISION      # initial conditions are in double precision
 #OUTPUT_COORDINATES_IN_DOUBLEPRECISION  # will always output coordinates in double precision
@@ -193,7 +194,7 @@ INPUT_IN_DOUBLEPRECISION      # initial conditions are in double precision
 #OUTPUT_MESH_FACE_ANGLE        # output max. face angle of cells
 #OUTPUT_VERTEX_VELOCITY        # output velocity of cell
 #OUTPUT_VERTEX_VELOCITY_DIVERGENCE # output deivergence of cell velocity
-OUTPUT_VOLUME                 # output volume of cells; note that this can always be computat as both, density and mass of cells are by default in output
+#OUTPUT_VOLUME                 # output volume of cells; note that this can always be computat as both, density and mass of cells are by default in output
 #OUTPUT_CENTER_OF_MASS         # output center of mass of cells (position is mesh-generating point)
 #OUTPUT_SURFACE_AREA           # output surface area of cells
 #OUTPUT_PRESSURE               # output pressure of gas
@@ -214,12 +215,12 @@ OUTPUT_VOLUME                 # output volume of cells; note that this can alway
 #REDUCE_FLUSH                  # only flush output to log-files in predefined intervals
 #OUTPUT_EVERY_STEP             # Create snapshot on every (global) synchronization point, independent of parameters choosen or output list.
 #OUTPUT_CPU_CSV                # output of a cpu.csv file on top of cpu.txt
-HAVE_HDF5                     # needed when HDF5 I/O support is desired (recommended)
+HAVE_HDF5                      # needed when HDF5 I/O support is desired (recommended)
 #HDF5_FILTERS                  # activate snapshot compression and checksum for HDF5 output
 #OUTPUT_XDMF                   # writes an .xmf file for each snapshot, which can be read by visit (with the hdf5 snapshot)
 
 #--------------------------------------- Testing and Debugging options
-DEBUG                         # enables core-dumps
+DEBUG                          # enables core-dumps
 #VERBOSE                       # reports readjustments of buffer sizes
 
 #--------------------------------------- Mesh-relaxing or mesh-adding (this will not carry out a simulation)

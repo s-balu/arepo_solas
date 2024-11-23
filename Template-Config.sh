@@ -3,6 +3,7 @@
 ##################################################
 #  Enable/Disable compile-time options as needed #
 ##################################################
+#STARS
 #BLACKHOLES
 #BURST_MODE
 #BONDI_ACCRETION
@@ -22,7 +23,7 @@
 #BH_JET_REFINEMENT
 #OUTPUT_REFBHCOUNTER
 
---------------------------------------- Basic operation mode of code; default: 3d with 6 particle types; type 0: gas >0: only gravitationally interacting
+#--------------------------------------- Basic operation mode of code; default: 3d with 6 particle types; type 0: gas >0: only gravitationally interacting
 #NTYPES=6                      # number of particle types
 #TWODIMS                       # 2d simulation
 #ONEDIMS                       # 1d simulation
@@ -71,7 +72,7 @@
 
 #--------------------------------------- non-standard phyiscs
 #COOLING                       # Simple primordial cooling
-#LOW_TEMP_COOLING
+#LOW_TEMP_COOLING              # Maschenko et al. 2008
 #ENFORCE_JEANS_STABILITY_OF_CELLS  # this imposes an adaptive floor for the temperature
 #USE_SFR                       # Star formation model, turning dense gas into collisionless partices
 #SFR_KEEP_CELLS                # Do not distroy cell out of which a star has formed
@@ -122,7 +123,7 @@
 #ISO_Eps=0.1                   # softening of isothermal sphere potential
 #ISO_FRACTION=0.9              # fraction in dark matter in isothermal sphere potential
 
-#--------------------------------------- Static Hernquist Potential
+#--------------------------------------- Static Hernquist Potential (This is setup for the nuclear star cluster)
 #STATICHQ                      # static gravitational Hernquist potential
 #HQ_M200=186.015773            # mass causing the Hernquist potential
 #HQ_C=10.0                     # concentration parameter of Hernquist potential
