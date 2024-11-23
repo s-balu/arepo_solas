@@ -105,6 +105,10 @@ void domain_rearrange_particle_sequence(void)
             if (P[NumGas - 1].Type == 5)
               BPP(NumGas - 1).PID = NumGas - 1;
 #endif
+#ifdef STARS
+            if (P[NumGas - 1].Type == 4)
+              SPP(NumGas - 1).PID = NumGas - 1;
+#endif
 
             NumGas--;
             count_gaselim++;
