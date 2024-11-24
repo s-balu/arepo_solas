@@ -23,7 +23,6 @@ typedef struct
   MyDouble Pos[3];
   MyFloat Hsml;
   int Bin;
-  int IsBh;
   MyDouble BhRho;
   MyDouble BhMass;
   MyDouble NgbMass;
@@ -57,7 +56,6 @@ static void particle2in(data_in *in, int i, int firstnode)
   in->Pos[2]        = PPB(i).Pos[2];
   in->Hsml          = BhP[i].Hsml;
   in->Bin           = BhP[i].TimeBinBh;
-  in->IsBh          = BhP[i].IsBh;
   in->BhRho         = BhP[i].Density;
   in->BhMass        = PPB(i).Mass;
   in->NgbMass       = BhP[i].NgbMass;
@@ -177,7 +175,7 @@ void bh_ngb_feedback(void)
 
 static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 {
-  int j, n, bin, isbh, snIIflag;
+  int j, n, bin, snIIflag;
   int numnodes, *firstnode;
   double h, h2, hinv, hinv3, hinv4, wk, dwk;
   double dx, dy, dz, r, r2, u;
@@ -205,7 +203,6 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 
   pos            = target_data->Pos;
   h              = target_data->Hsml;
-  isbh           = target_data->IsBh;
   bin            = target_data->Bin;
   snIIflag       = target_data->SNIIFlag;
   bh_rho         = target_data->BhRho;
