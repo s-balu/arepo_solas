@@ -524,10 +524,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   
   out.Ngb                     = numngb;
   out.Rho                     = rho;
-  if(All.JetFeedback)
-    out.Mass                  = mass_feed;
-  else
-    out.Mass                  = mass;
+  out.Mass                    = mass;
   out.MassFeed                = mass_feed;
   out.NgbMinStep              = ngb_min_step;
 #ifdef BONDI_ACCRETION
