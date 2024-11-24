@@ -110,8 +110,8 @@ SofteningTypeOfPartType2                  2
 SofteningTypeOfPartType3                  3
 SofteningTypeOfPartType4                  4
 SofteningTypeOfPartType5                  5
-BhDesNumNgb                               4.3
-BhMaxNumNgbDeviation                      0.1
+DesNgbMass                                4.3
+DesMassDev                                0.1
 FeedbackTime                              0
 JetFeedback                               0
 Ftherm                                    1

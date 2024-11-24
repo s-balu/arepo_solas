@@ -507,12 +507,12 @@ void read_parameter_file(char *fname)
 #endif /* #ifdef ONEDIMS_SPHERICAL */
 
 #ifdef BLACKHOLES
-      strcpy(tag[nt], "BhDesNumNgb");
-      addr[nt] = &All.BhDesNumNgb;
+      strcpy(tag[nt], "DesNgbMass");
+      addr[nt] = &All.DesNgbMass;
       id[nt++] = REAL;
       
-      strcpy(tag[nt], "BhMaxNumNgbDeviation");
-      addr[nt] = &All.BhMaxNumNgbDeviation;
+      strcpy(tag[nt], "DesMassDev");
+      addr[nt] = &All.DesMassDev;
       id[nt++] = REAL;
 
       strcpy(tag[nt], "FeedbackTime");
