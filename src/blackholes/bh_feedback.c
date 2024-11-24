@@ -9,8 +9,6 @@
 #include "../main/proto.h"
 
 #include "../domain/domain.h"
-#include "../celib/src/config.h"
-
 
 static int bh_ngb_feedback_evaluate(int target, int mode, int threadid);
 

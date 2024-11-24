@@ -12,7 +12,7 @@
 #include "../celib/src/config.h"
 
 
-static int bh_ngb_feedback_evaluate(int target, int mode, int threadid);
+static int star_ngb_feedback_evaluate(int target, int mode, int threadid);
 
 /*! \brief Local data structure for collecting particle/cell data that is sent
  *         to other processors if needed. Type called data_in and static
@@ -20,20 +20,12 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid);
  */
 typedef struct
 {
+  int Bin;  
   MyDouble Pos[3];
   MyFloat Hsml;
-  int Bin;
-  MyDouble BhRho;
-  MyDouble BhMass;
+  MyDouble StarDensity;
+  MyDouble StarMass;
   MyDouble NgbMass;
-  MyDouble NgbMassFeed;
-#ifdef BONDI_ACCRETION
-  MyDouble AccretionRate;
-  MyDouble MassToDrain;
-#endif
-#ifdef INFALL_ACCRETION
-  MyDouble Accretion;
-#endif
   int SNIIFlag;
   int Firstnode;
 } data_in;
@@ -51,23 +43,15 @@ static data_in *DataIn, *DataGet;
  */
 static void particle2in(data_in *in, int i, int firstnode)
 {
-  in->Pos[0]        = PPB(i).Pos[0];
-  in->Pos[1]        = PPB(i).Pos[1];
-  in->Pos[2]        = PPB(i).Pos[2];
-  in->Hsml          = BhP[i].Hsml;
-  in->Bin           = BhP[i].TimeBinBh;
-  in->BhRho         = BhP[i].Density;
-  in->BhMass        = PPB(i).Mass;
-  in->NgbMass       = BhP[i].NgbMass;
-  in->NgbMassFeed   = BhP[i].NgbMassFeed;
-#ifdef BONDI_ACCRETION 
-  in->AccretionRate = BhP[i].AccretionRate;
-  in->MassToDrain   = BhP[i].MassToDrain;
-#endif
-#ifdef INFALL_ACCRETION
-  in->Accretion     = BhP[i].Accretion;
-#endif
-  in->SNIIFlag      = BhP[i].SNIIFlag;
+  in->Bin           = SP[i].TimeBinStar;
+  in->Pos[0]        = PPS(i).Pos[0];
+  in->Pos[1]        = PPS(i).Pos[1];
+  in->Pos[2]        = PPS(i).Pos[2];
+  in->Hsml          = SP[i].Hsml;
+  in->StarDensity   = SP[i].Density;
+  in->StarMass      = PPS(i).Mass;
+  in->NgbMass       = SP[i].NgbMass;
+  in->SNIIFlag      = SP[i].SNIIFlag;
   in->Firstnode     = firstnode;
 }
 
@@ -97,11 +81,11 @@ static void out2particle(data_out *out, int i, int mode)
 {
   if(mode == MODE_LOCAL_PARTICLES) /* initial store */
     {
-      BhP[i].SNIIRemnantMass = out->SNIIRemnantMass;
+      SP[i].SNIIRemnantMass = out->SNIIRemnantMass;
     }
   else /* combine */
     {
-      BhP[i].SNIIRemnantMass = out->SNIIRemnantMass;
+      SP[i].SNIIRemnantMass = out->SNIIRemnantMass;
     }
 }
 
@@ -130,13 +114,13 @@ static void kernel_local(void)
 
         idx = NextParticle++;
 
-        if(idx >= TimeBinsBh.NActiveParticles)
+        if(idx >= TimeBinsStar.NActiveParticles)
           break;
 
-        int i = TimeBinsBh.ActiveParticleList[idx];
+        int i = TimeBinsStar.ActiveParticleList[idx];
         if(i < 0)
           continue;
-        bh_ngb_feedback_evaluate(i, MODE_LOCAL_PARTICLES, threadid);
+        star_ngb_feedback_evaluate(i, MODE_LOCAL_PARTICLES, threadid);
       }
   }
 }
@@ -161,27 +145,25 @@ static void kernel_imported(void)
         if(i >= Nimport)
           break;
 
-        bh_ngb_feedback_evaluate(i, MODE_IMPORTED_PARTICLES, threadid);
+        star_ngb_feedback_evaluate(i, MODE_IMPORTED_PARTICLES, threadid);
       }
   }
 }
 
-void bh_ngb_feedback(void)
+void star_ngb_feedback(void)
 {
   generic_set_MaxNexport();
 
-  generic_comm_pattern(TimeBinsBh.NActiveParticles, kernel_local, kernel_imported);
+  generic_comm_pattern(TimeBinsStar.NActiveParticles, kernel_local, kernel_imported);
 }
 
-static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
+static int star_ngb_feedback_evaluate(int target, int mode, int threadid)
 {
-  int j, n, bin, snIIflag;
+  int j, n, bin, snIIflag; 
   int numnodes, *firstnode;
-  double h, h2, hinv, hinv3, hinv4, wk, dwk;
-  double dx, dy, dz, r, r2, u;
-  double dt; //dtime;
-  MyDouble bh_mass, ngbmass, ngbmass_feed; 
-  MyDouble *pos, bh_rho, energyfeed, snIIremnantmass;
+  double h, h2, hinv, hinv3, hinv4, 
+  double dx, dy, dz, r, r2, u, wk, dwk, dt;
+  MyDouble *pos, star_density, star_mass, ngbmass, energyfeed, snIIremnantmass;
 
   data_in local, *target_data;
   data_out out;
@@ -200,25 +182,14 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 
       generic_get_numnodes(target, &numnodes, &firstnode);
     }
-
+  
+  bin            = target_data->Bin;
   pos            = target_data->Pos;
   h              = target_data->Hsml;
-  bin            = target_data->Bin;
-  snIIflag       = target_data->SNIIFlag;
-  bh_rho         = target_data->BhRho;
-  bh_mass        = target_data->BhMass;
+  star_density   = target_data->StarDensity;
+  star_mass      = target_data->StarMass;
   ngbmass        = target_data->NgbMass;
-  ngbmass_feed   = target_data->NgbMassFeed;
-
-#ifdef BONDI_ACCRETION
-  MyDouble accretion_rate, mass_to_drain;
-  accretion_rate = target_data->AccretionRate;
-  mass_to_drain  = target_data->MassToDrain; 
-#endif
-#ifdef INFALL_ACCRETION
-  MyDouble accretion;
-  accretion      = target_data->Accretion;
-#endif
+  snIIflag       = target_data->SNIIFlag;
 
   h2   = h * h;
   hinv = 1.0 / h;
@@ -231,37 +202,17 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 
   snIIremnantmass = 0;
  
-/*bh timestep*/
-      dt    = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
-    //dtime = All.cf_atime * dt / All.cf_time_hubble_a;
+/* star timestep */
+  dt    = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
+  //dtime = All.cf_atime * dt / All.cf_time_hubble_a;
 
-  if(isbh) /*is bh->*/
-    {
-#ifdef BONDI_ACCRETION
-      energyfeed = All.Epsilon_f * All.Epsilon_r * accretion_rate * dt * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
-#endif
-#ifdef INFALL_ACCRETION  
-      energyfeed = All.Epsilon_f * All.Epsilon_r * accretion * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
-#endif
-    }
-  else /*is star->*/
-    {
-      double EddingtonLuminosity = 4. * M_PI * GRAVITY * (bh_mass * All.UnitMass_in_g) * PROTONMASS * CLIGHT / THOMPSON;
-      EddingtonLuminosity *=  (All.UnitTime_in_s / (All.UnitMass_in_g*pow(All.UnitVelocity_in_cm_per_s,2)));
-      energyfeed = EddingtonLuminosity * dt;
-      
-      if(snIIflag == 2)
-        energyfeed = 0;
-    }
-
-/*jet axis and opening angle*/    
-
-/*positive and negative jet axes (no need to be normalized) */
-  double pos_x_axis[3] = {1, 0, 0};
-  double neg_x_axis[3] = {-1, 0, 0};      
-/*jet angle*/
-  double theta = 0.35;
-  double vx, vy, vz, pos_x_angle, neg_x_angle; 
+  /* stellar wind */    
+  double EddingtonLuminosity = 4. * M_PI * GRAVITY * (bh_mass * All.UnitMass_in_g) * PROTONMASS * CLIGHT / THOMPSON;
+  EddingtonLuminosity *=  (All.UnitTime_in_s / (All.UnitMass_in_g*pow(All.UnitVelocity_in_cm_per_s,2)));
+  energyfeed = EddingtonLuminosity * dt;
+  /* supernova */    
+  if(snIIflag == 2)
+    energyfeed = 0;
 
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
   for(n = 0; n < nfound; n++)
@@ -294,7 +245,6 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 #endif /* #ifndef REFLECTIVE_Z */
       r2 = dx * dx + dy * dy + dz * dz;
 
-/*kernel*/
       if(r2 < h2)
         {
           r = sqrt(r2);
@@ -303,111 +253,53 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 
           kernel(u, hinv3, hinv4, &wk, &dwk);
 
-          if(isbh)/*particle is a bh*/
-            {
-              if(All.JetFeedback)
-                {
-/*double cone jet setup*/
+          /* set radial momentum kick for wind */
+          /* uncomment for kernel */ 
+          //SphP[j].MomentumFeed  += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / star_density * wk;
+          //All.EnergyExchange[2] += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / star_density * wk;
 
-/*calculate vector to cone vertex*/
-                  vx = -dx; // x-component of the vector from the vertex to the point
-                  vy = -dy; // y-component of the vector from the vertex to the point
-                  vz = -dz; // z-component of the vector from the vertex to the point
-/*calculate angles*/    
-                  pos_x_angle = acos((vx*pos_x_axis[0] + vy*pos_x_axis[1] + vz*pos_x_axis[2]) / 
-                  (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2))));
-                  neg_x_angle = acos((vx*neg_x_axis[0] + vy*neg_x_axis[1] + vz*neg_x_axis[2]) / 
-                  (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) + pow(neg_x_axis[2], 2))));
-/*set flag to 1 if gas particle is on the positive side of jet*/
-                  if(pos_x_angle <= theta)
-                    SphP[j].PositiveJet = 1;
-/*check if particle is inside the cone*/ 
-                  if((pos_x_angle <= theta) || (neg_x_angle <= theta))
-                    {
-/*split kinetic and thermal energy feed*/ 
-                      SphP[j].KineticFeed       += (1-All.Ftherm) * energyfeed/ngbmass_feed*P[j].Mass;
-                      All.EnergyExchange[0]     += (1-All.Ftherm) * energyfeed/ngbmass_feed*P[j].Mass;
+          SphP[j].MomentumFeed  += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass;
+          All.EnergyExchange[2] += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass;
 
-/*only jet particles injected with thermal feedback if JetFeedback == 2, else isotropic*/             
-                      if(All.JetFeedback == 2)     
-                        {
-                          SphP[j].ThermalFeed   += All.Ftherm * energyfeed/ngbmass_feed*P[j].Mass;
-                          All.EnergyExchange[0] += All.Ftherm * energyfeed/ngbmass_feed*P[j].Mass;
-                        }
-                    }
+          SphP[j].EnergyFeed    += 0;
+          All.EnergyExchange[4] += 0;
               
-                  if(All.JetFeedback == 1)
-                    {
-                      SphP[j].ThermalFeed   += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
-                      All.EnergyExchange[0] += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
-                    } 
-            
-                }
-/*else All.JetFeedback == 0 i.e. isotropic thermal + kinetic injection*/
-              else
-                {
-                  SphP[j].KineticFeed   += (1-All.Ftherm) * energyfeed/ngbmass*P[j].Mass;
-                  All.EnergyExchange[0] += (1-All.Ftherm) * energyfeed/ngbmass*P[j].Mass;
-                  SphP[j].ThermalFeed   += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
-                  All.EnergyExchange[0] += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
-                }
-#ifdef BONDI_ACCRETION
-/*set drain mass flag*/
-              SphP[j].MassDrain = accretion_rate*dt/ngbmass*P[j].Mass + mass_to_drain/ngbmass*P[j].Mass;
-#endif
-/*set radial kick direction*/      
-              SphP[j].BhKickVector[0] = -dx;
-              SphP[j].BhKickVector[1] = -dy;
-              SphP[j].BhKickVector[2] = -dz;
-            }
-          
-          else /*particle is a star*/
+          SphP[j].MomentumKickVector[0] = -dx;
+          SphP[j].MomentumKickVector[1] = -dy;
+          SphP[j].MomentumKickVector[2] = -dz;
+
+          /* do supernova */
+          if (snIIflag == 1)
             {
-/*set radial momentum kick*/
-/*uncomment for kernel*/ //SphP[j].MomentumFeed  += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
-                         //All.EnergyExchange[2] += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / bh_rho * wk;
-
-              SphP[j].MomentumFeed  += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass;
-              All.EnergyExchange[2] += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass;
-
-              SphP[j].EnergyFeed    += 0;
-              All.EnergyExchange[4] += 0;
-              
-              SphP[j].MomentumKickVector[0] = -dx;
-              SphP[j].MomentumKickVector[1] = -dy;
-              SphP[j].MomentumKickVector[2] = -dz;
-
-              if (snIIflag == 1)
+              double elements[13] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
+              struct CELibStructFeedbackStarbyStarInput Input = 
                 {
-                  double elements[13] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
-                  struct CELibStructFeedbackStarbyStarInput Input = 
-                    {
-                      .Mass = bh_mass,                 
-                      .Metallicity = 0.0004,          
-                      .MassConversionFactor = 1, 
-                      .Elements = elements,
-                    };
+                  .Mass = star_mass,                 
+                  .Metallicity = 0.0004,          
+                  .MassConversionFactor = 1, 
+                  .Elements = elements,
+                };
 
-                  struct CELibStructFeedbackStarbyStarOutput Output = 
-                  CELibGetFeedbackStarbyStar(Input, CELibFeedbackType_SNII);
+              struct CELibStructFeedbackStarbyStarOutput Output = 
+              CELibGetFeedbackStarbyStar(Input, CELibFeedbackType_SNII);
 
-                  //SphP[j].MomentumFeed  -= All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass;
-                  //All.EnergyExchange[2] -= All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass; 
+              //SphP[j].MomentumFeed  -= All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass;
+              //All.EnergyExchange[2] -= All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass; 
 
-                  SphP[j].EnergyFeed    += Output.Energy / All.UnitEnergy_in_cgs * P[j].Mass / ngbmass;
-                  All.EnergyExchange[4] += Output.Energy / All.UnitEnergy_in_cgs * P[j].Mass / ngbmass;
+              SphP[j].EnergyFeed    += Output.Energy / All.UnitEnergy_in_cgs * P[j].Mass / ngbmass;
+              All.EnergyExchange[4] += Output.Energy / All.UnitEnergy_in_cgs * P[j].Mass / ngbmass;
 
-                  SphP[j].MassFeed      += Output.EjectaMass * P[j].Mass / ngbmass;
+              SphP[j].MassFeed      += Output.EjectaMass * P[j].Mass / ngbmass;
 
-                  snIIremnantmass        = Output.RemnantMass;
-                }
+              snIIremnantmass        = Output.RemnantMass;
+                
             }
         }
     }
 
   out.SNIIRemnantMass = snIIremnantmass;
 
-   /*Now collect the result at the right place*/
+   /* Now collect the result at the right place */
   if(mode == MODE_LOCAL_PARTICLES)
     out2particle(&out, target, MODE_LOCAL_PARTICLES);
   else

@@ -75,14 +75,14 @@ static void out2particle(data_out *out, int i, int mode)
 {
   if(mode == MODE_LOCAL_PARTICLES) /* initial store */
     {
-      StarNumNgb[i]                      = out->Ngb;
+      StarNumNgb[i]                   = out->Ngb;
       SP[i].Density                   = out->Rho;
       SP[i].NgbMass                   = out->Mass;
       SP[i].NgbMinStep                = out->NgbMinStep;
     }
   else /* combine */
     {
-      StarNumNgb[i]                      += out->Ngb;
+      StarNumNgb[i]                   += out->Ngb;
       SP[i].Density                   += out->Rho;
       SP[i].NgbMass                   += out->Mass;
       if(out->NgbMinStep < SP[i].NgbMinStep)
@@ -406,10 +406,10 @@ static int star_density_evaluate(int target, int mode, int threadid)
   else
     ngb_min_step   = (((integertime)1) << bin);
   
-  out.Ngb                     = numngb;
-  out.Rho                     = rho;
-  out.Mass                    = mass;
-  out.NgbMinStep              = ngb_min_step;
+  out.Ngb         = numngb;
+  out.Rho         = rho;
+  out.Mass        = mass;
+  out.NgbMinStep  = ngb_min_step;
 
 /* now collect the result at the right place */
   if(mode == MODE_LOCAL_PARTICLES)
