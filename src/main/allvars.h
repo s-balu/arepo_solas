@@ -1245,21 +1245,29 @@ extern struct global_data_all_processes
 
   double GlobalDisplacementVector[3];
 
-#ifdef BLACKHOLES
+#if defined(STARS) || defined(BLACKHOLES)
   double EnergyExchange[6];
   double EnergyExchangeTot[6];
   int FeedbackFlag;
-
-  /*for parameter file*/
+  /* for parameter file */
   double DesNgbMass;
   double DesMassDev;
   double FeedbackTime;
+#endif
+
+#ifdef BLACKHOLES
+  /* for parameter file */
   double JetFeedback;
   double Ftherm;
   double Epsilon_r;
   double Epsilon_f;
+#endif
+
+#ifdef STARS
+  /* for parameter file */
   double Lambda;
 #endif
+
 } All;
 
 /*****************************************************************************
@@ -1489,13 +1497,18 @@ extern struct sph_particle_data
   MyFloat Weight;
 #endif /* #ifdef ADDBACKGROUNDGRID */
     
+#if defined(STARS) || defined(BLACKHOLES)
+  MyDouble MassFeed;
+#endif
+
 #ifdef BLACKHOLES
-  int PositiveJet;
   MyDouble MassDrain;
   MyDouble ThermalFeed;
   MyDouble KineticFeed;
   MyDouble BhKickVector[3];
-  MyDouble MassFeed;
+#endif
+
+#ifdef STARS
   MyDouble EnergyFeed;
   MyDouble MomentumFeed;
   MyDouble MomentumKickVector[3];
@@ -1523,12 +1536,7 @@ extern struct bh_particle_data
 #ifdef INFALL_ACCRETION
   MyDouble Accretion;
 #endif
-  MyDouble SNIITime;
-  MyDouble SNIIRemnantMass;
-  int SNIIFlag; //=0 before SNII, =1 during SNII (do supernova feedback), =2 after SNII (pause winds)
-  
   integertime NgbMinStep;
-  int IsBh;
   int DensityFlag;
   signed char TimeBinBh;
 }  *BhP
@@ -1544,6 +1552,12 @@ extern struct star_particle_data
   MyDouble Hsml;
   MyDouble Density;
   MyDouble NgbMass;
+  integertime NgbMinStep;
+  int DensityFlag;
+  signed char TimeBinStar;
+  MyDouble SNIITime;
+  MyDouble SNIIRemnantMass;
+  int SNIIFlag; //=0 before SNII, =1 during SNII (do supernova feedback), =2 after SNII (pause winds)
 }  *SP
 
 #define SPP(i) SP[P[i].SID]
