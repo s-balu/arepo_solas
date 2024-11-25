@@ -293,6 +293,7 @@ OBJS    += blackholes/bh_density.o \
            blackholes/bh_refinement.o
 INCL    += blackholes/bh_proto.h
 SUBDIRS += blackholes
+endif
 
 ifeq (STARS,$(findstring STARS,$(CONFIGVARS)))
 OBJS    += stars/star_density.o \

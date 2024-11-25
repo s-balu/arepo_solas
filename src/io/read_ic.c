@@ -223,13 +223,15 @@ void read_ic(const char *fname, int readTypes)
       /* now do the memory allocation */
       if(rep == 0)
         {
-          int max_load, max_sphload, max_bhload;
+          int max_load, max_sphload;
           MPI_Allreduce(&NumPart, &max_load, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
           MPI_Allreduce(&NumGas, &max_sphload, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
 #ifdef BLACKHOLES
+          int max_bhload;
           MPI_Allreduce(&NumBhs, &max_bhload, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
 #endif
 #ifdef STARS
+          int max_starload;
           MPI_Allreduce(&NumStars, &max_starload, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
 #endif
 
@@ -486,7 +488,7 @@ void read_ic(const char *fname, int readTypes)
     }
 
 #ifdef BLACKHOLES
-  int j =0;
+  int j=0;
   for(int i = 0; i<NumPart; i++)
     {
       if(P[i].Type == 5)
@@ -499,8 +501,8 @@ void read_ic(const char *fname, int readTypes)
 #endif
 
 #ifdef STARS
-  int j =0;
-  for(int i = 0; i<NumPart; i++)
+  j=0;
+  for(i = 0; i<NumPart; i++)
     {
       if(P[i].Type == 4)
         {

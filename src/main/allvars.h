@@ -1542,7 +1542,7 @@ extern struct bh_particle_data
   integertime NgbMinStep;
   int DensityFlag;
   signed char TimeBinBh;
-}  *BhP
+}  *BhP;
 
 #define BPP(i) BhP[P[i].BhID]
 #define PPB(i) P[BhP[i].PID]
@@ -1561,7 +1561,7 @@ extern struct star_particle_data
   MyDouble SNIITime;
   MyDouble SNIIRemnantMass;
   int SNIIFlag; //=0 before SNII, =1 during SNII (do supernova feedback), =2 after SNII (pause winds)
-}  *SP
+}  *SP;
 
 #define SPP(i) SP[P[i].SID]
 #define PPS(i) P[SP[i].PID]
