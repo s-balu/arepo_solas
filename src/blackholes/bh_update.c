@@ -446,6 +446,8 @@ void update_list_of_active_star_particles(void)
 
 void perform_end_of_step_physics(void)
 {
+#if defined(STARS) || defined(BLACKHOLES)
+
   int idx, i;
   double pj, p0, cos_theta;
   double kick_vector[3], bh_momentum_kick[3];
@@ -650,7 +652,8 @@ void perform_end_of_step_physics(void)
 #ifdef BURST_MODE
   if(All.EnergyExchangeTot[0] - All.EnergyExchangeTot[1] > 10)  
     All.FeedbackFlag = 1;
-#endif   
+#endif  
+#endif 
 }
 
 static int int_compare(const void *a, const void *b)

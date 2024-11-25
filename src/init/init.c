@@ -573,7 +573,7 @@ int init(void)
 
   free_mesh();
 
-#if defined(BLACKHOLES) || (STARS)
+#if defined(STARS) || (BLACKHOLES)
   /* initialize feedback variables */
   
   for(i=0; i<NumBhs; i++) /* we dont really need to do this as these are set to 0 anyway */
