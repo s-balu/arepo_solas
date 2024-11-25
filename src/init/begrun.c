@@ -147,7 +147,10 @@ void begrun1(void)
   timebins_init(&TimeBinsHydro, "Hydro", &All.MaxPartSph);
   timebins_init(&TimeBinsGravity, "Gravity", &All.MaxPart);
 #ifdef BLACKHOLES 
-  timebins_init(&TimeBinsBh, "Bh", &All.MaxPartBh);
+  timebins_init(&TimeBinsBh, "Bh", &All.MaxPartBhs);
+#endif
+#ifdef STARS 
+  timebins_init(&TimeBinsStar, "Star", &All.MaxPartStars);
 #endif
 
 #if defined(COOLING)

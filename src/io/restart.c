@@ -1250,21 +1250,39 @@ static void contents_restart_file(int modus)
 #endif
 
 #ifdef BLACKHOLES 
-  in(&NumBh, modus);
+  in(&NumBhs, modus);
   
-    if(NumBh > 0)
+    if(NumBhs > 0)
     {
       /* Bh-Particle data  */
-      byten(&BhP[0], NumBh * sizeof(struct bh_particle_data), modus);
+      byten(&BhP[0], NumBhs * sizeof(struct bh_particle_data), modus);
     }
 
   in(&TimeBinsBh.NActiveParticles, modus);
   byten(TimeBinsBh.ActiveParticleList, TimeBinsBh.NActiveParticles * sizeof(int), modus);
-  byten(TimeBinsBh.NextInTimeBin, NumBh * sizeof(int), modus);
-  byten(TimeBinsBh.PrevInTimeBin, NumBh * sizeof(int), modus);
+  byten(TimeBinsBh.NextInTimeBin, NumBhs * sizeof(int), modus);
+  byten(TimeBinsBh.PrevInTimeBin, NumBhs * sizeof(int), modus);
   byten(TimeBinsBh.TimeBinCount, TIMEBINS * sizeof(int), modus);
   byten(TimeBinsBh.FirstInTimeBin, TIMEBINS * sizeof(int), modus);
   byten(TimeBinsBh.LastInTimeBin, TIMEBINS * sizeof(int), modus);
+#endif
+
+#ifdef STARS 
+  in(&NumStars, modus);
+  
+    if(NumStars > 0)
+    {
+      /* Bh-Particle data  */
+      byten(&BhP[0], NumStars * sizeof(struct star_particle_data), modus);
+    }
+
+  in(&TimeBinsStar.NActiveParticles, modus);
+  byten(TimeBinsStar.ActiveParticleList, TimeBinsStar.NActiveParticles * sizeof(int), modus);
+  byten(TimeBinsStar.NextInTimeBin, NumStars * sizeof(int), modus);
+  byten(TimeBinsStar.PrevInTimeBin, NumStars * sizeof(int), modus);
+  byten(TimeBinsStar.TimeBinCount, TIMEBINS * sizeof(int), modus);
+  byten(TimeBinsStar.FirstInTimeBin, TIMEBINS * sizeof(int), modus);
+  byten(TimeBinsStar.LastInTimeBin, TIMEBINS * sizeof(int), modus);
 #endif
 
   polling(modus);

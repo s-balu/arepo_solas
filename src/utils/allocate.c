@@ -112,6 +112,9 @@ void allocate_memory(void)
 #ifdef BLACKHOLES
   timebins_allocate(&TimeBinsBh);
 #endif
+#ifdef STARS
+  timebins_allocate(&TimeBinsStar);
+#endif
 
   /* set to zero */
   memset(P, 0, All.MaxPart * sizeof(struct particle_data));
@@ -168,7 +171,7 @@ void reallocate_memory_maxpartstars(void)
   mpi_printf("ALLOCATE: Changing to MaxPartStars= %d\n", All.MaxPartStars);
 
   SP = (struct star_particle_data *)myrealloc_movable(SP, All.MaxPartStars * sizeof(struct stat_particle_data));
-  timebins_reallocate(&TimeBinsBh);
+  timebins_reallocate(&TimeBinsStar);
 }
 #endif
 

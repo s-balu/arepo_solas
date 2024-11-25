@@ -108,6 +108,9 @@ struct TimeBinData TimeBinsHydro, TimeBinsGravity;
 #ifdef BLACKHOLES
 struct TimeBinData TimeBinsBh;
 #endif
+#ifdef STARS
+struct TimeBinData TimeBinsStar;
+#endif
 
 #ifdef USE_SFR
 double TimeBinSfr[TIMEBINS];

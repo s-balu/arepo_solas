@@ -94,7 +94,7 @@ static void kernel_local(void)
 #pragma omp atomic capture
         idx = NextParticle++;
 
-        if(idx >= NumBh)
+        if(idx >= NumBhs)
           break;
 
         //if(BPP(idx).SwallowID == 0)
@@ -142,7 +142,7 @@ void blackhole_mark_cells_for_refinement(void)
     }
 
   generic_set_MaxNexport();
-  generic_comm_pattern(NumBh, kernel_local, kernel_imported);
+  generic_comm_pattern(NumBhs, kernel_local, kernel_imported);
 
   int refcount_can = 0, refcount = 0;
   long long totrefcount = 0, totrefcount_can = 0;

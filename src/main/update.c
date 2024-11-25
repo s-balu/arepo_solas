@@ -202,7 +202,7 @@ void update_bh_accretion_rate(void)
 
   accretion_rate = acc_rate_for_print = 0;
 
-  for(i = 0; i < NumBh; i++)
+  for(i = 0; i < NumBhs; i++)
     {
       if(BhP[i].IsBh) // is bh -> compute accretion rate
         {

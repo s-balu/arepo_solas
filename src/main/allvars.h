@@ -665,6 +665,9 @@ extern struct TimeBinData TimeBinsHydro, TimeBinsGravity;
 #ifdef BLACKHOLES
 extern struct TimeBinData TimeBinsBh;
 #endif
+#ifdef STARS
+extern struct TimeBinData TimeBinsStar;
+#endif
 
 #ifdef USE_SFR
 extern double TimeBinSfr[TIMEBINS];
