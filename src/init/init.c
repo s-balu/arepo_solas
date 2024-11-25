@@ -575,12 +575,6 @@ int init(void)
 
 #if defined(STARS) || defined(BLACKHOLES)
   /* initialize feedback variables */
-  
-  for(i=0; i<NumBhs; i++) /* we dont really need to do this as these are set to 0 anyway */
-    BhP[i].DensityFlag = 1;
-  for(i=0; i<NumStars; i++) /* we dont really need to do this as these are set to 0 anyway */
-    SP[i].DensityFlag = 1;
-
   All.FeedbackFlag = 1;
   All.EnergyExchange[0] = All.EnergyExchange[1] = 0;
   All.EnergyExchange[2] = All.EnergyExchange[3] = 0;

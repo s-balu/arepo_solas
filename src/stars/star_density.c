@@ -184,10 +184,8 @@ void star_density(void)
 
   for(i = 0; i < NumStars; i++)
     {
-      if(star_density_isactive(i))
-        {
-          Left[i] = Right[i] = 0;
-        }
+      Left[i] = Right[i] = 0;
+      SP[i].DensityFlag = 1;
     }
 
   generic_set_MaxNexport();

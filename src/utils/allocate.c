@@ -170,7 +170,7 @@ void reallocate_memory_maxpartstars(void)
 {
   mpi_printf("ALLOCATE: Changing to MaxPartStars= %d\n", All.MaxPartStars);
 
-  SP = (struct star_particle_data *)myrealloc_movable(SP, All.MaxPartStars * sizeof(struct stat_particle_data));
+  SP = (struct star_particle_data *)myrealloc_movable(SP, All.MaxPartStars * sizeof(struct star_particle_data));
   timebins_reallocate(&TimeBinsStar);
 }
 #endif

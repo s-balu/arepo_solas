@@ -245,11 +245,11 @@ struct sph_particle_data *SphP, /*!< holds SPH particle data on local processor 
     *DomainSphBuf;              /*!< buffer for SPH particle data in domain decomposition */
 
 #ifdef BLACKHOLES
-struct bh_particle_data *BhP
+struct bh_particle_data *BhP;
 #endif 
 
 #ifdef STARS
-struct star_particle_data *SP
+struct star_particle_data *SP;
 #endif
 
 #ifdef EXACT_GRAVITY_FOR_PARTICLE_TYPE

@@ -441,7 +441,7 @@ void calculate_non_standard_physics_prior_mesh_construction(void)
  */
 void calculate_non_standard_physics_end_of_step(void)
 {
-#if defined (STARS) || (BLACKHOLES)
+#if defined (STARS) || defined(BLACKHOLES)
   perform_end_of_step_physics();
 #endif 
 

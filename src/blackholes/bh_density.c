@@ -227,10 +227,8 @@ void bh_density(void)
 
   for(i = 0; i < NumBhs; i++)
     {
-      if(bh_density_isactive(i))
-        {
-          Left[i] = Right[i] = 0;
-        }
+      Left[i] = Right[i] = 0;
+      BhP[i].DensityFlag = 1;
     }
 
   generic_set_MaxNexport();

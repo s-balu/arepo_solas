@@ -161,7 +161,7 @@ static int star_ngb_feedback_evaluate(int target, int mode, int threadid)
 {
   int j, n, bin, snIIflag; 
   int numnodes, *firstnode;
-  double h, h2, hinv, hinv3, hinv4, 
+  double h, h2, hinv, hinv3, hinv4; 
   double dx, dy, dz, r, r2, u, wk, dwk, dt;
   MyDouble *pos, star_density, star_mass, ngbmass, energyfeed, snIIremnantmass;
 
@@ -207,7 +207,7 @@ static int star_ngb_feedback_evaluate(int target, int mode, int threadid)
   //dtime = All.cf_atime * dt / All.cf_time_hubble_a;
 
   /* stellar wind */    
-  double EddingtonLuminosity = 4. * M_PI * GRAVITY * (bh_mass * All.UnitMass_in_g) * PROTONMASS * CLIGHT / THOMPSON;
+  double EddingtonLuminosity = 4. * M_PI * GRAVITY * (star_mass * All.UnitMass_in_g) * PROTONMASS * CLIGHT / THOMPSON;
   EddingtonLuminosity *=  (All.UnitTime_in_s / (All.UnitMass_in_g*pow(All.UnitVelocity_in_cm_per_s,2)));
   energyfeed = EddingtonLuminosity * dt;
   /* supernova */    
