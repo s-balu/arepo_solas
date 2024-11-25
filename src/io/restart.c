@@ -1272,8 +1272,8 @@ static void contents_restart_file(int modus)
   
     if(NumStars > 0)
     {
-      /* Bh-Particle data  */
-      byten(&BhP[0], NumStars * sizeof(struct star_particle_data), modus);
+      /* Star-Particle data  */
+      byten(&SP[0], NumStars * sizeof(struct star_particle_data), modus);
     }
 
   in(&TimeBinsStar.NActiveParticles, modus);

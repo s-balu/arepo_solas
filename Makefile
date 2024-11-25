@@ -297,12 +297,12 @@ endif
 
 ifeq (STARS,$(findstring STARS,$(CONFIGVARS)))
 OBJS    += stars/star_density.o \
-           stars/star_feedback.o \
+           stars/star_feedback.o 
 INCL    += stars/star_proto.h
 SUBDIRS += stars
 
 OBJS    += celib/src/SNIIYields.o \
-           celib/src/LifeTime.o \
+           celib/src/LifeTime.o 
 	   
 INCL    += celib/src/Astro.h \
            celib/src/CELib.h \
@@ -312,6 +312,8 @@ INCL    += celib/src/Astro.h \
 SUBDIRS += celib/src \
            celib/data
 endif
+
+OBJS    += main/update.o
 
 
 ################################

@@ -243,11 +243,9 @@ void read_ic(const char *fname, int readTypes)
           All.MaxPart    = max_load / (1.0 - 2 * ALLOC_TOLERANCE);
           All.MaxPartSph = max_sphload / (1.0 - 2 * ALLOC_TOLERANCE);
 #ifdef BLACKHOLES
-          
           All.MaxPartBhs  = max_bhload / (1.0 - 2 * ALLOC_TOLERANCE);
 #endif
-#ifdef BLACKHOLES
-          
+#ifdef STARS
           All.MaxPartStars  = max_starload / (1.0 - 2 * ALLOC_TOLERANCE);
 #endif
 
@@ -488,27 +486,27 @@ void read_ic(const char *fname, int readTypes)
     }
 
 #ifdef BLACKHOLES
-  int j=0;
-  for(int i = 0; i<NumPart; i++)
+  int jb=0;
+  for(int ib = 0; ib<NumPart; ib++)
     {
-      if(P[i].Type == 5)
+      if(P[ib].Type == 5)
         {
-          P[i].BhID = j;
-          BhP[j].PID = i;
-          j++;
+          P[ib].BhID = jb;
+          BhP[jb].PID = ib;
+          jb++;
         }
     }
 #endif
 
 #ifdef STARS
-  j=0;
-  for(i = 0; i<NumPart; i++)
+  int js=0;
+  for(int is = 0; is<NumPart; is++)
     {
-      if(P[i].Type == 4)
+      if(P[is].Type == 4)
         {
-          P[i].SID = j;
-          SP[j].PID = i;
-          j++;
+          P[is].SID = js;
+          SP[js].PID = is;
+          js++;
         }
     }
 #endif

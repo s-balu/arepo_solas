@@ -1502,16 +1502,10 @@ extern struct sph_particle_data
     
 #if defined(STARS) || defined(BLACKHOLES)
   MyDouble MassFeed;
-#endif
-
-#ifdef BLACKHOLES
   MyDouble MassDrain;
   MyDouble ThermalFeed;
   MyDouble KineticFeed;
   MyDouble BhKickVector[3];
-#endif
-
-#ifdef STARS
   MyDouble EnergyFeed;
   MyDouble MomentumFeed;
   MyDouble MomentumKickVector[3];

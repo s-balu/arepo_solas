@@ -73,7 +73,6 @@ static void particle2in(data_in *in, int i, int firstnode)
 
 typedef struct
 {
-  MyDouble SNIIRemnantMass;
 } data_out;
 
 static data_out *DataResult, *DataOut;
