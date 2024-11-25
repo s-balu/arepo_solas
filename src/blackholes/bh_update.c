@@ -9,7 +9,7 @@
 #include "../main/proto.h"
 
 
-/*THIS PART ADAPTED FROM GADGET4*/
+/* THIS PART ADAPTED FROM GADGET4 */
 /* fall back to cubic spline kernel */
 #if !defined(CUBIC_SPLINE_KERNEL) && !defined(WENDLAND_C2_KERNEL) && !defined(WENDLAND_C4_KERNEL) && !defined(WENDLAND_C6_KERNEL)
 #define CUBIC_SPLINE_KERNEL 
@@ -87,7 +87,7 @@
 
 static int int_compare(const void *a, const void *b);
 
-/*sph loop kernel function -> u < 1 */
+/* sph loop kernel function -> u < 1 */
 void kernel(double u, double hinv3, double hinv4, double *wk, double *dwk)
 {
 #ifdef CUBIC_SPLINE_KERNEL
@@ -188,12 +188,13 @@ void kernel(double u, double hinv3, double hinv4, double *wk, double *dwk)
   
   *wk *= NORM * hinv3;
 }
-/*THIS PART ADAPTED FROM GADGET4*/
+/* THIS PART ADAPTED FROM GADGET4 */
 
-#ifdef BONDI_ACCRETION
+#ifdef BLACKHOLES
+#ifdef BONDI_ACCRETION 
 void update_bh_accretion_rate(void)
 {
-  /*calculate bondi accretion rate*/
+  /* calculate bondi accretion rate */
   int i;
   double density, pressure, sound_speed, velocity_gas_norm;
   double denominator, denominator_inv, BondiRate, EddingtonRate;
@@ -203,15 +204,15 @@ void update_bh_accretion_rate(void)
 
   for(i = 0; i < NumBh; i++)
     {
-      if(BhP[i].IsBh)/*is bh -> compute accretion rate*/
+      if(BhP[i].IsBh) // is bh -> compute accretion rate
         {
-/*get pressure*/
+          /* get pressure */
           if(BhP[i].Density>0)
             {  
               density = BhP[i].Density;
               pressure = GAMMA_MINUS1 * density * BhP[i].InternalEnergyGas;
 
-/*get soundspeed*/
+              /* get soundspeed */
               sound_speed = sqrt(GAMMA * pressure / density);
       
               velocity_gas_norm = sqrt(BhP[i].VelocityGas[0]*BhP[i].VelocityGas[0] + 
@@ -230,7 +231,7 @@ void update_bh_accretion_rate(void)
           else
             BondiRate = 0;
   
-/*limit by Eddington accretion rate*/
+          /* limit by Eddington accretion rate */
           EddingtonRate = 4. * M_PI * GRAVITY * (PPB(i).Mass * All.UnitMass_in_g) * PROTONMASS / (All.Epsilon_r * CLIGHT * THOMPSON);
           EddingtonRate *=  (All.UnitTime_in_s / All.UnitMass_in_g);
           accretion_rate = fmin(BondiRate, EddingtonRate);
@@ -244,46 +245,47 @@ void update_bh_accretion_rate(void)
   mpi_printf("BLACK_HOLES: Black hole accretion rate: %e \n", acc_rate_for_print);
 }
 #endif
+#endif
 
-/*update the SNII flag*/
+#ifdef STARS
+/* update the SNII flag */
 void update_SNII(void)
 {
   int i;
   
-  for(i=0; i<NumBh; i++)
+  for(i=0; i<NumStars; i++)
     {
-      if(BhP[i].SNIIRemnantMass) //change this for appropriate flag
+      if(SP[i].SNIIRemnantMass) // change this for appropriate flag
         {
-          PPB(i).Mass = BhP[i].SNIIRemnantMass;
-          BhP[i].SNIIRemnantMass = 0;
-          BhP[i].SNIIFlag = 2;
+          PPS(i).Mass = SP[i].SNIIRemnantMass;
+          SP[i].SNIIRemnantMass = 0;
+          SP[i].SNIIFlag = 2;
           continue;
         }
 
-      if(BhP[i].SNIIFlag == 2)
+      if(SP[i].SNIIFlag == 2)
         continue;
 
-      if(All.Time > BhP[i].SNIITime / All.UnitTime_in_Megayears)
-        BhP[i].SNIIFlag = 1; 
+      if(All.Time > SP[i].SNIITime / All.UnitTime_in_Megayears)
+        SP[i].SNIIFlag = 1; 
     } 
 }
+#endif
 
-/*get timestep for bh based on smallest between ngbs*/
+#ifdef BLACKHOLES
+/* get timestep for bh based on smallest between ngbs */
 integertime get_timestep_bh(int p)
-{
-  if(PPB(p).Mass < 5)
-    return All.TimeMax / All.Timebase_interval;
-  
+{ 
   return BhP[p].NgbMinStep;
 }
 
-/*update bh-timestep at prior_mesh_construction*/
+/* update bh-timestep at prior_mesh_construction */
 void update_bh_timesteps(void)
 {
   int i, bin;
   integertime ti_step;
 
-  for(i = 0; i < NumBh; i++)
+  for(i = 0; i < NumBhs; i++)
     { 
       ti_step = get_timestep_bh(i);
       //binold = BhP[i].TimeBinBh;
@@ -296,7 +298,7 @@ void update_bh_timesteps(void)
   update_list_of_active_bh_particles();
 }
 
-/*call this function as the reconstruct_timebins() bh version*/
+/* call this function as the reconstruct_timebins() bh version */
 void reconstruct_bh_timebins(void)
 {
   int i, bin;
@@ -308,7 +310,7 @@ void reconstruct_bh_timebins(void)
       TimeBinsBh.LastInTimeBin[bin]  = -1;
     }
   
-  for(i = 0; i < NumBh; i++)
+  for(i = 0; i < NumBhs; i++)
     {
       
       bin = BhP[i].TimeBinBh;
@@ -331,7 +333,7 @@ void reconstruct_bh_timebins(void)
     }
 }
 
-/*call this function after updating the bh-timebin to the ngb condition*/
+/* call this function after updating the bh-timebin to the ngb condition */
 void update_list_of_active_bh_particles(void)
 {
   int i, n;
@@ -360,8 +362,89 @@ void update_list_of_active_bh_particles(void)
 
   TimeBinsBh.GlobalNActiveParticles = out;*/
 }
+#endif
 
-void perform_end_of_step_bh_physics(void)
+#ifdef STARS
+/* get timestep for star based on smallest between ngbs */
+integertime get_timestep_star(int p)
+{ 
+  return SP[p].NgbMinStep;
+}
+
+void update_star_timesteps(void)
+{
+  int i, bin;
+  integertime ti_step;
+
+  for(i = 0; i < NumStars; i++)
+    { 
+      ti_step = get_timestep_star(i);
+    
+      bin = get_timestep_bin(ti_step);
+
+      SP[i].TimeBinStar = bin;
+    }
+  reconstruct_star_timebins();
+  update_list_of_active_star_particles();
+}
+
+/* call this function as the reconstruct_timebins() star version */
+void reconstruct_star_timebins(void)
+{
+  int i, bin;
+
+  for(bin = 0; bin < TIMEBINS; bin++)
+    {
+      TimeBinsStar.TimeBinCount[bin]   = 0;
+      TimeBinsStar.FirstInTimeBin[bin] = -1;
+      TimeBinsStar.LastInTimeBin[bin]  = -1;
+    }
+  
+  for(i = 0; i < NumStars; i++)
+    {
+      
+      bin = SP[i].TimeBinStar;
+      if(bin >= TIMEBINS)
+        continue;
+
+      if(TimeBinsStar.TimeBinCount[bin] > 0)
+        {
+          TimeBinsStar.PrevInTimeBin[i]                                  = TimeBinsStar.LastInTimeBin[bin];
+          TimeBinsStar.NextInTimeBin[i]                                  = -1;
+          TimeBinsStar.NextInTimeBin[TimeBinsStar.LastInTimeBin[bin]]    = i;
+          TimeBinsStar.LastInTimeBin[bin]                                = i;
+        }
+      else
+        {
+          TimeBinsStar.FirstInTimeBin[bin] = TimeBinsStar.LastInTimeBin[bin] = i;
+          TimeBinsStar.PrevInTimeBin[i] = TimeBinsStar.NextInTimeBin[i] = -1;
+        }
+      TimeBinsStar.TimeBinCount[bin]++;
+    }
+}
+
+/* call this function after updating the star-timebin to the ngb condition */
+void update_list_of_active_star_particles(void)
+{
+  int i, n;
+  TimeBinsStar.NActiveParticles = 0;
+  for(n = 0; n < TIMEBINS; n++)
+    {
+      if(TimeBinSynchronized[n]) 
+        {
+          for(i = TimeBinsStar.FirstInTimeBin[n]; i >= 0; i = TimeBinsStar.NextInTimeBin[i])
+            {
+              TimeBinsStar.ActiveParticleList[TimeBinsStar.NActiveParticles] = i;
+              TimeBinsStar.NActiveParticles++;  
+            }
+        }
+    }
+
+    mysort(TimeBinsStar.ActiveParticleList, TimeBinsStar.NActiveParticles, sizeof(int), int_compare);
+}
+#endif
+
+void perform_end_of_step_physics(void)
 {
   int idx, i;
   double pj, p0, cos_theta;
@@ -369,11 +452,12 @@ void perform_end_of_step_bh_physics(void)
 
   bh_momentum_kick[0] = bh_momentum_kick[1] = bh_momentum_kick[2] = 0;
 
+#ifdef BLACKHOLES
 #ifdef BONDI_ACCRETION
   int j, bin;
   double dt;
-/*accrete mass, angular momentum onto the bh and drain ngb cells*/
-  for(i=0; i<NumBh; i++)
+  /* accrete mass, angular momentum onto the bh and drain ngb cells */
+  for(i=0; i<NumBhs; i++)
     {
       bin = BhP[i].TimeBinBh;
       dt  = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
@@ -392,12 +476,12 @@ void perform_end_of_step_bh_physics(void)
                 {
                   P[j].Mass -= 0.9*P[j].Mass;
                   BhP[i].MassToDrain += SphP[j].MassDrain - 0.9*P[j].Mass; 
-                  /*we're also losing thermal and kinetic energy & momentum*/
+                  /* we're also losing thermal and kinetic energy & momentum */
                 
-                  /*update total energy*/
+                  /* update total energy */
                   SphP[j].Energy *= 0.1;
 
-                  /*update momentum*/
+                  /* update momentum */
                   SphP[j].Momentum[0] *= 0.1;
                   SphP[j].Momentum[1] *= 0.1;
                   SphP[j].Momentum[2] *= 0.1;
@@ -406,10 +490,10 @@ void perform_end_of_step_bh_physics(void)
                 {
                   P[j].Mass -= SphP[j].MassDrain;
                 
-                  /*update total energy*/
+                  /* update total energy */
                   SphP[j].Energy *= (P[j].Mass)/(P[j].Mass + SphP[j].MassDrain);
 
-                  /*update momentum*/
+                  /* update momentum */
                   SphP[j].Momentum[0] *= (P[j].Mass)/(P[j].Mass + SphP[j].MassDrain);
                   SphP[j].Momentum[1] *= (P[j].Mass)/(P[j].Mass + SphP[j].MassDrain);
                   SphP[j].Momentum[2] *= (P[j].Mass)/(P[j].Mass + SphP[j].MassDrain);
@@ -420,15 +504,18 @@ void perform_end_of_step_bh_physics(void)
         }
     }
 #endif
+
 #ifdef INFALL_ACCRETION
-  for(i=0; i<NumBh; i++)
+  for(i=0; i<NumBhs; i++)
     {
       PPB(i).Mass += (1-All.Epsilon_r) * BhP[i].Accretion;
       BhP[i].Accretion = 0;
     }
 #endif
+#endif
 
-/*for SNII*/
+#ifdef STARS
+  /* for SNII */
   for(i=0; i<NumGas; i++)
     {
       if(SphP[i].MassFeed > 0)
@@ -437,8 +524,9 @@ void perform_end_of_step_bh_physics(void)
         SphP[i].MassFeed = 0;
        }  
     }
+#endif
 
-/*inject feedback to ngb cells*/
+    /* inject feedback to ngb cells */
     if(All.Time >= All.FeedbackTime)
     {   
       if(All.FeedbackFlag > 0)
@@ -459,10 +547,10 @@ void perform_end_of_step_bh_physics(void)
               if(i < 0)
               continue;
 
-/*dump energy and momentum injected by bh*/
+              /* dump energy and momentum injected by bh */
               if(SphP[i].KineticFeed > 0)
                 {
-                  /*calculate momentum feed exactly so energy is conserved*/
+                  /* calculate momentum feed exactly so energy is conserved */
                   /*-> we need to do this here so that particle properties don't change between loading the buffer and emptying it*/
                   kick_vector[0] = SphP[i].BhKickVector[0];
                   kick_vector[1] = SphP[i].BhKickVector[1];
@@ -485,30 +573,30 @@ void perform_end_of_step_bh_physics(void)
 
               if(SphP[i].ThermalFeed > 0 || SphP[i].KineticFeed > 0)
                 {
-                  /*update total energy*/
+                  /* update total energy */
                   SphP[i].Energy += SphP[i].ThermalFeed + SphP[i].KineticFeed;
                   All.EnergyExchange[1] += SphP[i].ThermalFeed + SphP[i].KineticFeed;
-                  /*update momentum*/
+                  /* update momentum */
                     SphP[i].Momentum[0] += bh_momentum_kick[0];
                     SphP[i].Momentum[1] += bh_momentum_kick[1];
                     SphP[i].Momentum[2] += bh_momentum_kick[2];
-                  /*update velocities*/
+                  /* update velocities */
                   update_primitive_variables_single(P, SphP, i, &pvd);
-                  /*update internal energy*/
+                  /* update internal energy */
                   update_internal_energy(P, SphP, i, &pvd);
-                  /*update pressure*/
+                  /* update pressure */
                   set_pressure_of_cell_internal(P, SphP, i);
-                  /*set feed flags to zero*/
+                  /* set feed flags to zero */
                   SphP[i].ThermalFeed = SphP[i].KineticFeed = 0;
                   bh_momentum_kick[0] = bh_momentum_kick[1] = bh_momentum_kick[2] = 0;
 #ifdef PASSIVE_SCALARS                 
-                  /*tracer field advected passively*/
+                  /* tracer field advected passively */
                   SphP[i].PScalars[0] = 1;
                   SphP[i].PConservedScalars[0] = P[i].Mass;
 #endif
                 }
             
-/*dump energy and momentum injected by stars*/              
+              /* dump energy and momentum injected by stars */              
               if(SphP[i].MomentumFeed > 0 || SphP[i].EnergyFeed > 0)
                 {
                   kick_vector[0] = SphP[i].MomentumKickVector[0];
@@ -516,29 +604,29 @@ void perform_end_of_step_bh_physics(void)
                   kick_vector[2] = SphP[i].MomentumKickVector[2];
                   pj = SphP[i].MomentumFeed;
 
-                  /*update momentum*/
+                  /* update momentum */
                   SphP[i].Momentum[0] += kick_vector[0] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
                   SphP[i].Momentum[1] += kick_vector[1] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
                   SphP[i].Momentum[2] += kick_vector[2] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));  
 
                   All.EnergyExchange[3] += SphP[i].MomentumFeed;     
                  
-                  /*update velocities*/
+                  /* update velocities */
                   update_primitive_variables_single(P, SphP, i, &pvd);  
 
-                  /*update total energy*/
+                  /* update total energy */
                   SphP[i].Energy = SphP[i].Utherm * P[i].Mass + SphP[i].EnergyFeed + 
                     0.5 * P[i].Mass * (pow(P[i].Vel[0], 2) + pow(P[i].Vel[1], 2) + pow(P[i].Vel[2], 2));
                   All.EnergyExchange[5] += SphP[i].EnergyFeed;               
-                  /*update internal energy*/
+                  /* update internal energy */
                   update_internal_energy(P, SphP, i, &pvd);
-                  /*update pressure*/
+                  /* update pressure */
                   set_pressure_of_cell_internal(P, SphP, i);
-                  /*set feed flag to zero*/
+                  /* set feed flag to zero */
                   SphP[i].MomentumFeed = 0;
                   SphP[i].EnergyFeed   = 0;
 #ifdef PASSIVE_SCALARS                 
-                  /*tracer field advected passively*/
+                  /* tracer field advected passively */
                   SphP[i].PScalars[0] = 1;
                   SphP[i].PConservedScalars[0] = P[i].Mass;
 #endif
