@@ -3,11 +3,21 @@
 ##################################################
 #  Enable/Disable compile-time options as needed #
 ##################################################
+#->INCLUDE STARS/BLACKHOLES
 STARS
 BLACKHOLES
+
+#->TURN ON FOR DISCRETE FEEDBACK EVENTS (OTHERWISE EVERY TIMESTEP)
 #BURST_MODE
+
+#->PICK BH ACCRETION MODE
 BONDI_ACCRETION
+#INFALL_ACCRETION
+
+#->PICK KERNEL FOR FEEDBACK
 WENDLAND_C2_KERNEL
+
+#->THIS IS FOR BH-REFINEMENT
 #REFINEMENT_AROUND_BH=0
 #REFINEMENT_AROUND_BH_FIXED
 #--------------------------------------- Basic operation mode of code; default: 3d with 6 particle types; type 0: gas >0: only gravitationally interacting

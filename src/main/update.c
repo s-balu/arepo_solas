@@ -204,40 +204,37 @@ void update_bh_accretion_rate(void)
 
   for(i = 0; i < NumBhs; i++)
     {
-      if(BhP[i].IsBh) // is bh -> compute accretion rate
-        {
-          /* get pressure */
-          if(BhP[i].Density>0)
-            {  
-              density = BhP[i].Density;
-              pressure = GAMMA_MINUS1 * density * BhP[i].InternalEnergyGas;
+      /* get pressure */
+      if(BhP[i].Density>0)
+        {  
+          density = BhP[i].Density;
+          pressure = GAMMA_MINUS1 * density * BhP[i].InternalEnergyGas;
 
-              /* get soundspeed */
-              sound_speed = sqrt(GAMMA * pressure / density);
+          /* get soundspeed */
+          sound_speed = sqrt(GAMMA * pressure / density);
       
-              velocity_gas_norm = sqrt(BhP[i].VelocityGas[0]*BhP[i].VelocityGas[0] + 
-              BhP[i].VelocityGas[1]*BhP[i].VelocityGas[1] + BhP[i].VelocityGas[2]*BhP[i].VelocityGas[2]); 
+          velocity_gas_norm = sqrt(BhP[i].VelocityGas[0]*BhP[i].VelocityGas[0] + 
+            BhP[i].VelocityGas[1]*BhP[i].VelocityGas[1] + BhP[i].VelocityGas[2]*BhP[i].VelocityGas[2]); 
 
-              denominator = (sound_speed*sound_speed + velocity_gas_norm*velocity_gas_norm);
-              if(denominator > 0)
-                {
-                  denominator_inv = 1. / sqrt(denominator);
-                  BondiRate = 4. * M_PI * All.G * All.G * PPB(i).Mass * PPB(i).Mass * density *
-                  denominator_inv * denominator_inv * denominator_inv;
-                }
-              else
-                terminate("Invalid denominator in Bondi Accretion Rate");
+          denominator = (sound_speed*sound_speed + velocity_gas_norm*velocity_gas_norm);
+          if(denominator > 0)
+            {
+              denominator_inv = 1. / sqrt(denominator);
+              BondiRate = 4. * M_PI * All.G * All.G * PPB(i).Mass * PPB(i).Mass * density *
+              denominator_inv * denominator_inv * denominator_inv;
             }
           else
-            BondiRate = 0;
-  
-          /* limit by Eddington accretion rate */
-          EddingtonRate = 4. * M_PI * GRAVITY * (PPB(i).Mass * All.UnitMass_in_g) * PROTONMASS / (All.Epsilon_r * CLIGHT * THOMPSON);
-          EddingtonRate *=  (All.UnitTime_in_s / All.UnitMass_in_g);
-          accretion_rate = fmin(BondiRate, EddingtonRate);
-      
-          BhP[i].AccretionRate  = accretion_rate;
+            terminate("Invalid denominator in Bondi Accretion Rate");
         }
+      else
+        BondiRate = 0;
+  
+      /* limit by Eddington accretion rate */
+      EddingtonRate = 4. * M_PI * GRAVITY * (PPB(i).Mass * All.UnitMass_in_g) * PROTONMASS / (All.Epsilon_r * CLIGHT * THOMPSON);
+      EddingtonRate *=  (All.UnitTime_in_s / All.UnitMass_in_g);
+      accretion_rate = fmin(BondiRate, EddingtonRate);
+      
+      BhP[i].AccretionRate  = accretion_rate;
     }
  
   MPI_Allreduce(&accretion_rate, &acc_rate_for_print, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);

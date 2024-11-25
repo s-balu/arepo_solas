@@ -110,14 +110,26 @@ SofteningTypeOfPartType2                  2
 SofteningTypeOfPartType3                  3
 SofteningTypeOfPartType4                  4
 SofteningTypeOfPartType5                  5
+
+%%DESIRED NGB MASS FOR FEEDBACK
 DesNgbMass                                4.3
 DesMassDev                                0.1
+
+%%TIME TO TURN ON FEEDBACK
 FeedbackTime                              0
-JetFeedback                               0
-Ftherm                                    1
-Epsilon_f                                 0
+
+%%SET TO 1 TO INCLUDE BH JET FEEDBACK
+JetFeedback                               1
+
+%%FRACTION OF ENERGY GIVEN IN THERMAL FORM IN BH FEEDBACK
+Ftherm                                    0.5
+
+%%FEEDBACK PARAMETERS
+Epsilon_f                                 1
 Epsilon_r                                 0.1
 Lambda                                    0.05
+
+%%THIS IS FOR BH REFINEMENT
 %RefBHRadius                               0.1
 %RefBHMinCellRadius                        1e-8
 %RefBHMaxCellRadius                        1e-4
@@ -126,4 +138,5 @@ Lambda                                    0.05
 %RefBHMaxCellRadiusHSML                    0.2
 %RefBHMinCellMass                          1e-12
 %RefBHLowerFactorC                         2
+
 %GridSize                                 16
