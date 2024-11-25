@@ -1,24 +1,11 @@
 # AREPO Makefile
-#
-# If you add a new system below, also add that systype to Template-Makefile.systype
-
 EXEC   = Arepo
 LIBRARY = arepo
 CONFIG   = Config.sh
-#CONFIG   = Config_MESHRELAX.sh
-#CONFIG   = Config_ADDBACKGROUNDGRID.sh
 BUILD_DIR = build
 SRC_DIR = src
 
-###################
-#determine SYSTYPE#
-###################
-ifdef SYSTYPE
-SYSTYPE := "$(SYSTYPE)"
--include Makefile.systype
-else
-include Makefile.systype
-endif
+SYSTYPE := "$ LINUX"
 
 MAKEFILES = Makefile config-makefile
 ifeq ($(wildcard Makefile.systype), Makefile.systype)
@@ -45,14 +32,12 @@ GSL_LIB    = -lgsl -lgslcblas
 MATH_LIB   = -lm -lstdc++
 HWLOC_LIB  = -lhwloc
 
-
-# e.g. Mac OS using MacPorts modules for openmpi, fftw, gsl, hdf5 and hwloc
+#Mac OS using MacPorts modules for openmpi, fftw, gsl, hdf5 and hwloc
 ifeq ($(SYSTYPE),"Darwin")
 # compiler and its optimization options
 CC        =  mpicc   # sets the C-compiler
 OPTIMIZE  =  -std=c11 -ggdb -O3 -Wall -Wno-format-security -Wno-unknown-pragmas -Wno-unused-function
 
-# overwrite default:
 MPICH_LIB = -lmpi
 GSL_INCL  = -I/opt/local/include
 GSL_LIB   = -L/opt/local/lib -lgsl -lgslcblas
@@ -67,12 +52,12 @@ HWLOC_INCL= -I/opt/local/include
 endif
 # end of Darwin
 
-# Ubuntu Linux
-ifeq ($(SYSTYPE),"Ubuntu")
+#Linux
+ifeq ($(SYSTYPE),"LINUX")
 # compiler and its optimization options
+CC        =  mpicc
 OPTIMIZE  =  -std=c11 -ggdb -O3 -Wall -Wno-format-security -Wno-unknown-pragmas -Wno-unused-function
 
-# overwrite default:
 MPICH_INCL= -I/usr/lib/x86_64-linux-gnu/openmpi/include/
 MPICH_LIB = -L/usr/lib/x86_64-linux-gnu/openmpi/lib/ -lmpi
 GSL_INCL  =
@@ -86,16 +71,11 @@ HDF5_INCL = -I/usr/include/hdf5/serial/ -DH5_USE_16_API
 HDF5_LIB  = -L/usr/lib/x86_64-linux-gnu/hdf5/serial/ -lhdf5 -lz
 HWLOC_INCL=
 endif
-# end of Ubuntu
-
-
-# insert the library paths for your system here, similar to SYSTYPE "Darwin" above
-
+# end of Linux
 
 ifndef LINKER
 LINKER = $(CC)
 endif
-
 
 ##########################################
 #determine the needed object/header files#
