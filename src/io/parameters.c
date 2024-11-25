@@ -506,7 +506,7 @@ void read_parameter_file(char *fname)
       id[nt++] = REAL;
 #endif /* #ifdef ONEDIMS_SPHERICAL */
 
-#ifdef BLACKHOLES
+#if defined(STARS) || defined(BLACKHOLES)
       strcpy(tag[nt], "DesNgbMass");
       addr[nt] = &All.DesNgbMass;
       id[nt++] = REAL;
@@ -518,7 +518,9 @@ void read_parameter_file(char *fname)
       strcpy(tag[nt], "FeedbackTime");
       addr[nt] = &All.FeedbackTime;
       id[nt++] = REAL;
+#endif
 
+#ifdef BLACKHOLES
       strcpy(tag[nt], "JetFeedback");
       addr[nt] = &All.JetFeedback;
       id[nt++] = INT;
@@ -534,12 +536,15 @@ void read_parameter_file(char *fname)
       strcpy(tag[nt], "Epsilon_f");
       addr[nt] = &All.Epsilon_f;
       id[nt++] = REAL;
+#endif
 
-
+#ifdef STARS
       strcpy(tag[nt], "Lambda");
       addr[nt] = &All.Lambda;
       id[nt++] = REAL;
+#endif
 
+#ifdef BLACKHOLES
 #ifdef REFINEMENT_AROUND_BH
 #if defined(REFINEMENT_AROUND_BH_FIXED)
       strcpy(tag[nt], "RefBHRadius");

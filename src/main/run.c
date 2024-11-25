@@ -170,12 +170,15 @@ void run(void)
           compute_statistics();
 
           flush_everything();
-#ifdef BLACKHOLES
-/*create snapshots after feedback injection*/
+#if defined(STARS) || defined(BLACKHOLES)
+
+          /*create snapshots after feedback injection*/
           if(All.Time >= All.FeedbackTime)
             create_snapshot_if_desired();
 #endif
-#ifndef BLACKHOLES
+
+#if !defined(STARS) && !defined(BLACKHOLES)
+          
           create_snapshot_if_desired();
 #endif
           if(All.Ti_Current >= TIMEBASE) /* we reached the final time */
@@ -396,18 +399,35 @@ void calculate_non_standard_physics_prior_mesh_construction(void)
 
 #ifdef BLACKHOLES
   bh_density();
-
 #ifdef BONDI_ACCRETION
   update_bh_accretion_rate();
 #endif
+#endif
 
+#ifdef STARS
+  star_density();
   update_SNII();
+#endif
 
+#ifdef BLACKHOLES
   update_bh_timesteps();
-   
+#endif
+
+#ifdef STARS
+  update_star_timesteps();
+#endif
+
+#ifdef BLACKHOLES
    if(All.Time >= All.FeedbackTime)
     {   
       bh_ngb_feedback();
+    }
+#endif
+
+#ifdef STARS
+   if(All.Time >= All.FeedbackTime)
+    {   
+      star_ngb_feedback();
     }
 #endif
 }
@@ -421,8 +441,8 @@ void calculate_non_standard_physics_prior_mesh_construction(void)
  */
 void calculate_non_standard_physics_end_of_step(void)
 {
-#ifdef BLACKHOLES
-  perform_end_of_step_bh_physics();
+#if defined (STARS) || (BLACKHOLES)
+  perform_end_of_step_physics();
 #endif 
 
 #ifdef COOLING

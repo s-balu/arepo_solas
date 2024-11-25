@@ -1865,6 +1865,13 @@ enum iofields
 #endif
 #endif
 #ifdef STARS
+  IO_STARID,
+  IO_STARHSML,
+  IO_STARDENSITY,
+  IO_STAR_NGBMASS,
+#ifdef OUTPUT_TIMEBIN_STAR
+  IO_TIMEBIN_STAR,
+#endif
 #endif  
   IO_LASTENTRY /* This should be kept - it signals the end of the list */
 };

@@ -290,10 +290,15 @@ endif
 ifeq (BLACKHOLES,$(findstring BLACKHOLES,$(CONFIGVARS)))
 OBJS    += blackholes/bh_density.o \
            blackholes/bh_feedback.o \
-           blackholes/bh_update.o \
            blackholes/bh_refinement.o
 INCL    += blackholes/bh_proto.h
 SUBDIRS += blackholes
+
+ifeq (STARS,$(findstring STARS,$(CONFIGVARS)))
+OBJS    += stars/star_density.o \
+           stars/star_feedback.o \
+INCL    += stars/star_proto.h
+SUBDIRS += stars
 
 OBJS    += celib/src/SNIIYields.o \
            celib/src/LifeTime.o \

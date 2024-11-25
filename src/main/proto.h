@@ -58,6 +58,15 @@
 #include "../blackholes/bh_proto.h"
 #endif 
 
+#if defined(STARS)
+#include "../stars/star_proto.h"
+#endif 
+
+#if defined(STARS) || defined(BLACKHOLES)
+void kernel(double u, double hinv3, double hinv4, double *wk, double *dwk);
+void perform_end_of_step_physics(void);
+#endif
+
 void sfr_init();
 void sfr_create_star_particles(void);
 void ngb_finish_rangebounds_update(int nchanged, int *nodelist);

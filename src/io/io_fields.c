@@ -782,19 +782,6 @@ void init_io_fields()
 #endif /* #if defined(REFINEMENT_HIGH_RES_GAS) */
 
 #ifdef BLACKHOLES
- /* init_field(IO_BHTEMPERATURE, "BHT ", "BlackHoleTemperature", MEM_DOUBLE, FILE_MY_IO_FLOAT, FILE_MY_IO_FLOAT, 1, A_BH, &BhP[0].Temperature, 0,
-             BHS_ONLY);
-  init_units(IO_BHTEMPERATURE, 0., 0., 0., 0., 0., 0);
-
-    
-  init_field(IO_BHEF, "BHEF", "BlackholeEnergyRateFeedback", MEM_MY_FLOAT, FILE_NONE, FILE_MY_IO_FLOAT, 1, A_BH, &BhP[0].EnergyRateFeed, 0, BHS_ONLY);
-  init_units(IO_BHEF, 0., 0., -1., 1., 3., All.UnitEnergy_in_cgs / All.UnitTime_in_s);
-  init_snapshot_type(IO_BHEF, SN_MINI);
-  */
-  init_field(IO_ISBH, "ISBH", "IsBh", MEM_INT, FILE_INT , FILE_INT, 1, A_BH, &BhP[0].IsBh, 0, BHS_ONLY);
-  init_units(IO_ISBH, 0, 0, 0, 0, 0, 0);
- 
-
   init_field(IO_BHID, "BHID  ", "BlackholeIDs", MEM_MY_ID_TYPE, FILE_MY_ID_TYPE, FILE_NONE, 1, A_P, &P[0].BhID, 0, BHS_ONLY);
   init_units(IO_BHID, 0, 0, 0, 0, 0, 0);
   init_snapshot_type(IO_BHID, SN_MINI);
@@ -823,6 +810,32 @@ void init_io_fields()
   init_field(IO_TIMEBIN_BH, "TBBH", "TimebinBh", MEM_INT, FILE_INT, FILE_NONE, 1, A_BH, &BhP[0].TimeBinBh, 0, BHS_ONLY);
   init_units(IO_TIMEBIN_BH, 0., 0., 0., 0., 0., 0.0);
   init_snapshot_type(IO_TIMEBIN_BH, SN_MINI);
+#endif 
+#endif
+
+#ifdef STARS
+  init_field(IO_STARID, "SID  ", "STARIDs", MEM_MY_ID_TYPE, FILE_MY_ID_TYPE, FILE_NONE, 1, A_P, &P[0].SID, 0, STARS_ONLY);
+  init_units(IO_STARID, 0, 0, 0, 0, 0, 0);
+  init_snapshot_type(IO_STARID, SN_MINI);
+
+
+  init_field(IO_STARHSML, "SHS", "STARHsml", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, FILE_MY_IO_FLOAT, 1, A_S, &SP[0].Hsml, 0, STARS_ONLY);
+  init_units(IO_STARHSML, 0., 0., 0., 0., 0., All.UnitLength_in_cm);
+  init_snapshot_type(IO_STARHSML, SN_MINI);
+
+
+  init_field(IO_STARDENSITY, "SD ", "StarDensity", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, FILE_NONE, 1, A_S, &SP[0].Density, 0, STARS_ONLY);
+  init_units(IO_STARDENSITY, 0., 0., 0., 0., 0., All.UnitDensity_in_cgs);
+  init_snapshot_type(IO_STARDENSITY, SN_MINI);
+
+  init_field(IO_STAR_NGBMASS, "SNM ", "StarNgbMass", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, FILE_NONE, 1, A_S, &SP[0].NgbMass, 0, STARS_ONLY);
+  init_units(IO_STAR_NGBMASS, 0., 0., 0., 0., 0., All.UnitMass_in_g);
+  init_snapshot_type(IO_STAR_NGBMASS, SN_MINI);
+ 
+#ifdef OUTPUT_TIMEBIN_STAR
+  init_field(IO_TIMEBIN_STAR, "TBS", "TimebinStar", MEM_INT, FILE_INT, FILE_NONE, 1, A_S, &SP[0].TimeBinStar, 0, STARS_ONLY);
+  init_units(IO_TIMEBIN_STAR, 0., 0., 0., 0., 0., 0.0);
+  init_snapshot_type(IO_TIMEBIN_STAR, SN_MINI);
 #endif 
 #endif
 }
