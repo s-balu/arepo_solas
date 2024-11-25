@@ -573,15 +573,13 @@ int init(void)
 
   free_mesh();
 
-/*initialize bh density flag and feedback variables*/
-#ifdef BLACKHOLES
-  /*for(i = 0; i < NumBh; i++)
-    {
-      BhP[i].TimeBinBh = 0;
-    }
-  reconstruct_bh_timebins();*/
-  for(i=0; i<NumBh; i++)
-    BhP[i].DensityFlag = 1; /*we dont really need to do this as these are set to 0 anyway*/
+#if defined(BLACKHOLES) || (STARS)
+  /* initialize feedback variables */
+  
+  for(i=0; i<NumBhs; i++) /* we dont really need to do this as these are set to 0 anyway */
+    BhP[i].DensityFlag = 1;
+  for(i=0; i<NumStars; i++) /* we dont really need to do this as these are set to 0 anyway */
+    SP[i].DensityFlag = 1;
 
   All.FeedbackFlag = 1;
   All.EnergyExchange[0] = All.EnergyExchange[1] = 0;
@@ -590,24 +588,24 @@ int init(void)
 
   double *exch = All.EnergyExchangeTot;
   exch = malloc(6 * sizeof(double));
-  
-  //celib init
+#endif 
+
+#ifdef STARS
+  /* celib init */
   CELibInitLifeTime();
 
   CELibInitSNIIYields();
   
-  for(i=0; i<NumBh; i++)
+  for(i=0; i<NumStars; i++)
     {
       struct CELibStructNextEventTimeStarbyStarInput Input = 
       {
-        .InitialMass_in_Msun = PPB(i).Mass,
+        .InitialMass_in_Msun = PPS(i).Mass,
         .Metallicity = 0.0004
       };
       
-      BhP[i].SNIITime = CELibGetNextEventTimeStarbyStar(Input, CELibFeedbackType_SNII) / pow(10,6); /*in Myrs*/ 
+      SP[i].SNIITime = CELibGetNextEventTimeStarbyStar(Input, CELibFeedbackType_SNII) / pow(10,6); /*in Myrs*/ 
     }
-
-
 #endif
 
   return -1;  // return -1 means we ran to completion, i.e. not an endrun code

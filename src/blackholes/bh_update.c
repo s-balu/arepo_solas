@@ -86,9 +86,6 @@
 #endif /* WENDLAND_C6_KERNEL */
 
 static int int_compare(const void *a, const void *b);
-static double solve_quadratic_eq(double t); 
-static double f(double x);
-static double trapezoidal_integral(double a, double b, int n);
 
 /*sph loop kernel function -> u < 1 */
 void kernel(double u, double hinv3, double hinv4, double *wk, double *dwk)
