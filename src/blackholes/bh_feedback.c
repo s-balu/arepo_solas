@@ -10,6 +10,8 @@
 
 #include "../domain/domain.h"
 
+#define DEG_TO_RAD(deg) ((deg) * M_PI / 180.0)
+
 static int bh_ngb_feedback_evaluate(int target, int mode, int threadid);
 
 /*! \brief Local data structure for collecting particle/cell data that is sent
@@ -171,8 +173,8 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   int j, n, bin;
   int numnodes, *firstnode;
   double h, h2, hinv, hinv3, hinv4;
-  double dx, dy, dz, r, r2, u, wk, dwk, dt;
-  MyDouble *pos, bh_rho, bh_mass, ngbmass, ngbmass_feed, energyfeed;
+  double dx, dy, dz, r, r2, u, wk, dwk;
+  MyDouble *pos, dt, bh_rho, bh_mass, ngbmass, ngbmass_feed, massloading, energyfeed;
 
   data_in local, *target_data;
   data_out out;
@@ -219,26 +221,27 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 #endif /* #ifndef  TWODIMS #else */
   hinv4 = hinv3 * hinv;
 
- 
-/* bh timestep */
+  /* bh timestep */
   dt    = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
   //dtime = All.cf_atime * dt / All.cf_time_hubble_a;
 
 #ifdef BONDI_ACCRETION
+  massloading   = All.Mload * accretion_rate * dt; //units?
   energyfeed = All.Epsilon_f * All.Epsilon_r * accretion_rate * dt * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
 #endif
 #ifdef INFALL_ACCRETION  
+  massloading   = All.Mload * accretion_rate; //units?
   energyfeed = All.Epsilon_f * All.Epsilon_r * accretion * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
 #endif
 
-/* jet axis and opening angle */    
+  /* jet axis and opening angle */    
 
-/* positive and negative jet axes (no need to be normalized) */
-  double pos_x_axis[3] = {1, 0, 0};
-  double neg_x_axis[3] = {-1, 0, 0};      
-/* jet angle */
-  double theta = 0.35;
-  double vx, vy, vz, pos_x_angle, neg_x_angle; 
+  /* positive and negative jet axes */
+  double pos_z_axis[3] = {0, 0, 1};
+  double neg_z_axis[3] = {0, 0, -1};      
+  /* jet angle */
+  double theta = DEG_TO_RAD(10);
+  double vx, vy, vz, pos_z_angle, neg_z_angle;
 
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
   for(n = 0; n < nfound; n++)
@@ -288,36 +291,40 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
               vy = -dy; // y-component of the vector from the vertex to the point
               vz = -dz; // z-component of the vector from the vertex to the point
               /* calculate angles */    
-              pos_x_angle = acos((vx*pos_x_axis[0] + vy*pos_x_axis[1] + vz*pos_x_axis[2]) / 
-                (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2))));
-              neg_x_angle = acos((vx*neg_x_axis[0] + vy*neg_x_axis[1] + vz*neg_x_axis[2]) / 
-                (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) + pow(neg_x_axis[2], 2))));
-
+              pos_z_angle = acos((vx*pos_z_axis[0] + vy*pos_z_axis[1] + vz*pos_z_axis[2]) / 
+                (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(pos_z_axis[0], 2) + pow(pos_z_axis[1], 2) + pow(pos_z_axis[2], 2))));
+              neg_z_angle = acos((vx*neg_z_axis[0] + vy*neg_z_axis[1] + vz*neg_z_axis[2]) / 
+                (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(neg_z_axis[0], 2) + pow(neg_z_axis[1], 2) + pow(neg_z_axis[2], 2))));    
               /* check if particle is inside the cone */ 
-                  if((pos_x_angle <= theta) || (neg_x_angle <= theta))
-                    {
-              /* split kinetic and thermal energy feed */ 
-              /* add kinetic energy in cone */
-                      SphP[j].KineticFeed   += (1-All.Ftherm) * energyfeed/ngbmass_feed*P[j].Mass;
-                      All.EnergyExchange[0] += (1-All.Ftherm) * energyfeed/ngbmass_feed*P[j].Mass;            
-                    }
-             /* add thermal energy isotropically */
-                  SphP[j].ThermalFeed   += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
-                  All.EnergyExchange[0] += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
+              if((pos_z_angle <= theta) || (neg_z_angle <= theta))
+                {
+                  /* add mass */
+                  SphP[j].MassLoading += massloading/ngbmass_feed*P[j].Mass;
+                  
+                  /* split kinetic and thermal energy feed */ 
+                  /* add kinetic energy in cone */
+                  SphP[j].KineticFeed   += (1-All.Ftherm) * energyfeed/ngbmass_feed*P[j].Mass;
+                  All.EnergyExchange[0] += (1-All.Ftherm) * energyfeed/ngbmass_feed*P[j].Mass;
+
+                  /* set radial kick direction */      
+                  SphP[j].BhKickVector[0] = vx/r;
+                  SphP[j].BhKickVector[1] = vy/r;
+                  SphP[j].BhKickVector[2] = vz/r;                
                 }
+              /* add thermal energy isotropically */
+              SphP[j].ThermalFeed   += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
+              All.EnergyExchange[0] += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
+            }
 
 #ifdef BONDI_ACCRETION
-              /*set drain mass flag*/
-              SphP[j].MassDrain = accretion_rate*dt/ngbmass*P[j].Mass + mass_to_drain/ngbmass*P[j].Mass;
+          /* set drain mass flag */
+          SphP[j].MassDrain = accretion_rate*dt/ngbmass*P[j].Mass + mass_to_drain/ngbmass*P[j].Mass;
 #endif
-/*set radial kick direction*/      
-              SphP[j].BhKickVector[0] = -dx;
-              SphP[j].BhKickVector[1] = -dy;
-              SphP[j].BhKickVector[2] = -dz;     
+ 
         }
     }
 
-   /*Now collect the result at the right place*/
+  /* Now collect the result at the right place */
   if(mode == MODE_LOCAL_PARTICLES)
     out2particle(&out, target, MODE_LOCAL_PARTICLES);
   else

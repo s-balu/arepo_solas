@@ -1261,9 +1261,10 @@ extern struct global_data_all_processes
 #ifdef BLACKHOLES
   /* for parameter file */
   double JetFeedback;
-  double Ftherm;
   double Epsilon_r;
   double Epsilon_f;
+  double Mload;
+  double Ftherm;
 #endif
 
 #ifdef STARS
@@ -1501,11 +1502,13 @@ extern struct sph_particle_data
 #endif /* #ifdef ADDBACKGROUNDGRID */
     
 #if defined(STARS) || defined(BLACKHOLES)
-  MyDouble MassFeed;
   MyDouble MassDrain;
+  MyDouble MassLoading;
   MyDouble ThermalFeed;
   MyDouble KineticFeed;
   MyDouble BhKickVector[3];
+
+  MyDouble MassFeed; 
   MyDouble EnergyFeed;
   MyDouble MomentumFeed;
   MyDouble MomentumKickVector[3];

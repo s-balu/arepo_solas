@@ -10,6 +10,8 @@
 
 #include "../domain/domain.h"
 
+#define DEG_TO_RAD(deg) ((deg) * M_PI / 180.0)
+
 static int bh_density_evaluate(int target, int mode, int threadid);
 static int bh_density_isactive(int n);
 
@@ -107,7 +109,7 @@ static void out2particle(data_out *out, int i, int mode)
       BhP[i].InternalEnergyGas         = out->InternalEnergyGas;
 #endif
 #ifdef INFALL_ACCRETION
-      BhP[i].Accretion                += out->Accretion; /*bh might not be active at every timestep*/
+      BhP[i].Accretion                += out->Accretion;
 #endif
     }
   else /* combine */
@@ -160,7 +162,7 @@ static void kernel_local(void)
         //i = NextParticle++;
 
         //if(i >= NumBhs)
-        //  break;
+        //break;
         
         idx = NextParticle++;
 
@@ -400,14 +402,14 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 
   numngb = mass = mass_feed = 0;
 
-/* jet axis and opening angle */    
+  /* jet axis and opening angle */    
 
-/* positive and negative jet axes (no need to be normalized) */
-  double pos_x_axis[3] = {1, 0, 0};
-  double neg_x_axis[3] = {-1, 0, 0};      
-/* jet angle */
-  double theta = 0.35;
-  double vx, vy, vz, pos_x_angle, neg_x_angle; 
+  /* positive and negative jet axes */
+  double pos_z_axis[3] = {0, 0, 1};
+  double neg_z_axis[3] = {0, 0, -1};      
+  /* jet angle */
+  double theta = DEG_TO_RAD(10);
+  double vx, vy, vz, pos_z_angle, neg_z_angle;
 
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
 
@@ -415,7 +417,6 @@ static int bh_density_evaluate(int target, int mode, int threadid)
     {
       j = Thread[threadid].Ngblist[n];
 
-/* compute bh->cell position (and velocity for bhs later) vectors: posBhP-posSphP (while velSphP-velBhP) */
       dx = pos[0] - P[j].Pos[0];
       dy = pos[1] - P[j].Pos[1];
       dz = pos[2] - P[j].Pos[2];
@@ -454,18 +455,19 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 
           mass_j = P[j].Mass;
 
-/* compute bh density */
+          /* compute bh density */
           rho +=  mass_j * wk;
 
-/* compute the min hydro step for neighbors */     
+          /* compute the min hydro step for neighbors */     
           if(bin > P[j].TimeBinHydro)
             bin = P[j].TimeBinHydro;
 
-/* compute the bh-ngb-mass (sphere) */
+          /* compute the bh-ngb-mass (sphere) */
           mass += mass_j;
 
 #ifdef BONDI_ACCRETION
-/* compute relative velocities, relative specific angular momenta and internal energy of gas */
+          /* comute relative velocities, 
+               relative specific angular momenta and internal energy of gas */
           dvx = P[j].Vel[0] - vel[0]; 
           dvy = P[j].Vel[1] - vel[1]; 
           dvz = P[j].Vel[2] - vel[2]; 
@@ -486,7 +488,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
           internal_energy_gas += SphP[j].Utherm*mass_j/rho_j*wk;
 #endif
 #ifdef INFALL_ACCRETION
-/* cell nibbled */
+          /* cell nibbled */
           if(r < 2*rbh) 
             {
               accretion += P[j].Mass * exp(-r2/(2*rbh2));
@@ -495,26 +497,26 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 #endif
           if(All.JetFeedback)
             {
-/* double cone jet setup */    
+              /* double cone jet setup */    
   
-/* calculate vector to cone vertex */
+              /* calculate vector to cone vertex */
               vx = -dx; // x-component of the vector from the vertex to the point
               vy = -dy; // y-component of the vector from the vertex to the point
               vz = -dz; // z-component of the vector from the vertex to the point
-/* calculate angles */    
-              pos_x_angle = acos((vx*pos_x_axis[0] + vy*pos_x_axis[1] + vz*pos_x_axis[2]) / 
-                (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(pos_x_axis[0], 2) + pow(pos_x_axis[1], 2) +  pow(pos_x_axis[2], 2))));
-              neg_x_angle = acos((vx*neg_x_axis[0] + vy*neg_x_axis[1] + vz*neg_x_axis[2]) / 
-                (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(neg_x_axis[0], 2) + pow(neg_x_axis[1], 2) + pow(neg_x_axis[2], 2))));
-/* check if particle is inside the cone */ 
-              if((pos_x_angle <= theta) || (neg_x_angle <= theta))
-/* compute the bh-ngb-mass (cones) */              
+              /* calculate angles */ 
+              pos_z_angle = acos((vx*pos_z_axis[0] + vy*pos_z_axis[1] + vz*pos_z_axis[2]) / 
+                (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(pos_z_axis[0], 2) + pow(pos_z_axis[1], 2) + pow(pos_z_axis[2], 2))));
+              neg_z_angle = acos((vx*neg_z_axis[0] + vy*neg_z_axis[1] + vz*neg_z_axis[2]) / 
+                (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(neg_z_axis[0], 2) + pow(neg_z_axis[1], 2) + pow(neg_z_axis[2], 2))));   
+              /* check if particle is inside the cone */ 
+              if((pos_z_angle <= theta) || (neg_z_angle <= theta))
+                /* compute the bh-ngb-mass (cones) */              
                 mass_feed += P[j].Mass;
             }
         }
     }
 
-/* compute bh timestep based on min ngb timestep */
+  /* compute bh timestep based on min ngb timestep */
   if(bin == 0)
     ngb_min_step = 0;
   else
@@ -538,7 +540,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   out.Accretion               = accretion;
 #endif
 
-/* now collect the result at the right place */
+  /* now collect the result at the right place */
   if(mode == MODE_LOCAL_PARTICLES)
     out2particle(&out, target, MODE_LOCAL_PARTICLES);
   else
