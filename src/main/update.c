@@ -544,9 +544,15 @@ void perform_end_of_step_physics(void)
               if(i < 0)
               continue;
 
-              /* dump energy and momentum injected by bh */
-              if(SphP[i].KineticFeed > 0)
+              /* dump mass, momentum and energy injected by bh */
+              if(All.JetFeedback)
                 {
+                  /* add mass */
+                  P[i].Mass += SphP[i].MassLoading;
+
+                  /* add kinetic energy */
+                  SphP[i].Energy += SphP[i].KineticFeed;
+
                   /* calculate momentum feed exactly so energy is conserved */
                   /*-> we need to do this here so that particle properties don't change between loading the buffer and emptying it*/
                   kick_vector[0] = SphP[i].BhKickVector[0];
@@ -555,28 +561,19 @@ void perform_end_of_step_physics(void)
 
                   p0 = sqrt(pow(SphP[i].Momentum[0], 2) + pow(SphP[i].Momentum[1], 2) + pow(SphP[i].Momentum[2], 2));
               
-                  if(p0 < pow(10,-10)) //protect against p0 = 0;
-                    cos_theta = 1;
-                  else 
-                    cos_theta = (SphP[i].Momentum[0]*kick_vector[0] + SphP[i].Momentum[1]*kick_vector[1] + SphP[i].Momentum[2]*kick_vector[2]) / 
-                    (p0*sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2)));       
-          
-                  pj = -p0*cos_theta + sqrt(p0*p0 * cos_theta*cos_theta + 2*P[i].Mass*SphP[i].KineticFeed);
-
+                  pj = sqrt(2 * P[i].Mass * (SphP[i].Energy - (P[i].Mass-SphP[i].MassLoading)*SphP[i].Utherm)) - p0;
+    
                   bh_momentum_kick[0] = kick_vector[0] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
                   bh_momentum_kick[1] = kick_vector[1] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
                   bh_momentum_kick[2] = kick_vector[2] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2)); 
-                }
-
-              if(SphP[i].ThermalFeed > 0 || SphP[i].KineticFeed > 0)
-                {
+   
                   /* update total energy */
-                  SphP[i].Energy += SphP[i].ThermalFeed + SphP[i].KineticFeed;
+                  SphP[i].Energy += SphP[i].ThermalFeed;
                   All.EnergyExchange[1] += SphP[i].ThermalFeed + SphP[i].KineticFeed;
                   /* update momentum */
-                    SphP[i].Momentum[0] += bh_momentum_kick[0];
-                    SphP[i].Momentum[1] += bh_momentum_kick[1];
-                    SphP[i].Momentum[2] += bh_momentum_kick[2];
+                  SphP[i].Momentum[0] += bh_momentum_kick[0];
+                  SphP[i].Momentum[1] += bh_momentum_kick[1];
+                  SphP[i].Momentum[2] += bh_momentum_kick[2];
                   /* update velocities */
                   update_primitive_variables_single(P, SphP, i, &pvd);
                   /* update internal energy */
@@ -584,7 +581,7 @@ void perform_end_of_step_physics(void)
                   /* update pressure */
                   set_pressure_of_cell_internal(P, SphP, i);
                   /* set feed flags to zero */
-                  SphP[i].ThermalFeed = SphP[i].KineticFeed = 0;
+                  SphP[i].ThermalFeed = SphP[i].KineticFeed = SphP[i].MassLoading = 0;
                   bh_momentum_kick[0] = bh_momentum_kick[1] = bh_momentum_kick[2] = 0;
 #ifdef PASSIVE_SCALARS                 
                   /* tracer field advected passively */
