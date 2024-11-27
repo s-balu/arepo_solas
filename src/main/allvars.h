@@ -1501,13 +1501,14 @@ extern struct sph_particle_data
   MyFloat Weight;
 #endif /* #ifdef ADDBACKGROUNDGRID */
     
-#if defined(STARS) || defined(BLACKHOLES)
+#ifdef BLACKHOLES
   MyDouble MassDrain;
   MyDouble MassLoading;
   MyDouble ThermalFeed;
   MyDouble KineticFeed;
   MyDouble BhKickVector[3];
-
+#endif
+#ifdef STARS
   MyDouble MassFeed; 
   MyDouble EnergyFeed;
   MyDouble MomentumFeed;

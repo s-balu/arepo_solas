@@ -526,7 +526,8 @@ void perform_end_of_step_physics(void)
     /* inject feedback to ngb cells */
     if(All.Time >= All.FeedbackTime)
     {   
-      if(All.FeedbackFlag > 0)
+#ifdef BLACKHOLES
+      if(SphP[i].ThermalFeed > 0 || SphP[i].KineticFeed > 0)
         {
           struct pv_update_data pvd;
           if(All.ComovingIntegrationOn)
@@ -589,7 +590,8 @@ void perform_end_of_step_physics(void)
                   SphP[i].PConservedScalars[0] = P[i].Mass;
 #endif
                 }
-            
+#endif
+#ifdef STARS            
               /* dump energy and momentum injected by stars */              
               if(SphP[i].MomentumFeed > 0 || SphP[i].EnergyFeed > 0)
                 {
@@ -625,6 +627,7 @@ void perform_end_of_step_physics(void)
                   SphP[i].PConservedScalars[0] = P[i].Mass;
 #endif
                 }
+#endif
             }
 #ifdef BURST_MODE
           All.FeedbackFlag = -1;
