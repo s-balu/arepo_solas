@@ -814,12 +814,12 @@ void init_io_fields()
 #endif
 
 #ifdef STARS
-  init_field(IO_STARID, "SID  ", "STARIDs", MEM_MY_ID_TYPE, FILE_MY_ID_TYPE, FILE_NONE, 1, A_P, &P[0].SID, 0, STARS_ONLY);
+  init_field(IO_STARID, "SID  ", "StarIDs", MEM_MY_ID_TYPE, FILE_MY_ID_TYPE, FILE_NONE, 1, A_P, &P[0].SID, 0, STARS_ONLY);
   init_units(IO_STARID, 0, 0, 0, 0, 0, 0);
   init_snapshot_type(IO_STARID, SN_MINI);
 
 
-  init_field(IO_STARHSML, "SHS", "STARHsml", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, FILE_MY_IO_FLOAT, 1, A_S, &SP[0].Hsml, 0, STARS_ONLY);
+  init_field(IO_STARHSML, "SHS", "StarHsml", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, FILE_MY_IO_FLOAT, 1, A_S, &SP[0].Hsml, 0, STARS_ONLY);
   init_units(IO_STARHSML, 0., 0., 0., 0., 0., All.UnitLength_in_cm);
   init_snapshot_type(IO_STARHSML, SN_MINI);
 
