@@ -526,8 +526,7 @@ void perform_end_of_step_physics(void)
     /* inject feedback to ngb cells */
     if(All.Time >= All.FeedbackTime)
     {   
-#ifdef BLACKHOLES
-      if(SphP[i].ThermalFeed > 0 || SphP[i].KineticFeed > 0)
+      if(All.FeedbackFlag > 0)
         {
           struct pv_update_data pvd;
           if(All.ComovingIntegrationOn)
@@ -545,8 +544,9 @@ void perform_end_of_step_physics(void)
               if(i < 0)
               continue;
 
+#ifdef BLACKHOLES
               /* dump mass, momentum and energy injected by bh */
-              if(All.JetFeedback)
+              if(SphP[i].ThermalFeed > 0 || SphP[i].KineticFeed > 0)
                 {
                   /* add mass */
                   P[i].Mass += SphP[i].MassLoading;
