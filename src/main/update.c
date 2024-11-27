@@ -444,7 +444,7 @@ void update_list_of_active_star_particles(void)
 void perform_end_of_step_physics(void)
 {
   int idx, i;
-  double pj, p0, cos_theta;
+  double pj, p0;
   double kick_vector[3], bh_momentum_kick[3];
 
   bh_momentum_kick[0] = bh_momentum_kick[1] = bh_momentum_kick[2] = 0;

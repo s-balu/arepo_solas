@@ -531,7 +531,7 @@ void read_parameter_file(char *fname)
             
       strcpy(tag[nt], "Epsilon_f");
       addr[nt] = &All.Epsilon_f;
-      id[nt++] = REAL;,
+      id[nt++] = REAL;
 
       strcpy(tag[nt], "Mload");
       addr[nt] = &All.Mload;

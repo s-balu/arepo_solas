@@ -121,6 +121,9 @@ FeedbackTime                              0
 %%SET TO 1 TO INCLUDE BH JET FEEDBACK
 JetFeedback                               1
 
+%%RATIO OF JET MASS LOADING TO MASS ACCRETED
+Mload                                     0.1
+
 %%FRACTION OF ENERGY GIVEN IN THERMAL FORM IN BH FEEDBACK
 Ftherm                                    0.5
 
