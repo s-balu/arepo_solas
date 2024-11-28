@@ -670,25 +670,25 @@ if(count_stars[target] > 0 || count_recv_stars[target] > 0)
   NumGas += count_get_sph;
 
   myfree(keyBuf);
-#ifdef BLACKHOLES
-  myfree(bhBuf);
-#endif
 #ifdef STARS
   myfree(sBuf);
 #endif
+#ifdef BLACKHOLES
+  myfree(bhBuf);
+#endif
   myfree(sphBuf);
   myfree(partBuf);
-#ifdef BLACKHOLES
-  myfree(offset_recv_bhs);
-  myfree(count_recv_bhs);
-  myfree(offset_bhs);
-  myfree(count_bhs);
-#endif
 #ifdef STARS
   myfree(offset_recv_stars);
   myfree(count_recv_stars);
   myfree(offset_stars);
   myfree(count_stars);
+#endif
+#ifdef BLACKHOLES
+  myfree(offset_recv_bhs);
+  myfree(count_recv_bhs);
+  myfree(offset_bhs);
+  myfree(count_bhs);
 #endif
   myfree(offset_recv_sph);
   myfree(offset_recv);

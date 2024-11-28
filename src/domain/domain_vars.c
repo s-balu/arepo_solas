@@ -124,14 +124,15 @@ void domain_free_lists(void)
   myfree(list_load);
   myfree(list_NumGas);
   myfree(list_NumPart);
-#ifdef BLACKHOLES
-  myfree(toGetBhs);
-  myfree(toGoBhs);
-#endif
 #ifdef STARS
   myfree(toGetStars);
   myfree(toGoStars);
 #endif
+#ifdef BLACKHOLES
+  myfree(toGetBhs);
+  myfree(toGoBhs);
+#endif
+
   myfree(toGetSph);
   myfree(toGet);
   myfree(toGoSph);
