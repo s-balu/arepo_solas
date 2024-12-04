@@ -380,6 +380,7 @@ void drift_particle(int i, integertime time1)
       P[i].Ti_Current = time1;
       return;
     }*/
+    
   if(P[i].Type == 0)
     {
       for(j = 0; j < 3; j++)
