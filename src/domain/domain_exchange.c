@@ -95,7 +95,7 @@ void domain_resize_storage(int count_get, int count_get_sph, int option_flag)
 #ifdef BLACKHOLES
 void domain_resize_storage_bhs(int count_get_bhs)
 {
-  int bhload       = NumBhs + count_get_bhs;
+  /*int bhload       = NumBhs + count_get_bhs;
   int loc_data_bh  = bhload;
   int res_bh;
 
@@ -107,14 +107,14 @@ void domain_resize_storage_bhs(int count_get_bhs)
     {
       All.MaxPartBhs = max_bhload / (1.0 - 2 * ALLOC_TOLERANCE);
       reallocate_memory_maxpartbhs();
-    }
+    }*/
 }
 #endif
 
 #ifdef STARS
 void domain_resize_storage_stars(int count_get_stars)
 {
-  int starload       = NumStars + count_get_stars;
+  /*int starload       = NumStars + count_get_stars;
   int loc_data_star  = starload;
   int res_star;
 
@@ -126,7 +126,7 @@ void domain_resize_storage_stars(int count_get_stars)
     {
       All.MaxPartStars = max_starload / (1.0 - 2 * ALLOC_TOLERANCE);
       reallocate_memory_maxpartstars();
-    }
+    }*/
 }
 #endif
 

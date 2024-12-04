@@ -170,11 +170,13 @@ void run(void)
           compute_statistics();
 
           flush_everything();
+
 #if defined(STARS) || defined(BLACKHOLES)
 
           /*create snapshots after feedback injection*/
           if(All.Time >= All.FeedbackTime)
             create_snapshot_if_desired();
+
 #endif
 
 #if !defined(STARS) && !defined(BLACKHOLES)
