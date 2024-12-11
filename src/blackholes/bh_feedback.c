@@ -282,6 +282,13 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
 
           kernel(u, hinv3, hinv4, &wk, &dwk);
 
+          if(!All.JetFeedback)
+            {
+              /* add thermal energy isotropically */
+              SphP[j].ThermalFeed   += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
+              All.EnergyExchange[0] += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
+            }
+
           if(All.JetFeedback)
             {
               /* double cone jet setup */
@@ -291,7 +298,8 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
               vy = -dy; // y-component of the vector from the vertex to the point
               vz = -dz; // z-component of the vector from the vertex to the point
               /* calculate angles */    
-              pos_z_angle = acos((vx*pos_z_axis[0] + vy*pos_z_axis[1] + vz*pos_z_axis[2]) / 
+              pos_z_angle = acos((vx*pos_z_axis[0] + 
+              vy*pos_z_axis[1] + vz*pos_z_axis[2]) / 
                 (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(pos_z_axis[0], 2) + pow(pos_z_axis[1], 2) + pow(pos_z_axis[2], 2))));
               neg_z_angle = acos((vx*neg_z_axis[0] + vy*neg_z_axis[1] + vz*neg_z_axis[2]) / 
                 (sqrt(pow(vx, 2) + pow(vy, 2) + pow(vz, 2)) * sqrt(pow(neg_z_axis[0], 2) + pow(neg_z_axis[1], 2) + pow(neg_z_axis[2], 2))));    
@@ -299,21 +307,18 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
               if((pos_z_angle <= theta) || (neg_z_angle <= theta))
                 {
                   /* add mass */
-                  SphP[j].MassLoading += massloading/ngbmass_feed*P[j].Mass;
+                  SphP[j].MassLoading += massloading/ngbmass*P[j].Mass;
                   
                   /* split kinetic and thermal energy feed */ 
                   /* add kinetic energy in cone */
-                  SphP[j].KineticFeed   += (1-All.Ftherm) * energyfeed/ngbmass_feed*P[j].Mass;
-                  All.EnergyExchange[0] += (1-All.Ftherm) * energyfeed/ngbmass_feed*P[j].Mass;
+                  SphP[j].KineticFeed   += (1-All.Ftherm) * energyfeed/ngbmass*P[j].Mass;
+                  All.EnergyExchange[0] += (1-All.Ftherm) * energyfeed/ngbmass*P[j].Mass;
 
                   /* set radial kick direction */      
                   SphP[j].BhKickVector[0] = vx/r;
                   SphP[j].BhKickVector[1] = vy/r;
                   SphP[j].BhKickVector[2] = vz/r;                
                 }
-              /* add thermal energy isotropically */
-              SphP[j].ThermalFeed   += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
-              All.EnergyExchange[0] += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
             }
 
 #ifdef BONDI_ACCRETION
