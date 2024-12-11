@@ -226,11 +226,11 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   //dtime = All.cf_atime * dt / All.cf_time_hubble_a;
 
 #ifdef BONDI_ACCRETION
-  massloading = All.Mload * accretion_rate * dt; //units?
+  massloading = All.Mload * accretion_rate * dt;
   energyfeed = All.Epsilon_f * All.Epsilon_r * accretion_rate * dt * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
 #endif
 #ifdef INFALL_ACCRETION  
-  massloading = All.Mload * accretion_rate; //units?
+  massloading = All.Mload * accretion; 
   energyfeed = All.Epsilon_f * All.Epsilon_r * accretion * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
 #endif
 
