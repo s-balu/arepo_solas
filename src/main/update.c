@@ -590,49 +590,52 @@ void perform_end_of_step_physics(void)
                   SphP[i].PConservedScalars[0] = P[i].Mass;
 #endif
                 }
-#endif
-#ifdef STARS            
-              /* dump energy and momentum injected by stars */              
-              if(SphP[i].MomentumFeed > 0 || SphP[i].EnergyFeed > 0)
-                {
-                  kick_vector[0] = SphP[i].MomentumKickVector[0];
-                  kick_vector[1] = SphP[i].MomentumKickVector[1];
-                  kick_vector[2] = SphP[i].MomentumKickVector[2];
-                  pj = SphP[i].MomentumFeed;
-
-                  /* update momentum */
-                  SphP[i].Momentum[0] += kick_vector[0] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
-                  SphP[i].Momentum[1] += kick_vector[1] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
-                  SphP[i].Momentum[2] += kick_vector[2] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));  
-
-                  All.EnergyExchange[3] += SphP[i].MomentumFeed;     
-                 
-                  /* update velocities */
-                  update_primitive_variables_single(P, SphP, i, &pvd);  
-
-                  /* update total energy */
-                  SphP[i].Energy = SphP[i].Utherm * P[i].Mass + SphP[i].EnergyFeed + 
-                    0.5 * P[i].Mass * (pow(P[i].Vel[0], 2) + pow(P[i].Vel[1], 2) + pow(P[i].Vel[2], 2));
-                  All.EnergyExchange[5] += SphP[i].EnergyFeed;               
-                  /* update internal energy */
-                  update_internal_energy(P, SphP, i, &pvd);
-                  /* update pressure */
-                  set_pressure_of_cell_internal(P, SphP, i);
-                  /* set feed flag to zero */
-                  SphP[i].MomentumFeed = 0;
-                  SphP[i].EnergyFeed   = 0;
-#ifdef PASSIVE_SCALARS                 
-                  /* tracer field advected passively */
-                  SphP[i].PScalars[0] = 1;
-                  SphP[i].PConservedScalars[0] = P[i].Mass;
-#endif
-                }
-#endif
+#endif          
             }
 #ifdef BURST_MODE
           All.FeedbackFlag = -1;
-#endif      
+#endif 
+        }    
+
+      for(idx = 0; idx < TimeBinsHydro.NActiveParticles; idx++)
+        {
+          i = TimeBinsHydro.ActiveParticleList[idx];
+          if(i < 0)
+          continue;
+#ifdef STARS            
+          /* dump energy and momentum injected by stars */              
+          if(SphP[i].MomentumFeed > 0 || SphP[i].EnergyFeed > 0)
+            {
+              kick_vector[0] = SphP[i].MomentumKickVector[0];
+              kick_vector[1] = SphP[i].MomentumKickVector[1];
+              kick_vector[2] = SphP[i].MomentumKickVector[2];
+              pj = SphP[i].MomentumFeed;
+
+              /* update momentum */
+              SphP[i].Momentum[0] += kick_vector[0] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
+              SphP[i].Momentum[1] += kick_vector[1] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
+              SphP[i].Momentum[2] += kick_vector[2] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));  
+
+              All.EnergyExchange[3] += SphP[i].MomentumFeed;     
+                 
+              /* update velocities */
+              update_primitive_variables_single(P, SphP, i, &pvd);  
+
+              /* update total energy */
+              SphP[i].Energy = SphP[i].Utherm * P[i].Mass + SphP[i].EnergyFeed + 
+                0.5 * P[i].Mass * (pow(P[i].Vel[0], 2) + pow(P[i].Vel[1], 2) + pow(P[i].Vel[2], 2));
+              All.EnergyExchange[5] += SphP[i].EnergyFeed;               
+              /* update internal energy */
+              update_internal_energy(P, SphP, i, &pvd);
+              /* update pressure */
+              set_pressure_of_cell_internal(P, SphP, i);
+              /* set feed flag to zero */
+              SphP[i].MomentumFeed = 0;
+              SphP[i].EnergyFeed   = 0;
+            }
+#endif
         }
+       
     }
   MPI_Allreduce(&All.EnergyExchange, &All.EnergyExchangeTot, 6, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
   MPI_Barrier(MPI_COMM_WORLD); // synchronize all tasks
