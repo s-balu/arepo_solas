@@ -397,15 +397,6 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 
   numngb = rho = mass = 0;
 
-  /* jet axis and opening angle */    
-
-  /* positive and negative jet axes */
-  double pos_z_axis[3] = {0, 0, 1};
-  double neg_z_axis[3] = {0, 0, -1};      
-  /* jet angle */
-  double theta = DEG_TO_RAD(10);
-  double vx, vy, vz, pos_z_angle, neg_z_angle;
-
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
 
   for(n = 0; n < nfound; n++)

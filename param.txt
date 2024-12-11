@@ -118,15 +118,19 @@ DesMassDev                                0.1
 %%TIME TO TURN ON FEEDBACK
 FeedbackTime                              0
 
-%%SET TO 1 TO INCLUDE BH JET FEEDBACK
+%%SET TO 1 FOR KINETIC JET FEEDBACK
 JetFeedback                               1
 
 %%RATIO OF JET MASS LOADING TO MASS ACCRETED
 Mload                                     0.1
 
 %%FEEDBACK PARAMETERS
+
+%%Bhs
 Epsilon_f                                 1
 Epsilon_r                                 0.1
+
+%Stellar Winds (set to 0 for no winds)
 Lambda                                    0.05
 
 %%THIS IS FOR BH REFINEMENT
