@@ -395,7 +395,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 #endif /* #ifndef  TWODIMS #else */
   hinv4 = hinv3 * hinv;
 
-  numngb = mass = 0;
+  numngb = rho = mass = 0;
 
   /* jet axis and opening angle */    
 
