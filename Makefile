@@ -269,6 +269,7 @@ endif
 
 ifeq (BLACKHOLES,$(findstring BLACKHOLES,$(CONFIGVARS)))
 OBJS    += blackholes/bh_density.o \
+           blackholes/bh_jet_density.o\
            blackholes/bh_feedback.o \
            blackholes/bh_refinement.o
 INCL    += blackholes/bh_proto.h

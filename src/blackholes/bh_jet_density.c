@@ -164,7 +164,7 @@ static void kernel_imported(void)
  *
  *  \return void
  */
-void bh_density(void)
+void bh_jet_density(void)
 {
   MyFloat *Left, *Right;
   int idx, i, npleft, iter = 0;
@@ -299,7 +299,7 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   double h, h2, hinv, hinv3, hinv4; 
   int j, n, numngb, numnodes, *firstnode;
   double dx, dy, dz, r, r2, u, wk, dwk;
-  MyDouble *pos, mass_j, mass; 
+  MyDouble *pos, mass; 
   
   data_in local, *target_data;
   data_out out;
@@ -384,8 +384,6 @@ static int bh_density_evaluate(int target, int mode, int threadid)
 
           kernel(u, hinv3, hinv4, &wk, &dwk);
 
-          mass_j = P[j].Mass;
-
           /* double cone jet setup */    
   
           /* calculate vector to cone vertex */
@@ -409,7 +407,6 @@ static int bh_density_evaluate(int target, int mode, int threadid)
   
   out.Ngb                     = numngb;
   out.Mass                    = mass;
-  out.NgbMinStep              = ngb_min_step;
 
   /* now collect the result at the right place */
   if(mode == MODE_LOCAL_PARTICLES)
