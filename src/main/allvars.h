@@ -1264,7 +1264,6 @@ extern struct global_data_all_processes
   double Epsilon_r;
   double Epsilon_f;
   double Mload;
-  double Ftherm;
 #endif
 
 #ifdef STARS

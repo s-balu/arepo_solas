@@ -422,6 +422,9 @@ void calculate_non_standard_physics_prior_mesh_construction(void)
 #ifdef BLACKHOLES
    if(All.Time >= All.FeedbackTime)
     {   
+      if(All.JetFeedback)
+        bh_jet_density();
+      
       bh_ngb_feedback();
     }
 #endif

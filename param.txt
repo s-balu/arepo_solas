@@ -124,9 +124,6 @@ JetFeedback                               1
 %%RATIO OF JET MASS LOADING TO MASS ACCRETED
 Mload                                     0.1
 
-%%FRACTION OF ENERGY GIVEN IN THERMAL FORM IN BH FEEDBACK
-Ftherm                                    0.5
-
 %%FEEDBACK PARAMETERS
 Epsilon_f                                 1
 Epsilon_r                                 0.1

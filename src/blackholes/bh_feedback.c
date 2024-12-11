@@ -226,11 +226,11 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
   //dtime = All.cf_atime * dt / All.cf_time_hubble_a;
 
 #ifdef BONDI_ACCRETION
-  massloading   = All.Mload * accretion_rate * dt; //units?
+  massloading = All.Mload * accretion_rate * dt; //units?
   energyfeed = All.Epsilon_f * All.Epsilon_r * accretion_rate * dt * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
 #endif
 #ifdef INFALL_ACCRETION  
-  massloading   = All.Mload * accretion_rate; //units?
+  massloading = All.Mload * accretion_rate; //units?
   energyfeed = All.Epsilon_f * All.Epsilon_r * accretion * (CLIGHT * CLIGHT / (All.UnitVelocity_in_cm_per_s * All.UnitVelocity_in_cm_per_s));
 #endif
 
@@ -285,8 +285,8 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
           if(!All.JetFeedback)
             {
               /* add thermal energy isotropically */
-              SphP[j].ThermalFeed   += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
-              All.EnergyExchange[0] += All.Ftherm * energyfeed/ngbmass*P[j].Mass;
+              SphP[j].ThermalFeed   += energyfeed/ngbmass*P[j].Mass;
+              All.EnergyExchange[0] += energyfeed/ngbmass*P[j].Mass;
             }
 
           if(All.JetFeedback)
@@ -307,12 +307,12 @@ static int bh_ngb_feedback_evaluate(int target, int mode, int threadid)
               if((pos_z_angle <= theta) || (neg_z_angle <= theta))
                 {
                   /* add mass */
-                  SphP[j].MassLoading += massloading/ngbmass*P[j].Mass;
+                  SphP[j].MassLoading += massloading/ngbmass_feed*P[j].Mass;
                   
                   /* split kinetic and thermal energy feed */ 
                   /* add kinetic energy in cone */
-                  SphP[j].KineticFeed   += (1-All.Ftherm) * energyfeed/ngbmass*P[j].Mass;
-                  All.EnergyExchange[0] += (1-All.Ftherm) * energyfeed/ngbmass*P[j].Mass;
+                  SphP[j].KineticFeed   += energyfeed/ngbmass_feed*P[j].Mass;
+                  All.EnergyExchange[0] += energyfeed/ngbmass_feed*P[j].Mass;
 
                   /* set radial kick direction */      
                   SphP[j].BhKickVector[0] = vx/r;

@@ -536,10 +536,6 @@ void read_parameter_file(char *fname)
       strcpy(tag[nt], "Mload");
       addr[nt] = &All.Mload;
       id[nt++] = REAL;
-      
-      strcpy(tag[nt], "Ftherm");
-      addr[nt] = &All.Ftherm;
-      id[nt++] = REAL;
 #endif
 
 #ifdef STARS
