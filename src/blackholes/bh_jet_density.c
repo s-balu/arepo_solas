@@ -199,7 +199,7 @@ void bh_jet_density(void)
         {
           i = TimeBinsBh.ActiveParticleList[idx];
 
-          if(BhP[i].NgbMass < (desngbmass - desmassdev) || BhP[i].NgbMass > (desngbmass + desmassdev))
+          if(BhP[i].NgbMassFeed < (desngbmass - desmassdev) || BhP[i].NgbMassFeed > (desngbmass + desmassdev))
           {
                   /* need to redo this particle */
             npleft++;
@@ -215,7 +215,7 @@ void bh_jet_density(void)
                 }
               } 
 
-            if(BhP[i].NgbMass < (desngbmass - desmassdev))
+            if(BhP[i].NgbMassFeed < (desngbmass - desmassdev))
               Left[i] = dmax(BhP[i].Hsml, Left[i]);
             else
               {

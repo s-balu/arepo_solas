@@ -10,8 +10,6 @@
 
 #include "../domain/domain.h"
 
-#define DEG_TO_RAD(deg) ((deg) * M_PI / 180.0)
-
 static int bh_density_evaluate(int target, int mode, int threadid);
 static int bh_density_isactive(int n);
 
