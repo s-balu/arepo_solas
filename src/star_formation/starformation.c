@@ -314,6 +314,29 @@ void convert_cell_into_star(int i, double birthtime)
 
   voronoi_remove_connection(i);
 
+#ifdef STARS
+  /* assign star_ids */
+  P[i].SID = NumStars + 1;
+  SP[NumStars + 1].PID = i;
+  /* assign density loop properties */
+  SP[NumStars + 1].Hsml = 10;
+  
+  NumStars++;
+
+  /* set SN properties */
+  SP[NumStars + 1].Birthtime = birthtime;
+  SP[NumStars + 1].SNIIFlag = 0;
+
+  struct CELibStructNextEventTimeStarbyStarInput Input = 
+    {
+      .InitialMass_in_Msun = P[i].Mass,
+      .Metallicity = 0.0004
+    };
+
+  SP[NumStars + 1].SNIITime = birthtime + CELibGetNextEventTimeStarbyStar(Input, CELibFeedbackType_SNII) 
+    / (1.e6) / All.UnitTime_in_Megayears;
+#endif
+
   return;
 }
 
@@ -379,6 +402,29 @@ void spawn_star_from_cell(int igas, double birthtime, int istar, MyDouble mass_o
   for(int s = 0; s < N_Scalar; s++) /* Note, the changes in MATERIALS, HIGHRESGASMASS, etc., are treated as part of the Scalars */
     *(MyFloat *)(((char *)(&SphP[igas])) + scalar_elements[s].offset_mass) *= fac;
 #endif /* #ifdef MAXSCALARS */
+
+#ifdef STARS
+  /* assign star_ids */
+  P[istar].SID = NumStars + 1;
+  SP[NumStars + 1].PID = istar;
+  /* assign density loop properties */
+  SP[NumStars + 1].Hsml = 10;
+  
+  NumStars++;
+
+  /* set SN properties */
+  SP[NumStars + 1].Birthtime = birthtime;
+  SP[NumStars + 1].SNIIFlag = 0;
+  
+  struct CELibStructNextEventTimeStarbyStarInput Input = 
+    {
+      .InitialMass_in_Msun = P[istar].Mass,
+      .Metallicity = 0.0004
+    };
+
+  SP[NumStars + 1].SNIITime = birthtime + CELibGetNextEventTimeStarbyStar(Input, CELibFeedbackType_SNII)
+    / (1.e6) / All.UnitTime_in_Megayears;
+#endif
 
   return;
 }

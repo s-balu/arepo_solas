@@ -598,7 +598,8 @@ int init(void)
         .Metallicity = 0.0004
       };
       
-      SP[i].SNIITime = CELibGetNextEventTimeStarbyStar(Input, CELibFeedbackType_SNII) / pow(10,6); /*in Myrs*/ 
+      SP[i].SNIITime = CELibGetNextEventTimeStarbyStar(Input, CELibFeedbackType_SNII) 
+        / (1.e6) / All.UnitTime_in_Megayears;  
     }
 #endif
 
