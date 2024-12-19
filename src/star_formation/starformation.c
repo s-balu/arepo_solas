@@ -47,6 +47,7 @@
 #include "../main/proto.h"
 
 #include "../gravity/forcetree.h"
+#include "../celib/src/config.h"
 
 #ifdef USE_SFR
 
