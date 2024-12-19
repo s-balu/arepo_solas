@@ -59,8 +59,8 @@ REGULARIZE_MESH_CM_DRIFT_USE_SOUNDSPEED  # Limit mesh regularization speed by lo
 REGULARIZE_MESH_FACE_ANGLE     # Use maximum face angle as roundness criterion in mesh regularization
 
 #--------------------------------------- Refinement and derefinement; default: no refinement/derefinement; criterion: target mass
-#REFINEMENT_SPLIT_CELLS        # Refinement
-#REFINEMENT_MERGE_CELLS        # Derefinement
+REFINEMENT_SPLIT_CELLS        # Refinement
+REFINEMENT_MERGE_CELLS        # Derefinement
 #REFINEMENT_VOLUME_LIMIT       # Limit the volume of cells and the maximum volume difference between neighboring cels
 #JEANS_REFINEMENT              # Refinement criterion to ensure Jeans stability of cells
 #REFINEMENT_HIGH_RES_GAS       # Refinement criterion for high-resolution region in zoom simulation
@@ -68,14 +68,14 @@ REGULARIZE_MESH_FACE_ANGLE     # Use maximum face angle as roundness criterion i
 #OPTIMIZE_MESH_MEMORY_FOR_REFINEMENT  # deletes the mesh structures not needed for refinement/derefinemet to lower the peak memory consumption
 
 #--------------------------------------- non-standard phyiscs
-#COOLING                       # Simple primordial cooling
-#LOW_TEMP_COOLING              # Maschenko et al. 2008
+COOLING                       # Simple primordial cooling
+LOW_TEMP_COOLING              # Maschenko et al. 2008
 #ENFORCE_JEANS_STABILITY_OF_CELLS  # this imposes an adaptive floor for the temperature
 #USE_SFR                       # Star formation model, turning dense gas into collisionless partices
 #SFR_KEEP_CELLS                # Do not distroy cell out of which a star has formed
 
 #--------------------------------------- Gravity treatment; default: no gravity
-#SELFGRAVITY                   # gravitational intraction between simulation particles/cells
+SELFGRAVITY                   # gravitational intraction between simulation particles/cells
 #HIERARCHICAL_GRAVITY          # use hierarchical splitting of the time integration of the gravity
 #CELL_CENTER_GRAVITY           # uses geometric centers to calculate gravity of cells, only possible with HIERARCHICAL_GRAVITY
 #NO_GAS_SELFGRAVITY            # switch off gas self-gravity in tree
