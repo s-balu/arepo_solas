@@ -252,8 +252,8 @@ void update_SNII(void)
   
   for(i=0; i<NumStars; i++)
     {
-      if(SP[i].SNIIRemnantMass) // change this for appropriate flag
-        {
+      if(SP[i].SNIIRemnantMass) // needs to have flag=1 and be active
+        {                         
           PPS(i).Mass = SP[i].SNIIRemnantMass;
           SP[i].SNIIRemnantMass = 0;
           SP[i].SNIIFlag = 2;
@@ -263,7 +263,7 @@ void update_SNII(void)
       if(SP[i].SNIIFlag == 2)
         continue;
 
-      if(All.Time > SP[i].SNIITime / All.UnitTime_in_Megayears)
+      if(All.Time > SP[i].SNIITime)
         SP[i].SNIIFlag = 1; 
     } 
 }
