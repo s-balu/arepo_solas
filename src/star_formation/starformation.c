@@ -321,7 +321,8 @@ void convert_cell_into_star(int i, double birthtime)
   SP[NumStars].PID = i;
   /* assign density loop properties */
   SP[NumStars].Hsml = 10;
-
+  /* set timebin */
+  SP[NumStars].TimeBinStar = 0;
   /* set SN properties */
   SP[NumStars].Birthtime = birthtime;
   SP[NumStars].SNIIFlag = 0;
@@ -335,9 +336,9 @@ void convert_cell_into_star(int i, double birthtime)
   SP[NumStars].SNIITime = birthtime + CELibGetNextEventTimeStarbyStar(Input, CELibFeedbackType_SNII) 
     / (1.e6) / All.UnitTime_in_Megayears;
 
+  timebin_add_particle(&TimeBinsStar, NumStars, -1, 0, 1);  
+ 
   NumStars++;
-
-  timebin_add_particle(&TimeBinsStar, 0, -1, 0, 1);
 #endif
 
   return;
@@ -412,7 +413,8 @@ void spawn_star_from_cell(int igas, double birthtime, int istar, MyDouble mass_o
   SP[NumStars].PID = istar;
   /* assign density loop properties */
   SP[NumStars].Hsml = 10;
-
+  /* set timebin */
+  SP[NumStars].TimeBinStar = 0;
   /* set SN properties */
   SP[NumStars].Birthtime = birthtime;
   SP[NumStars].SNIIFlag = 0;
@@ -426,9 +428,9 @@ void spawn_star_from_cell(int igas, double birthtime, int istar, MyDouble mass_o
   SP[NumStars].SNIITime = birthtime + CELibGetNextEventTimeStarbyStar(Input, CELibFeedbackType_SNII)
     / (1.e6) / All.UnitTime_in_Megayears;
 
-  NumStars++;
+  timebin_add_particle(&TimeBinsStar, NumStars, -1, 0, 1); 
 
-  timebin_add_particle(&TimeBinsStar, 0, -1, 0, 1);
+  NumStars++;
 #endif
 
   return;
