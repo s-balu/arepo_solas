@@ -45,7 +45,7 @@
 #include "../domain/domain.h"
 #include "../mesh/voronoi/voronoi.h"
 
-#include "../celib/src/config.h"
+#include "../../celib/src/config.h"
 
 /*! \brief Prepares the loaded initial conditions for the run.
  *

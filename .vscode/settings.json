@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "voronoi.h": "c",
+        "allvars.h": "c",
+        "math.h": "c"
+    }
+}

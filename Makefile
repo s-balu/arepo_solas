@@ -311,7 +311,7 @@ HWLOC_LIB =
 endif
 
 ifeq (STARS,$(findstring STARS,$(CONFIGVARS)))
-CELIB_LIB = -L./src/celib/src -lCELib
+CELIB_LIB = -L./celib/src -lCELib
 endif
 
 
