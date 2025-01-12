@@ -511,18 +511,6 @@ void perform_end_of_step_physics(void)
 #endif
 #endif
 
-#ifdef STARS
-  /* for SNII */
-  for(i=0; i<NumGas; i++)
-    {
-      if(SphP[i].MassFeed > 0)
-       {
-        P[i].Mass += SphP[i].MassFeed;
-        SphP[i].MassFeed = 0;
-       }  
-    }
-#endif
-
     struct pv_update_data pvd;
     if(All.ComovingIntegrationOn)
       {
@@ -604,12 +592,17 @@ void perform_end_of_step_physics(void)
           continue;
 
 #ifdef STARS            
-          /* dump energy and momentum injected by stars */              
+          /* dump mass, momentum and energy injected by stars */              
           if(SphP[i].MomentumFeed > 0 || SphP[i].EnergyFeed > 0)
             {
+              /* add mass */
+              P[i].Mass += SphP[i].MassFeed;
+               
+              /* calculate kick: momentum conserving wind */
               kick_vector[0] = SphP[i].MomentumKickVector[0];
               kick_vector[1] = SphP[i].MomentumKickVector[1];
               kick_vector[2] = SphP[i].MomentumKickVector[2];
+
               pj = SphP[i].MomentumFeed;
 
               /* update momentum */
@@ -630,9 +623,8 @@ void perform_end_of_step_physics(void)
               update_internal_energy(P, SphP, i, &pvd);
               /* update pressure */
               set_pressure_of_cell_internal(P, SphP, i);
-              /* set feed flag to zero */
-              SphP[i].MomentumFeed = 0;
-              SphP[i].EnergyFeed   = 0;
+              /* set feed flags to zero */
+              SphP[i].MomentumFeed = SphP[i].EnergyFeed = SphP[i].MassFeed = 0;
             }
 #endif
         }

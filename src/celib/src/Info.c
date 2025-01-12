@@ -16,11 +16,10 @@
  */
 void CELibShowVersion(void){
     
-    fprintf(stderr,"// CELib, chemical evolution library for galaxy formation simulations.\n");
-    fprintf(stderr,"//\t This library is developed by Takayuki Saitoh.\n");
-    fprintf(stderr,"//\t Version %d.%d.%d\n",
+    fprintf(stderr,"\n CELib, chemical evolution library for galaxy formation simulations.\n");
+    fprintf(stderr,"\n This library is developed by Takayuki Saitoh.\n");
+    fprintf(stderr,"\n Version %d.%d.%d\n",
             __CELib_MajorVersion__,__CELib_MinorVersion__,__CELib_MicroVersion__);
-    fprintf(stderr,"//\t Git repository hash: %s\n",GITVERSION);
     fflush(stderr);
 
     return ;
@@ -38,7 +37,7 @@ void CELibShowCurrentStatus(void){
     if(CELibRunParameters.TestMode == true){
         fprintf(stderr,"\tTest mode: on\n");
     }else {
-        fprintf(stderr,"\tTest mode: on\n");
+        fprintf(stderr,"\tTest mode: off\n");
     }
  
     /// IMF

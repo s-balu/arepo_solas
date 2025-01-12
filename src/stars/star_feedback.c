@@ -211,7 +211,7 @@ static int star_ngb_feedback_evaluate(int target, int mode, int threadid)
   EddingtonLuminosity *=  (All.UnitTime_in_s / (All.UnitMass_in_g*pow(All.UnitVelocity_in_cm_per_s,2)));
   energyfeed = EddingtonLuminosity * dt;
   /* supernova */    
-  if(snIIflag == 2)
+  if(snIIflag > 0)
     energyfeed = 0;
 
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
@@ -260,9 +260,6 @@ static int star_ngb_feedback_evaluate(int target, int mode, int threadid)
 
           SphP[j].MomentumFeed  += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass;
           All.EnergyExchange[2] += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass;
-
-          SphP[j].EnergyFeed    += 0;
-          All.EnergyExchange[4] += 0;
               
           SphP[j].MomentumKickVector[0] = -dx;
           SphP[j].MomentumKickVector[1] = -dy;
@@ -271,7 +268,9 @@ static int star_ngb_feedback_evaluate(int target, int mode, int threadid)
           /* do supernova */
           if (snIIflag == 1)
             {
-              double elements[13] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
+             double elements[13] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+#ifdef STAR_CLUSTER
               struct CELibStructFeedbackStarbyStarInput Input = 
                 {
                   .Mass = star_mass,                 
@@ -282,17 +281,25 @@ static int star_ngb_feedback_evaluate(int target, int mode, int threadid)
 
               struct CELibStructFeedbackStarbyStarOutput Output = 
               CELibGetFeedbackStarbyStar(Input, CELibFeedbackType_SNII);
+#else
+              struct CELibStructFeedbackInput Input = 
+                {
+                  .Mass = star_mass,                 
+                  .Metallicity = 0.0004,          
+                  .MassConversionFactor = 1, 
+                  .Elements = elements,
+                };
 
-              //SphP[j].MomentumFeed  -= All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass;
-              //All.EnergyExchange[2] -= All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass; 
+              struct CELibStructFeedbackOutput Output = 
+              CELibGetFeedback(Input, CELibFeedbackType_SNII);
+#endif
+              
+              SphP[j].EnergyFeed    += (Output.Energy / All.UnitEnergy_in_cgs) * P[j].Mass / ngbmass;
+              All.EnergyExchange[4] += (Output.Energy / All.UnitEnergy_in_cgs) * P[j].Mass / ngbmass;
 
-              SphP[j].EnergyFeed    += Output.Energy / All.UnitEnergy_in_cgs * P[j].Mass / ngbmass;
-              All.EnergyExchange[4] += Output.Energy / All.UnitEnergy_in_cgs * P[j].Mass / ngbmass;
+              SphP[j].MassFeed      += (Output.EjectaMass * SOLAR_MASS / All.UnitMass_in_g) * P[j].Mass / ngbmass;
 
-              SphP[j].MassFeed      += Output.EjectaMass * P[j].Mass / ngbmass;
-
-              snIIremnantmass        = Output.RemnantMass;
-                
+              snIIremnantmass        = (Output.RemnantMass * SOLAR_MASS / All.UnitMass_in_g);
             }
         }
     }

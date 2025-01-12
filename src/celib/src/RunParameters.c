@@ -20,7 +20,7 @@
 struct CELibStructRunParameters CELibRunParameters = {
     .TestMode = false,
     .IntegrationSteps = 10000,
-    .IMFType = CELibIMF_Salpeter,
+    .IMFType = CELibIMF_Chabrier,
     .SolarAbundancePatternType = CELibSolarAbundancePattern_A09,
 
     .LifeTimeType = 1,
