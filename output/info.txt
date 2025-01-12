@@ -1,2 +1,0 @@
-
-Sync-Point 0, TimeBin=0, Time: 0, Systemstep: 0, Nsync-grv:     110000, Nsync-hyd:     110000

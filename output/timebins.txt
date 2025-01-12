@@ -1,7 +1,0 @@
-
-Sync-Point 0, Time: 0, Systemstep: 0
-Occupied timebins: gravity      hydro               dt              cumul-grav   cumul-sph A D    avg-time  cpu-frac
- X  bin= 0          110000      110000        0.000000000000           110000      110000 < *        0.00      0.0%
-               ------------------------
-Total active:       110000      110000    
-
