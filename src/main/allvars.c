@@ -116,8 +116,8 @@ double TimeBinSfr[TIMEBINS];
 #endif
 
 #ifdef SUBFIND
-int GrNr;
-int NumPartGroup;
+extern int GrNr;
+extern int NumPartGroup;
 #endif /* #ifdef SUBFIND */
 
 char DumpFlag         = 1;
