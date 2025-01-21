@@ -330,7 +330,7 @@ void convert_cell_into_star(int i, double birthtime)
 #ifdef STAR_CLUSTER
   struct CELibStructNextEventTimeStarbyStarInput Input = 
     {
-      .InitialMass_in_Msun = P[i].Mass,
+      .InitialMass_in_Msun = (P[i].Mass * All.UnitMass_in_g / SOLAR_MASS),
       .Metallicity = 0.0004
     };
 
@@ -340,7 +340,7 @@ void convert_cell_into_star(int i, double birthtime)
     struct CELibStructNextEventTimeInput Input = 
     {
       .R = (double)rand()/(double)RAND_MAX,
-      .InitialMass_in_Msun = P[i].Mass,
+      .InitialMass_in_Msun = (P[i].Mass * All.UnitMass_in_g / SOLAR_MASS),
       .Metallicity = 0.0004
     };
 
@@ -434,7 +434,7 @@ void spawn_star_from_cell(int igas, double birthtime, int istar, MyDouble mass_o
   #ifdef STAR_CLUSTER
   struct CELibStructNextEventTimeStarbyStarInput Input = 
     {
-      .InitialMass_in_Msun = P[istar].Mass,
+      .InitialMass_in_Msun = (P[istar].Mass * All.UnitMass_in_g / SOLAR_MASS),
       .Metallicity = 0.0004
     };
 
@@ -444,7 +444,7 @@ void spawn_star_from_cell(int igas, double birthtime, int istar, MyDouble mass_o
     struct CELibStructNextEventTimeInput Input = 
     {
       .R = (double)rand()/(double)RAND_MAX,
-      .InitialMass_in_Msun = P[istar].Mass,
+      .InitialMass_in_Msun = (P[istar].Mass * All.UnitMass_in_g / SOLAR_MASS),
       .Metallicity = 0.0004
     };
 

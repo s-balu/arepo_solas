@@ -273,7 +273,7 @@ static int star_ngb_feedback_evaluate(int target, int mode, int threadid)
 #ifdef STAR_CLUSTER
               struct CELibStructFeedbackStarbyStarInput Input = 
                 {
-                  .Mass = star_mass,                 
+                  .Mass = (star_mass * All.UnitMass_in_g / SOLAR_MASS),                 
                   .Metallicity = 0.0004,          
                   .MassConversionFactor = 1, 
                   .Elements = elements,
@@ -284,7 +284,7 @@ static int star_ngb_feedback_evaluate(int target, int mode, int threadid)
 #else
               struct CELibStructFeedbackInput Input = 
                 {
-                  .Mass = star_mass,                 
+                  .Mass = (star_mass * All.UnitMass_in_g / SOLAR_MASS),                 
                   .Metallicity = 0.0004,          
                   .MassConversionFactor = 1, 
                   .Elements = elements,

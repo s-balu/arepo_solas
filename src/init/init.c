@@ -602,7 +602,7 @@ int init(void)
     {
       struct CELibStructNextEventTimeStarbyStarInput Input = 
       {
-        .InitialMass_in_Msun = PPS(i).Mass,
+        .InitialMass_in_Msun = (PPS(i).Mass * All.UnitMass_in_g / SOLAR_MASS),
         .Metallicity = 0.0004
       };
       
