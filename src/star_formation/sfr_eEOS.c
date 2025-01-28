@@ -47,7 +47,7 @@
 
 #include "../gravity/forcetree.h"
 
-#ifdef USE_SFR
+#if defined(USE_SFR) && !defined(AGORA_SF)
 
 /*! \brief Main driver for star formation and gas cooling.
  *

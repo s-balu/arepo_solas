@@ -1191,6 +1191,12 @@ extern struct global_data_all_processes
   double FactorSN;
 #endif /* #ifdef USE_SFR */
 
+#if defined(USE_SFR) && defined(AGORA_SF)
+  double StarFormationEfficiency;   // Corresponds to a percentage - lies between 0 and 1
+  double StarFormationNumberDensityThreshold;  // Neutral atomic hydrogen density in cubic cm
+#endif
+
+
 #ifdef MHD_POWELL
   double Powell_Momentum[3];
   double Powell_Angular_Momentum[3];

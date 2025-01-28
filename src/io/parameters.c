@@ -460,6 +460,17 @@ void read_parameter_file(char *fname)
       id[nt++] = REAL;
 #endif /* #ifdef USE_SFR */
 
+#if defined(USE_SFR) && defined(AGORA_SF)
+      strcpy(tag[nt], "StarFormationEfficiency");  // Value between 0 and 1
+      addr[nt] = &All.StarFormationEfficiency;
+      id[nt++] = REAL;
+
+      strcpy(tag[nt], "StarFormationNumberDensityThreshold"); // nh in units of cm^-3
+      addr[nt] = &All.StarFormationNumberDensityThreshold;
+      id[nt++] = REAL;
+#endif
+
+
 #ifdef MHD_SEEDFIELD
       strcpy(tag[nt], "MHDSeedDir");
       addr[nt] = &All.B_dir;
