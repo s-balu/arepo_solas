@@ -176,6 +176,7 @@ OBJS =   debug_md5/calc_checksum.o \
          ngbtree/ngbtree_search.o \
          ngbtree/ngbtree_walk.o \
          star_formation/sfr_eEOS.o \
+				 star_formation/sfr_AGORA.o \
          star_formation/starformation.o \
          time_integration/darkenergy.o \
          time_integration/do_gravity_hydro.o \
