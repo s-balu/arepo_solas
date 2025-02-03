@@ -587,15 +587,13 @@ int init(void)
 #ifdef STARS
   /* celib init */
   if(ThisTask == 0)
-    {
-      CELibShowVersion();
- 
-      CELibInit();
-  
-      CELibShowCurrentStatus();  
-    }
-  
+    CELibShowVersion();
+
+  CELibInit();
   srand((unsigned int)time(NULL));
+
+  if(ThisTask == 0)
+    CELibShowCurrentStatus();  
   
 #ifdef STAR_CLUSTER
   for(i=0; i<NumStars; i++)
