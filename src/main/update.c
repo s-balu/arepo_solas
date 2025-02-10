@@ -8,6 +8,8 @@
 #include "../main/allvars.h"
 #include "../main/proto.h"
 
+#include "../../celib/src/config.h"
+
 #if defined(STARS) || defined(BLACKHOLES)
 /* THIS PART ADAPTED FROM GADGET4 */
 /* fall back to cubic spline kernel */
@@ -24,15 +26,15 @@
 #ifdef CUBIC_SPLINE_KERNEL
 
 #ifdef THREEDIMS
-#define NORM (8.0 / M_PI) /*!< For 3D-normalized kernel */
+#define K_NORM (8.0 / M_PI) /*!< For 3D-normalized kernel */
 #endif
 
 #ifdef TWODIMS
-#define NORM (40.0 / (7.0 * M_PI)) /*!< For 2D-normalized kernel */
+#define K_NORM (40.0 / (7.0 * M_PI)) /*!< For 2D-normalized kernel */
 #endif
 
 #ifdef ONEDIMS
-#define NORM (4.0 / 3.0) /*!< For 1D-normalized kernel */
+#define K_NORM (4.0 / 3.0) /*!< For 1D-normalized kernel */
 #endif
 
 #endif /* CUBIC_SPLINE_KERNEL */
@@ -40,15 +42,15 @@
 #ifdef WENDLAND_C2_KERNEL
 
 #ifdef THREEDIMS
-#define NORM (21.0 / (2.0 * M_PI)) /*!< For 3D-normalized kernel */
+#define K_NORM (21.0 / (2.0 * M_PI)) /*!< For 3D-normalized kernel */
 #endif
 
 #ifdef TWODIMS
-#define NORM (7.0 / M_PI) /*!< For 2D-normalized kernel */
+#define K_NORM (7.0 / M_PI) /*!< For 2D-normalized kernel */
 #endif
 
 #ifdef ONEDIMS
-#define NORM (5.0 / 4.0) /*!< For 1D-normalized kernel */
+#define K_NORM (5.0 / 4.0) /*!< For 1D-normalized kernel */
 #endif
 
 #endif /* WENDLAND_C2_KERNEL */
@@ -56,15 +58,15 @@
 #ifdef WENDLAND_C4_KERNEL
 
 #ifdef THREEDIMS
-#define NORM (495.0 / (32.0 * M_PI)) /*!< For 3D-normalized kernel */
+#define K_NORM (495.0 / (32.0 * M_PI)) /*!< For 3D-normalized kernel */
 #endif
 
 #ifdef TWODIMS
-#define NORM (9.0 / M_PI) /*!< For 2D-normalized kernel */
+#define K_NORM (9.0 / M_PI) /*!< For 2D-normalized kernel */
 #endif
 
 #ifdef ONEDIMS
-#define NORM (3.0 / 2.0) /*!< For 1D-normalized kernel */
+#define K_NORM (3.0 / 2.0) /*!< For 1D-normalized kernel */
 #endif
 
 #endif /* WENDLAND_C4_KERNEL */
@@ -72,15 +74,15 @@
 #ifdef WENDLAND_C6_KERNEL
 
 #ifdef THREEDIMS
-#define NORM (1365.0 / (64.0 * M_PI)) /*!< For 3D-normalized kernel */
+#define K_NORM (1365.0 / (64.0 * M_PI)) /*!< For 3D-normalized kernel */
 #endif
 
 #ifdef TWODIMS
-#define NORM (78.0 / (7.0 * M_PI)) /*!< For 2D-normalized kernel */
+#define K_NORM (78.0 / (7.0 * M_PI)) /*!< For 2D-normalized kernel */
 #endif
 
 #ifdef ONEDIMS
-#define NORM (55.0 / 32.0) /*!< For 1D-normalized kernel */
+#define K_NORM (55.0 / 32.0) /*!< For 1D-normalized kernel */
 #endif
 
 #endif /* WENDLAND_C6_KERNEL */
@@ -184,9 +186,9 @@ void kernel(double u, double hinv3, double hinv4, double *wk, double *dwk)
 #endif
 #endif /* WENDLAND_C6_KERNEL */
   
-  *dwk *= NORM * hinv4;
+  *dwk *= K_NORM * hinv4;
   
-  *wk *= NORM * hinv3;
+  *wk *= K_NORM * hinv3;
 }
 /* THIS PART ADAPTED FROM GADGET4 */
 

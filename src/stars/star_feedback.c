@@ -9,7 +9,6 @@
 #include "../main/proto.h"
 
 #include "../domain/domain.h"
-#include "../../celib/src/config.h"
 
 
 static int star_ngb_feedback_evaluate(int target, int mode, int threadid);
@@ -167,7 +166,7 @@ static int star_ngb_feedback_evaluate(int target, int mode, int threadid)
   MyDouble *pos, star_density, star_mass, ngbmass, snIIenergyfeed, snIImassfeed;
 
   data_in local, *target_data;
-  data_out out;
+  //data_out out;
 
   if(mode == MODE_LOCAL_PARTICLES)
     {
@@ -276,7 +275,7 @@ static int star_ngb_feedback_evaluate(int target, int mode, int threadid)
                 SphP[j].MassFeed      += snIImassfeed * P[j].Mass / ngbmass;
               
               /* wake up particles */
-              timebin_move_particle(&TimeBinsHydro, j, P[j].TimeBinHydro, LowestActiveTimeBin)
+              timebin_move_particle(&TimeBinsHydro, j, P[j].TimeBinHydro, All.LowestActiveTimeBin);
 
               if(P[j].Ti_Current != All.Ti_Current)
                 drift_particle(j, All.Ti_Current);
