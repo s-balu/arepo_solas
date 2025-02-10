@@ -252,10 +252,9 @@ void update_SNII(void)
   
   for(i=0; i<NumStars; i++)
     {
-      if(SP[i].SNIIRemnantMass) // needs to have flag=1 and be active
+      if(SP[i].SNIIFlag == 1)
         {                         
           PPS(i).Mass = SP[i].SNIIRemnantMass;
-          SP[i].SNIIRemnantMass = 0;
           SP[i].SNIIFlag = 2;
           continue;
         }
