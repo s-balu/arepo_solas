@@ -274,6 +274,14 @@ static int star_ngb_feedback_evaluate(int target, int mode, int threadid)
               
               if(snIImassfeed > 1e-10)
                 SphP[j].MassFeed      += snIImassfeed * P[j].Mass / ngbmass;
+              
+              /* wake up particles */
+              timebin_move_particle(&TimeBinsHydro, j, P[j].TimeBinHydro, LowestActiveTimeBin)
+
+              if(P[j].Ti_Current != All.Ti_Current)
+                drift_particle(j, All.Ti_Current);
+              TimeBinsHydro.ActiveParticleList[TimeBinsHydro.NActiveParticles] = j;
+              TimeBinsHydro.NActiveParticles++;
             }
         }
     }
