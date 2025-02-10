@@ -114,19 +114,24 @@ void domain_resize_storage_bhs(int count_get_bhs)
 #ifdef STARS
 void domain_resize_storage_stars(int count_get_stars)
 {
-  /*int starload       = NumStars + count_get_stars;
+  int starload       = NumStars + count_get_stars;
   int loc_data_star  = starload;
   int res_star;
 
   MPI_Allreduce(&loc_data_star, &res_star, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
 
   int max_starload   = res_star;
+
+  if(max_starload > 250)
+  {
   
   if(max_starload > (1.0 - ALLOC_TOLERANCE) * All.MaxPartStars || max_starload < (1.0 - 3 * ALLOC_TOLERANCE) * All.MaxPartStars)
     {
       All.MaxPartStars = max_starload / (1.0 - 2 * ALLOC_TOLERANCE);
       reallocate_memory_maxpartstars();
-    }*/
+    }
+
+  }
 }
 #endif
 
