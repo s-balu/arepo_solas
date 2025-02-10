@@ -264,7 +264,41 @@ void update_SNII(void)
         continue;
 
       if(All.Time > SP[i].SNIITime)
-        SP[i].SNIIFlag = 1; 
+        {
+          SP[i].SNIIFlag = 1; 
+          
+          timebin_add_particle(&TimeBinsStar, i, -1, 0, 1);
+
+          /* SNII feedback variables */
+          double elements[13] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+#ifdef STAR_CLUSTER
+          struct CELibStructFeedbackStarbyStarInput Input = 
+            {
+              .Mass = (PPS(i).Mass * All.UnitMass_in_g / SOLAR_MASS),                 
+              .Metallicity = 0.0004,          
+              .MassConversionFactor = 1, 
+              .Elements = elements,
+            };
+
+          struct CELibStructFeedbackStarbyStarOutput Output = 
+            CELibGetFeedbackStarbyStar(Input, CELibFeedbackType_SNII);
+#else
+          struct CELibStructFeedbackInput Input = 
+            {
+              .Mass = (PPS(i).Mass * All.UnitMass_in_g / SOLAR_MASS),                 
+              .Metallicity = 0.0004,          
+              .MassConversionFactor = 1, 
+              .Elements = elements,
+            };
+
+          struct CELibStructFeedbackOutput Output = 
+            CELibGetFeedback(Input, CELibFeedbackType_SNII);
+#endif
+          SP[i].SNIIEnergyFeed = (Output.Energy / All.UnitEnergy_in_cgs);
+          SP[i].SNIIMassFeed = (Output.EjectaMass * SOLAR_MASS / All.UnitMass_in_g);
+          SP[i].SNIIRemnantMass = (Output.RemnantMass * SOLAR_MASS / All.UnitMass_in_g);
+        }  
     } 
 }
 #endif

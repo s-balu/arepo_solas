@@ -407,8 +407,8 @@ void calculate_non_standard_physics_prior_mesh_construction(void)
 #endif
 
 #ifdef STARS
-  star_density();
   update_SNII();
+  star_density();
 #endif
 
 #ifdef BLACKHOLES
