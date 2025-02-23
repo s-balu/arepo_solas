@@ -74,6 +74,10 @@ void domain_rearrange_particle_sequence(void)
             P[NumGas - 1]   = psave;
             Key[NumGas - 1] = key;
 
+#ifdef STARS
+            SPP(NumGas-1).PID = NumGas-1;
+#endif
+
             NumGas--;
             i--;
           }
