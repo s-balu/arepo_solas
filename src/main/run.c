@@ -404,19 +404,15 @@ void calculate_non_standard_physics_prior_mesh_construction(void)
 #ifdef BONDI_ACCRETION
   update_bh_accretion_rate();
 #endif
-#endif
-
-#ifdef STARS
-  update_SNII();
-  star_density();
-#endif
-
-#ifdef BLACKHOLES
   update_bh_timesteps();
 #endif
 
 #ifdef STARS
+  update_SNII();
+  
   update_star_timesteps();
+
+  star_density();
 #endif
 
 #ifdef BLACKHOLES

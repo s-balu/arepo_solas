@@ -348,7 +348,7 @@ void convert_cell_into_star(int i, double birthtime)
     / (1.e6) / All.UnitTime_in_Megayears;
 #endif
 
-  timebin_add_particle(&TimeBinsStar, NumStars, -1, 0, 1);  
+  //timebin_add_particle(&TimeBinsStar, NumStars, -1, 0, 1);  
  
   NumStars++;
 #endif
@@ -452,7 +452,7 @@ void spawn_star_from_cell(int igas, double birthtime, int istar, MyDouble mass_o
     / (1.e6) / All.UnitTime_in_Megayears;
 #endif  
 
-  timebin_add_particle(&TimeBinsStar, NumStars, -1, 0, 1); 
+  //timebin_add_particle(&TimeBinsStar, NumStars, -1, 0, 1); 
 
   NumStars++;
 #endif
