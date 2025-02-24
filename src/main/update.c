@@ -268,7 +268,7 @@ void update_SNII(void)
         {
           SP[i].SNIIFlag = 1; 
           
-          timebin_add_particle(&TimeBinsStar, i, -1, 0, 1);
+          //timebin_add_particle(&TimeBinsStar, i, -1, 0, 1);
 
           /* SNII feedback variables */
           double elements[13] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
