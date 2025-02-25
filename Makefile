@@ -282,17 +282,6 @@ OBJS    += stars/star_density.o \
            stars/star_feedback.o 
 INCL    += stars/star_proto.h
 SUBDIRS += stars
-
-OBJS    += celib/src/SNIIYields.o \
-           celib/src/LifeTime.o 
-	   
-INCL    += celib/src/Astro.h \
-           celib/src/CELib.h \
-           celib/src/config.h \
-	   celib/src/LifeTimeTable.h 
-	   
-SUBDIRS += celib/src \
-           celib/data
 endif
 
 OBJS    += main/update.o
@@ -322,6 +311,10 @@ HWLOC_INCL =
 HWLOC_LIB =
 endif
 
+ifeq (STARS,$(findstring STARS,$(CONFIGVARS)))
+CELIB_LIB = -L./celib/src -lCELib
+endif
+
 
 ##########################
 #combine compiler options#
@@ -329,7 +322,7 @@ endif
 
 CFLAGS = $(OPTIMIZE) $(MPICH_INCL) $(HDF5_INCL) $(GSL_INCL) $(FFTW_INCL) $(HWLOC_INCL) -I$(BUILD_DIR)
 
-LIBS = $(GMP_LIB) $(MATH_LIB) $(MPICH_LIB) $(HDF5_LIB) $(GSL_LIB) $(FFTW_LIB) $(HWLOC_LIB)
+LIBS = $(GMP_LIB) $(MPICH_LIB) $(HDF5_LIB) $(GSL_LIB) $(FFTW_LIB) $(HWLOC_LIB) $(CELIB_LIB) $(MATH_LIB)
 
 FOPTIONS = $(OPTIMIZE)
 FFLAGS = $(FOPTIONS)
@@ -360,7 +353,7 @@ all: check build
 build: $(EXEC)
 
 $(EXEC): $(OBJS)
-	$(LINKER) $(OPTIMIZE) $(OBJS) $(LIBS) -o $(EXEC)
+	$(LINKER) $(OPTIMIZE) $(OBJS) $(LIBS) -o $(EXEC) 
 
 lib$(LIBRARY).a: $(filter-out $(BUILD_DIR)/main/main.o,$(OBJS))
 	$(AR) -rcs lib$(LIBRARY).a $(OBJS)

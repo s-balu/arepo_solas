@@ -1,3 +1,5 @@
+#pragma once
+
 #define MaxCharactersInLine (256)
 #define NONE    (-1)
 

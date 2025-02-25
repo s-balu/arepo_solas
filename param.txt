@@ -21,11 +21,11 @@ OutputListFilename                        ol
 OutputListOn                              0
 
 %% simulation mode
-CoolingOn                                 0
-StarformationOn                           0
+CoolingOn                                 1
+StarformationOn                           1
 PeriodicBoundariesOn                      0
 ComovingIntegrationOn                     0
-%TreecoolFile                          TREECOOL_ep
+TreecoolFile                          TREECOOL_ep
 
 %% Cosmological parameters
 Omega0                                    0.0
@@ -78,15 +78,15 @@ MultipleDomains                           2
 TopNodeFactor                             4
 ActivePartFracForNewDomainDecomp          0.01
 
-%ReferenceGasPartMass                      0.043
-%TargetGasMassFactor                       1
-%RefinementCriterion                       1
-%DerefinementCriterion                     1
+ReferenceGasPartMass                      0.43
+TargetGasMassFactor                       1
+RefinementCriterion                       1
+DerefinementCriterion                     1
 %MaxVolumeDiff                             8
 %MinVolume                                 1e-18
 %MaxVolume                                 100
 
-%MeanVolume                                0.3
+MeanVolume                                3
 
 %% gravitational softening
 MinimumComovingHydroSoftening             0.01
@@ -112,23 +112,23 @@ SofteningTypeOfPartType4                  4
 SofteningTypeOfPartType5                  5
 
 %%DESIRED NGB MASS FOR FEEDBACK
-DesNgbMass                                4.3
-DesMassDev                                0.1
+DesNgbMass                                43
+DesMassDev                                1
 
 %%TIME TO TURN ON FEEDBACK
 FeedbackTime                              0
 
 %%SET TO 1 FOR KINETIC JET FEEDBACK
-JetFeedback                               1
+%JetFeedback                               1
 
 %%RATIO OF JET MASS LOADING TO MASS ACCRETED
-Mload                                     0.1
+%Mload                                     0.1
 
 %%FEEDBACK PARAMETERS
 
 %%Bhs
-Epsilon_f                                 1
-Epsilon_r                                 0.1
+%Epsilon_f                                 1
+%Epsilon_r                                 0.1
 
 %Stellar Winds (set to 0 for no winds)
 Lambda                                    0.05
@@ -144,3 +144,12 @@ Lambda                                    0.05
 %RefBHLowerFactorC                         2
 
 %GridSize                                 16
+
+CritPhysDensity                         0       % critical physical density for star formation (in cm^(-3))
+MaxSfrTimescale                         2.27    % in internal time units
+CritOverDensity                         57.7    % overdensity threshold value
+TempSupernova                           5.73e7  % in Kelvin
+TempClouds                              1000.0  % in Kelvin
+FactorEVP                               573.0
+TemperatureThresh                       1e+06
+FactorSN                                0.1

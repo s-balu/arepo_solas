@@ -8,6 +8,8 @@
 #include "../main/allvars.h"
 #include "../main/proto.h"
 
+#include "../../celib/src/config.h"
+
 #if defined(STARS) || defined(BLACKHOLES)
 /* THIS PART ADAPTED FROM GADGET4 */
 /* fall back to cubic spline kernel */
@@ -24,15 +26,15 @@
 #ifdef CUBIC_SPLINE_KERNEL
 
 #ifdef THREEDIMS
-#define NORM (8.0 / M_PI) /*!< For 3D-normalized kernel */
+#define K_NORM (8.0 / M_PI) /*!< For 3D-normalized kernel */
 #endif
 
 #ifdef TWODIMS
-#define NORM (40.0 / (7.0 * M_PI)) /*!< For 2D-normalized kernel */
+#define K_NORM (40.0 / (7.0 * M_PI)) /*!< For 2D-normalized kernel */
 #endif
 
 #ifdef ONEDIMS
-#define NORM (4.0 / 3.0) /*!< For 1D-normalized kernel */
+#define K_NORM (4.0 / 3.0) /*!< For 1D-normalized kernel */
 #endif
 
 #endif /* CUBIC_SPLINE_KERNEL */
@@ -40,15 +42,15 @@
 #ifdef WENDLAND_C2_KERNEL
 
 #ifdef THREEDIMS
-#define NORM (21.0 / (2.0 * M_PI)) /*!< For 3D-normalized kernel */
+#define K_NORM (21.0 / (2.0 * M_PI)) /*!< For 3D-normalized kernel */
 #endif
 
 #ifdef TWODIMS
-#define NORM (7.0 / M_PI) /*!< For 2D-normalized kernel */
+#define K_NORM (7.0 / M_PI) /*!< For 2D-normalized kernel */
 #endif
 
 #ifdef ONEDIMS
-#define NORM (5.0 / 4.0) /*!< For 1D-normalized kernel */
+#define K_NORM (5.0 / 4.0) /*!< For 1D-normalized kernel */
 #endif
 
 #endif /* WENDLAND_C2_KERNEL */
@@ -56,15 +58,15 @@
 #ifdef WENDLAND_C4_KERNEL
 
 #ifdef THREEDIMS
-#define NORM (495.0 / (32.0 * M_PI)) /*!< For 3D-normalized kernel */
+#define K_NORM (495.0 / (32.0 * M_PI)) /*!< For 3D-normalized kernel */
 #endif
 
 #ifdef TWODIMS
-#define NORM (9.0 / M_PI) /*!< For 2D-normalized kernel */
+#define K_NORM (9.0 / M_PI) /*!< For 2D-normalized kernel */
 #endif
 
 #ifdef ONEDIMS
-#define NORM (3.0 / 2.0) /*!< For 1D-normalized kernel */
+#define K_NORM (3.0 / 2.0) /*!< For 1D-normalized kernel */
 #endif
 
 #endif /* WENDLAND_C4_KERNEL */
@@ -72,15 +74,15 @@
 #ifdef WENDLAND_C6_KERNEL
 
 #ifdef THREEDIMS
-#define NORM (1365.0 / (64.0 * M_PI)) /*!< For 3D-normalized kernel */
+#define K_NORM (1365.0 / (64.0 * M_PI)) /*!< For 3D-normalized kernel */
 #endif
 
 #ifdef TWODIMS
-#define NORM (78.0 / (7.0 * M_PI)) /*!< For 2D-normalized kernel */
+#define K_NORM (78.0 / (7.0 * M_PI)) /*!< For 2D-normalized kernel */
 #endif
 
 #ifdef ONEDIMS
-#define NORM (55.0 / 32.0) /*!< For 1D-normalized kernel */
+#define K_NORM (55.0 / 32.0) /*!< For 1D-normalized kernel */
 #endif
 
 #endif /* WENDLAND_C6_KERNEL */
@@ -184,9 +186,9 @@ void kernel(double u, double hinv3, double hinv4, double *wk, double *dwk)
 #endif
 #endif /* WENDLAND_C6_KERNEL */
   
-  *dwk *= NORM * hinv4;
+  *dwk *= K_NORM * hinv4;
   
-  *wk *= NORM * hinv3;
+  *wk *= K_NORM * hinv3;
 }
 /* THIS PART ADAPTED FROM GADGET4 */
 
@@ -252,10 +254,9 @@ void update_SNII(void)
   
   for(i=0; i<NumStars; i++)
     {
-      if(SP[i].SNIIRemnantMass) // needs to have flag=1 and be active
+      if(SP[i].SNIIFlag == 1)
         {                         
           PPS(i).Mass = SP[i].SNIIRemnantMass;
-          SP[i].SNIIRemnantMass = 0;
           SP[i].SNIIFlag = 2;
           continue;
         }
@@ -264,7 +265,41 @@ void update_SNII(void)
         continue;
 
       if(All.Time > SP[i].SNIITime)
-        SP[i].SNIIFlag = 1; 
+        {
+          SP[i].SNIIFlag = 1; 
+          
+          //timebin_add_particle(&TimeBinsStar, i, -1, 0, 1);
+
+          /* SNII feedback variables */
+          double elements[13] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+#ifdef STAR_CLUSTER
+          struct CELibStructFeedbackStarbyStarInput Input = 
+            {
+              .Mass = (PPS(i).Mass * All.UnitMass_in_g / SOLAR_MASS),                 
+              .Metallicity = 0.0004,          
+              .MassConversionFactor = 1, 
+              .Elements = elements,
+            };
+
+          struct CELibStructFeedbackStarbyStarOutput Output = 
+            CELibGetFeedbackStarbyStar(Input, CELibFeedbackType_SNII);
+#else
+          struct CELibStructFeedbackInput Input = 
+            {
+              .Mass = (PPS(i).Mass * All.UnitMass_in_g / SOLAR_MASS),                 
+              .Metallicity = 0.0004,          
+              .MassConversionFactor = 1, 
+              .Elements = elements,
+            };
+
+          struct CELibStructFeedbackOutput Output = 
+            CELibGetFeedback(Input, CELibFeedbackType_SNII);
+#endif
+          SP[i].SNIIEnergyFeed = (Output.Energy / All.UnitEnergy_in_cgs);
+          SP[i].SNIIMassFeed = (Output.EjectaMass * SOLAR_MASS / All.UnitMass_in_g);
+          SP[i].SNIIRemnantMass = (Output.RemnantMass * SOLAR_MASS / All.UnitMass_in_g);
+        }  
     } 
 }
 #endif
@@ -365,7 +400,10 @@ void update_list_of_active_bh_particles(void)
 /* get timestep for star based on smallest between ngbs */
 integertime get_timestep_star(int p)
 { 
-  return SP[p].NgbMinStep;
+  if(SP[p].SNIIFlag == 1)
+    return 0;
+  
+  return (integertime)(1e-2 / All.Timebase_interval);
 }
 
 void update_star_timesteps(void)
@@ -511,18 +549,6 @@ void perform_end_of_step_physics(void)
 #endif
 #endif
 
-#ifdef STARS
-  /* for SNII */
-  for(i=0; i<NumGas; i++)
-    {
-      if(SphP[i].MassFeed > 0)
-       {
-        P[i].Mass += SphP[i].MassFeed;
-        SphP[i].MassFeed = 0;
-       }  
-    }
-#endif
-
     struct pv_update_data pvd;
     if(All.ComovingIntegrationOn)
       {
@@ -604,18 +630,23 @@ void perform_end_of_step_physics(void)
           continue;
 
 #ifdef STARS            
-          /* dump energy and momentum injected by stars */              
+          /* dump mass, momentum and energy injected by stars */              
           if(SphP[i].MomentumFeed > 0 || SphP[i].EnergyFeed > 0)
             {
+              /* add mass */
+              P[i].Mass += SphP[i].MassFeed;
+               
+              /* calculate kick: momentum conserving wind */
               kick_vector[0] = SphP[i].MomentumKickVector[0];
               kick_vector[1] = SphP[i].MomentumKickVector[1];
               kick_vector[2] = SphP[i].MomentumKickVector[2];
+
               pj = SphP[i].MomentumFeed;
 
               /* update momentum */
-              SphP[i].Momentum[0] += kick_vector[0] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
-              SphP[i].Momentum[1] += kick_vector[1] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
-              SphP[i].Momentum[2] += kick_vector[2] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));  
+              //SphP[i].Momentum[0] += kick_vector[0] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
+              //SphP[i].Momentum[1] += kick_vector[1] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
+              //SphP[i].Momentum[2] += kick_vector[2] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));  
 
               All.EnergyExchange[3] += SphP[i].MomentumFeed;     
                  
@@ -630,9 +661,8 @@ void perform_end_of_step_physics(void)
               update_internal_energy(P, SphP, i, &pvd);
               /* update pressure */
               set_pressure_of_cell_internal(P, SphP, i);
-              /* set feed flag to zero */
-              SphP[i].MomentumFeed = 0;
-              SphP[i].EnergyFeed   = 0;
+              /* set feed flags to zero */
+              SphP[i].MomentumFeed = SphP[i].EnergyFeed = SphP[i].MassFeed = 0;
             }
 #endif
         }

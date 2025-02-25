@@ -1,8 +1,10 @@
 #include "config.h"
 #include "LifeTimeTable.h"
 
-double (*CELibGetLifeTimeofStar)(const double, const double);
-double (*CELibGetDyingStellarMass)(const double, const double);
+
+// Define the function pointer
+double (*CELibGetDyingStellarMass)(const double, const double) = NULL;
+double (*CELibGetLifeTimeofStar)(const double, const double) = NULL;
 
 /*!
  * Sizes of the lifetime table. 
@@ -13,7 +15,14 @@ int CELibLifeTime_Mass;
 double *CELibLifeTimeZ;
 double *CELibLifeTimeLogZ;
 
+static void pCELibStellarLifeTimeDumpInterpolatedValues(const char OutDir[]);
+static void pCELibDyingStarMassDump(const char OutDir[]);
+static void pCELibDyingStarMassDumpInterpolatedValues(const char OutDir[]);
 static void pCELibFittingLifeTime(void);
+static void pCELibStellarLifeTimeDumpInterpolatedValuesLSF(const char OutDir[]);
+static void pCELibDyingStarMassDumpInterpolatedValuesLSF(const char OutDir[]);
+static void pCELibDyingStarMassDumpLSF(const char OutDir[]);
+static void pCELibShowZeroZStarLifeTime(void);
 
 
 int CELibGetLifeTimeTableSizeMetallicity(void){
@@ -25,18 +34,36 @@ int CELibGetLifeTimeTableSizeMetallicity(void){
  */
 void CELibInitLifeTime(void){
 
+    if(CELibRunParameters.PopIIILifeTime == 1){
+        // Adopt Schaerer's popIII lifetime data 
+        CELibLifeTime_Metallicity = CELIB_LIFETIME_Z_P98+1; 
+        free(CELibLifeTimeZ);
+        free(CELibLifeTimeLogZ);
+        CELibLifeTimeZ = malloc(sizeof(double)*CELibLifeTime_Metallicity);
+        CELibLifeTimeLogZ = malloc(sizeof(double)*CELibLifeTime_Metallicity);
 
-    CELibLifeTime_Metallicity = CELIB_LIFETIME_Z_P98; 
-    free(CELibLifeTimeZ);
-    free(CELibLifeTimeLogZ);
-    CELibLifeTimeZ = malloc(sizeof(double)*CELibLifeTime_Metallicity);
-    CELibLifeTimeLogZ = malloc(sizeof(double)*CELibLifeTime_Metallicity);
+        CELibLifeTime_Mass = CELIB_LIFETIME_M_P98;
 
-    CELibLifeTime_Mass = CELIB_LIFETIME_M_P98;
+        CELibLifeTimeZ[0] = CELibRunParameters.PopIIIMetallicity;
+        CELibLifeTimeLogZ[0] = log10(CELibRunParameters.PopIIIMetallicity);
+        for(int i=0;i<CELIB_LIFETIME_Z_P98;i++){
+            CELibLifeTimeZ[i+1] = CELibLifeTimeZ_P98[i];
+            CELibLifeTimeLogZ[i+1] = log10(CELibLifeTimeZ_P98[i]);
+        }
+    } else {
+        // Use only Portinari et al. (1998)'s lifetime data.
+        CELibLifeTime_Metallicity = CELIB_LIFETIME_Z_P98; 
+        free(CELibLifeTimeZ);
+        free(CELibLifeTimeLogZ);
+        CELibLifeTimeZ = malloc(sizeof(double)*CELibLifeTime_Metallicity);
+        CELibLifeTimeLogZ = malloc(sizeof(double)*CELibLifeTime_Metallicity);
 
-    for(int i=0;i<CELibLifeTime_Metallicity;i++){
-        CELibLifeTimeZ[i] = CELibLifeTimeZ_P98[i];
-        CELibLifeTimeLogZ[i] = log10(CELibLifeTimeZ_P98[i]);
+        CELibLifeTime_Mass = CELIB_LIFETIME_M_P98;
+
+        for(int i=0;i<CELibLifeTime_Metallicity;i++){
+            CELibLifeTimeZ[i] = CELibLifeTimeZ_P98[i];
+            CELibLifeTimeLogZ[i] = log10(CELibLifeTimeZ_P98[i]);
+        }
     }
 
     // Set function pointers.
@@ -52,6 +79,17 @@ void CELibInitLifeTime(void){
 
     // Evaluate fitting coefficients.
     pCELibFittingLifeTime();
+
+    // Write log.
+    if(CELibRunParameters.TestMode){
+        pCELibDyingStarMassDump("./CELib/CELibLife");
+        pCELibDyingStarMassDumpInterpolatedValues("./CELib/CELibLife");
+        pCELibStellarLifeTimeDumpInterpolatedValues("./CELib/CELibLife");
+
+        pCELibDyingStarMassDumpLSF("./CELib/CELibLife");
+        pCELibDyingStarMassDumpInterpolatedValuesLSF("./CELib/CELibLife");
+        pCELibStellarLifeTimeDumpInterpolatedValuesLSF("./CELib/CELibLife");
+    }
 
     return ;
 }
@@ -175,6 +213,102 @@ double CELibGetLifeTimeofStarTable(const double Mass, const double Metallicity){
     }
 }
 
+/*!
+ * This function writes the lifetime table of Portinari et al. (1998) in files.
+ */
+static void pCELibStellarLifeTimeDumpInterpolatedValues(const char OutDir[]){
+
+    const int NMetal = 10;
+    const int NMass = 100;
+    MakeDir(OutDir);
+    
+    double dMetal = (log10(CELibLifeTimeZ_P98[CELIB_LIFETIME_Z_P98-1]) - log10(CELibLifeTimeZ_P98[0]))/NMetal;
+    double dMass = (CELibLifeTimeMass_P98[CELIB_LIFETIME_M_P98-1] - CELibLifeTimeMass_P98[0])/NMass;
+
+    FILE *fp;
+    char fname[MaxCharactersInLine];
+
+    for(int i=0;i<NMetal;i++){
+        double Metallicity = pow(10.0,dMetal*i+log10(CELibLifeTimeZ_P98[0]));
+
+        Snprintf(fname,"%s/CELibLifeTime.%02d",OutDir,i);
+        FileOpen(fp,fname,"w");
+        fprintf(fp,"#%g\n",Metallicity);
+        fprintf(fp,"#Mass #Age\n");
+        for(int k=0;k<NMass;k++){
+            double Mass = dMass*k+CELibLifeTimeMass_P98[0];
+            fprintf(fp,"%g %g\n",Mass,CELibGetLifeTimeofStar(Mass,Metallicity));
+        }
+        fclose(fp);
+    }
+
+    return ;
+}
+
+/*!
+ * This function writes ages and stellar masses who finish their lives.
+ * Data are on the grid points of the lifetime table.
+ */
+static void pCELibDyingStarMassDump(const char OutDir[]){
+
+    MakeDir(OutDir);
+    
+    FILE *fp;
+    char fname[MaxCharactersInLine];
+
+    const int NAge = 100;
+    double dAge = (log10(1.5e10)-log10(1.e6))/NAge;
+
+    for(int i=0;i<CELIB_LIFETIME_Z_P98;i++){
+
+        Snprintf(fname,"%s/CELibDyingMass.%02d",OutDir,i);
+        FileOpen(fp,fname,"w");
+
+        for(int k=0;k<NAge;k++){
+            double Age = pow(10.0,dAge*k+log10(1.e6));
+            fprintf(fp,"%g %g\n",Age,pCELibGetDyingStellarMassFromTable(i,Age));
+        }
+        fclose(fp);
+    }
+
+    return ;
+}
+
+/*!
+ * This function writes ages and stellar masses who finish their lives.  Unlike
+ * pCELibDyingStarMassDump(const char OutDir[]), the interpolation is applied in
+ * the direction of metallicity.
+ */
+static void pCELibDyingStarMassDumpInterpolatedValues(const char OutDir[]){
+
+    MakeDir(OutDir);
+
+    const int NMetal = 10;
+    double dMetal = (log10(CELibLifeTimeZ[CELibLifeTime_Metallicity-1]) - log10(CELibLifeTimeZ[0]))/NMetal;
+    
+    FILE *fp;
+    char fname[MaxCharactersInLine];
+
+    const int NAge = 10000;
+    double dAge = (log10(1.5e10)-log10(1.e6))/NAge;
+
+    for(int i=0;i<NMetal;i++){
+
+        double Metallicity = pow(10.0,dMetal*i+log10(CELibLifeTimeZ_P98[0]));
+
+        Snprintf(fname,"%s/CELibDyingMassInterpolated.%02d",OutDir,i);
+        FileOpen(fp,fname,"w");
+
+        for(int k=0;k<NAge;k++){
+            double Age = pow(10.0,dAge*k+log10(1.e6));
+            fprintf(fp,"%g %g\n",Age,CELibGetDyingStellarMassTable(Age,Metallicity));
+        }
+        fclose(fp);
+    }
+
+    return ;
+}
+
 /*
  * @def
  * The order of least square fitting.
@@ -255,6 +389,25 @@ static void pCELibFittingLifeTimei(const double Mass[restrict], const double LT[
 }
 
 /*!
+ * This function shows the coefficients of the fitted stellar lifetimes.
+ */
+static void pCELibLifeTimeShowFittingCoefficients(void){
+
+    fprintf(stderr,"//\t Show coefficients of lifetime fittings\n");
+    for(int i=0;i<CELibLifeTime_Metallicity;i++){
+        fprintf(stderr,"//\t\t Z = %g\n",CELibLifeTimeZ[i]);
+        for(int k=0;k<FitDim+1;k++){
+            fprintf(stderr,"//\t\t LT Coef[%d][%d] = %g\n",i,k,FittingCoef[i][k]);
+        }
+        for(int k=0;k<FitDim;k++){
+            fprintf(stderr,"//\t\t MD Coef[%d][%d] = %g\n",i,k,FittingCoefMd[i][k]);
+        }
+    }
+
+    return ;
+}
+
+/*!
  * This function evaluates coefficients of stellar lifetime data for the whole
  * metallicity range.
  */
@@ -281,17 +434,36 @@ static void pCELibFittingLifeTime(void){
 
     for(int i=0;i<CELibLifeTime_Metallicity;i++){
         int Length;
-    
-        for(int k=0;k<CELibLifeTime_Mass;k++){
-            tmpLT[k] = CELibLifeTimeZMF_P98[i][k];
+        if(CELibRunParameters.PopIIILifeTime == 1){
+            if(i == 0){
+                for(int k=0;k<CELIB_LIFETIME_M_P98;k++){
+                    tmpLT[k] = CELibLifeTimeZMF_P98[i][k];
+                }
+                for(int k=0;k<CELIB_LIFETIME_M_S02;k++){
+                    tmpLT[CELIB_LIFETIME_M_P98+k] = CELibLifeTimeZMF_S02[k];
+                }
+                Length = CELIB_LIFETIME_M_P98+CELIB_LIFETIME_M_S02;
+            } else {
+                for(int k=0;k<CELibLifeTime_Mass;k++){
+                    tmpLT[k] = CELibLifeTimeZMF_P98[i-1][k];
+                }
+                Length = CELibLifeTime_Mass;
+            }
+        } else {
+            for(int k=0;k<CELibLifeTime_Mass;k++){
+                tmpLT[k] = CELibLifeTimeZMF_P98[i][k];
+            }
+            Length = CELibLifeTime_Mass;
         }
-        Length = CELibLifeTime_Mass;
-    
         pCELibFittingLifeTimei(tmpMass,tmpLT,Length,FittingCoef[i],FittingCoefMd[i]);
     }
 
+    if(CELibRunParameters.TestMode == true)
+        pCELibLifeTimeShowFittingCoefficients();
+
     return ;
 }
+
 
 /*!
  * This function returns the lifetime of a star whose mass is "Mass" based on
@@ -332,6 +504,44 @@ double CELibGetLifeTimeofStarLSF(const double Mass, const double Metallicity){
         double grad = ((AgeUpper-AgeLower)/(CELibLifeTimeZ[TableID+1]-CELibLifeTimeZ[TableID]));
         return grad*(Metallicity-CELibLifeTimeZ[TableID])+AgeLower;
     }
+}
+
+/*!
+ * This function writes lifetimes of stars for given masses based on data
+ * obtained by the least square fitting. 
+ */
+static void pCELibStellarLifeTimeDumpInterpolatedValuesLSF(const char OutDir[]){
+
+    const int NMetal = 10;
+    const int NMass = 1000;
+    MakeDir(OutDir);
+    
+    double Zmin = CELibLifeTimeLogZ[0];  
+    double Zmax = CELibLifeTimeLogZ[CELibLifeTime_Metallicity-1];  
+    double dMetal = (Zmax-Zmin)/NMetal;
+
+    double Mmax = 1000;
+    double Mmin = 0.1;
+    double dMass = (Mmax-Mmin)/NMass;
+
+    FILE *fp;
+    char fname[MaxCharactersInLine];
+
+    for(int i=0;i<NMetal;i++){
+        double Metallicity = pow(10.0,dMetal*i+CELibLifeTimeLogZ[0]);
+
+        Snprintf(fname,"%s/CELibLifeTimeLSF.%02d",OutDir,i);
+        FileOpen(fp,fname,"w");
+        fprintf(fp,"#%g\n",Metallicity);
+        fprintf(fp,"#Mass #Age\n");
+        for(int k=0;k<NMass;k++){
+            double Mass = dMass*k+Mmin;
+            fprintf(fp,"%g %g\n",Mass,CELibGetLifeTimeofStarLSF(Mass,Metallicity));
+        }
+        fclose(fp);
+    }
+
+    return ;
 }
 
 /*!
@@ -379,31 +589,88 @@ double CELibGetDyingStellarMassLSF(const double LifeTime, const double Metallici
 }
 
 /*!
- * This function returns next event time. 
+ * This function writes the mass of stars whose lifetime is just finished.  The
+ * data with the least-square fitting are used. The interpolation is used for
+ * the age.
  */
-double CELibGetNextEventTimeStarbyStar(struct CELibStructNextEventTimeStarbyStarInput Input, const int Type){
+static void pCELibDyingStarMassDumpLSF(const char OutDir[]){
 
-    switch (Type){
-        case CELibFeedbackType_SNII:
-            {
-                /*
-                double Time;
-                if(Input.noPopIII == 1){
-                    Time = CELibGetLifeTimeofStar(Input.InitialMass_in_Msun,CELibLifeTimeZ[1]);
-                } else {
-                    Time = CELibGetLifeTimeofStar(Input.InitialMass_in_Msun,Input.Metallicity);
-                }
-                */
-                double Time = CELibGetLifeTimeofStar(Input.InitialMass_in_Msun,Input.Metallicity);
-                if(Time < 0.0){
-                    fprintf(stderr,"Input rate is incorrect.\n");
-                    return 0.e0;
-                } else { 
-                    return Time;
-                }
-            }
-        default:
-            fprintf(stderr,"Incorrect feedback type is used.\n");
-            return 0.e0;
+    MakeDir(OutDir);
+    
+    FILE *fp;
+    char fname[MaxCharactersInLine];
+
+    const int NLifeTime = 100;
+    double dLifeTime = (log10(1.5e10)-log10(1.e6))/NLifeTime;
+
+    for(int i=0;i<CELibLifeTime_Metallicity;i++){
+
+        Snprintf(fname,"%s/CELibDyingMassLSF.%02d",OutDir,i);
+        FileOpen(fp,fname,"w");
+
+        for(int k=0;k<NLifeTime;k++){
+            double LifeTime = pow(10.0,dLifeTime*k+log10(1.e6));
+            fprintf(fp,"%g %g\n",LifeTime,pCELibGetDyingStellarMassUsingLSF(i,LifeTime));
+        }
+        fclose(fp);
     }
+
+    return ;
+}
+
+/*!
+ * This function writes the mass of stars whose lifetime is just finished.  The
+ * data with the least-square fitting are used. The interpolation is used for
+ * both age and metallicity.
+ */
+static void pCELibDyingStarMassDumpInterpolatedValuesLSF(const char OutDir[]){
+
+    MakeDir(OutDir);
+
+    const int NMetal = 10;
+    double Zmin = CELibLifeTimeLogZ[0];  
+    double Zmax = CELibLifeTimeLogZ[CELibLifeTime_Metallicity-1];  
+    double dMetal = (Zmax-Zmin)/NMetal;
+
+    FILE *fp;
+    char fname[MaxCharactersInLine];
+
+    const int NAge = 1000;
+    double dAge = (log10(1.5e10)-log10(1.e6))/NAge;
+
+    for(int i=0;i<NMetal;i++){
+        double Metallicity = pow(10.0,dMetal*i+CELibLifeTimeLogZ[0]);
+
+        Snprintf(fname,"%s/CELibDyingMassInterpolatedLSF.%02d",OutDir,i);
+        FileOpen(fp,fname,"w");
+
+        for(int k=0;k<NAge;k++){
+            double Age = pow(10.0,dAge*k+log10(1.e6));
+            fprintf(fp,"%g %g\n",Age,CELibGetDyingStellarMassLSF(Age,Metallicity));
+        }
+        fclose(fp);
+    }
+
+    return ;
+}
+
+
+/*!
+ * This function shows the Schaerer (2002)'s zero-metal stars lifetime.
+ */
+static void pCELibShowZeroZStarLifeTime(void){
+
+    double Mass[] = {100,150,200,220,300,500,1000};
+
+    fprintf(stderr,"//\t Show lifetime of zero metal stars.\n");
+    for(int i=0;i<7;i++){
+        double LogMass = log10(Mass[i]);
+        double LogAge=0.e0;
+        for(int k=0;k<FitDim+1;k++){
+            LogAge += FittingCoef[0][k]*pow(LogMass,k);
+        }
+        fprintf(stderr,"//\t For %g Msun stars, lifetime = %g yr.\n",Mass[i],pow(10.0,LogAge));
+    }
+
+    return ;
 }

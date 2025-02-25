@@ -9,7 +9,6 @@
 #include "../main/proto.h"
 
 #include "../domain/domain.h"
-#include "../celib/src/config.h"
 
 
 static int star_ngb_feedback_evaluate(int target, int mode, int threadid);
@@ -27,6 +26,8 @@ typedef struct
   MyDouble StarMass;
   MyDouble NgbMass;
   int SNIIFlag;
+  MyDouble SNIIEnergyFeed;
+  MyDouble SNIIMassFeed;
   int Firstnode;
 } data_in;
 
@@ -43,16 +44,18 @@ static data_in *DataIn, *DataGet;
  */
 static void particle2in(data_in *in, int i, int firstnode)
 {
-  in->Bin           = SP[i].TimeBinStar;
-  in->Pos[0]        = PPS(i).Pos[0];
-  in->Pos[1]        = PPS(i).Pos[1];
-  in->Pos[2]        = PPS(i).Pos[2];
-  in->Hsml          = SP[i].Hsml;
-  in->StarDensity   = SP[i].Density;
-  in->StarMass      = PPS(i).Mass;
-  in->NgbMass       = SP[i].NgbMass;
-  in->SNIIFlag      = SP[i].SNIIFlag;
-  in->Firstnode     = firstnode;
+  in->Bin            = SP[i].TimeBinStar;
+  in->Pos[0]         = PPS(i).Pos[0];
+  in->Pos[1]         = PPS(i).Pos[1];
+  in->Pos[2]         = PPS(i).Pos[2];
+  in->Hsml           = SP[i].Hsml;
+  in->StarDensity    = SP[i].Density;
+  in->StarMass       = PPS(i).Mass;
+  in->NgbMass        = SP[i].NgbMass;
+  in->SNIIFlag       = SP[i].SNIIFlag;
+  in->SNIIEnergyFeed = SP[i].SNIIEnergyFeed;
+  in->SNIIMassFeed   = SP[i].SNIIMassFeed;
+  in->Firstnode      = firstnode;
 }
 
 /*! \brief Local data structure that holds results acquired on remote
@@ -61,7 +64,6 @@ static void particle2in(data_in *in, int i, int firstnode)
 
 typedef struct
 {
-  MyDouble SNIIRemnantMass;
 } data_out;
 
 static data_out *DataResult, *DataOut;
@@ -81,11 +83,9 @@ static void out2particle(data_out *out, int i, int mode)
 {
   if(mode == MODE_LOCAL_PARTICLES) /* initial store */
     {
-      SP[i].SNIIRemnantMass = out->SNIIRemnantMass;
     }
   else /* combine */
     {
-      SP[i].SNIIRemnantMass = out->SNIIRemnantMass;
     }
 }
 
@@ -163,10 +163,10 @@ static int star_ngb_feedback_evaluate(int target, int mode, int threadid)
   int numnodes, *firstnode;
   double h, h2, hinv, hinv3, hinv4; 
   double dx, dy, dz, r, r2, u, wk, dwk, dt;
-  MyDouble *pos, star_density, star_mass, ngbmass, energyfeed, snIIremnantmass;
+  MyDouble *pos, star_density, star_mass, ngbmass, snIIenergyfeed, snIImassfeed;
 
   data_in local, *target_data;
-  data_out out;
+  //data_out out;
 
   if(mode == MODE_LOCAL_PARTICLES)
     {
@@ -190,6 +190,8 @@ static int star_ngb_feedback_evaluate(int target, int mode, int threadid)
   star_mass      = target_data->StarMass;
   ngbmass        = target_data->NgbMass;
   snIIflag       = target_data->SNIIFlag;
+  snIIenergyfeed = target_data->SNIIEnergyFeed;
+  snIImassfeed   = target_data->SNIIMassFeed;
 
   h2   = h * h;
   hinv = 1.0 / h;
@@ -199,8 +201,6 @@ static int star_ngb_feedback_evaluate(int target, int mode, int threadid)
   hinv3 = hinv * hinv / boxSize_Z;
 #endif /* #ifndef  TWODIMS #else */
   hinv4 = hinv3 * hinv;
-
-  snIIremnantmass = 0;
  
 /* star timestep */
   dt    = (bin ? (((integertime)1) << bin) : 0) * All.Timebase_interval;
@@ -209,9 +209,9 @@ static int star_ngb_feedback_evaluate(int target, int mode, int threadid)
   /* stellar wind */    
   double EddingtonLuminosity = 4. * M_PI * GRAVITY * (star_mass * All.UnitMass_in_g) * PROTONMASS * CLIGHT / THOMPSON;
   EddingtonLuminosity *=  (All.UnitTime_in_s / (All.UnitMass_in_g*pow(All.UnitVelocity_in_cm_per_s,2)));
-  energyfeed = EddingtonLuminosity * dt;
+  double energyfeed = EddingtonLuminosity * dt;
   /* supernova */    
-  if(snIIflag == 2)
+  if(snIIflag > 0)
     energyfeed = 0;
 
   int nfound = ngb_treefind_variable_threads(pos, h, target, mode, threadid, numnodes, firstnode);
@@ -258,11 +258,8 @@ static int star_ngb_feedback_evaluate(int target, int mode, int threadid)
           //SphP[j].MomentumFeed  += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / star_density * wk;
           //All.EnergyExchange[2] += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / star_density * wk;
 
-          SphP[j].MomentumFeed  += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass;
-          All.EnergyExchange[2] += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass;
-
-          SphP[j].EnergyFeed    += 0;
-          All.EnergyExchange[4] += 0;
+          //SphP[j].MomentumFeed  += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass;
+          //All.EnergyExchange[2] += All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass;
               
           SphP[j].MomentumKickVector[0] = -dx;
           SphP[j].MomentumKickVector[1] = -dy;
@@ -270,40 +267,21 @@ static int star_ngb_feedback_evaluate(int target, int mode, int threadid)
 
           /* do supernova */
           if (snIIflag == 1)
-            {
-              double elements[13] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
-              struct CELibStructFeedbackStarbyStarInput Input = 
-                {
-                  .Mass = star_mass,                 
-                  .Metallicity = 0.0004,          
-                  .MassConversionFactor = 1, 
-                  .Elements = elements,
-                };
-
-              struct CELibStructFeedbackStarbyStarOutput Output = 
-              CELibGetFeedbackStarbyStar(Input, CELibFeedbackType_SNII);
-
-              //SphP[j].MomentumFeed  -= All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass;
-              //All.EnergyExchange[2] -= All.Lambda * energyfeed / (CLIGHT / All.UnitVelocity_in_cm_per_s) * P[j].Mass / ngbmass; 
-
-              SphP[j].EnergyFeed    += Output.Energy / All.UnitEnergy_in_cgs * P[j].Mass / ngbmass;
-              All.EnergyExchange[4] += Output.Energy / All.UnitEnergy_in_cgs * P[j].Mass / ngbmass;
-
-              SphP[j].MassFeed      += Output.EjectaMass * P[j].Mass / ngbmass;
-
-              snIIremnantmass        = Output.RemnantMass;
-                
+            {              
+              SphP[j].EnergyFeed    += snIIenergyfeed * P[j].Mass / ngbmass;
+              All.EnergyExchange[4] += snIIenergyfeed * P[j].Mass / ngbmass;
+              
+              if(snIImassfeed > 1e-10)
+                SphP[j].MassFeed      += snIImassfeed * P[j].Mass / ngbmass;
             }
         }
     }
 
-  out.SNIIRemnantMass = snIIremnantmass;
-
    /* Now collect the result at the right place */
-  if(mode == MODE_LOCAL_PARTICLES)
+  /*if(mode == MODE_LOCAL_PARTICLES)
     out2particle(&out, target, MODE_LOCAL_PARTICLES);
   else
-    DataResult[target] = out;
+    DataResult[target] = out;*/
 
   return 0;
 }

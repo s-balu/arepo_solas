@@ -5,13 +5,13 @@
 ##################################################
 #->INCLUDE STARS/BLACKHOLES
 STARS
-BLACKHOLES
+#BLACKHOLES
 
 #->TURN ON FOR DISCRETE FEEDBACK EVENTS (OTHERWISE EVERY TIMESTEP)
 #BURST_MODE
 
 #->PICK BH ACCRETION MODE
-BONDI_ACCRETION
+#BONDI_ACCRETION
 #INFALL_ACCRETION
 
 #->PICK KERNEL FOR DENSITY/FEEDBACK
@@ -64,14 +64,14 @@ REFINEMENT_MERGE_CELLS        # Derefinement
 #REFINEMENT_VOLUME_LIMIT       # Limit the volume of cells and the maximum volume difference between neighboring cels
 #JEANS_REFINEMENT              # Refinement criterion to ensure Jeans stability of cells
 #REFINEMENT_HIGH_RES_GAS       # Refinement criterion for high-resolution region in zoom simulation
-#NODEREFINE_BACKGROUND_GRID    # Do not de-refine low-res gas cells in zoom simulations
+NODEREFINE_BACKGROUND_GRID    # Do not de-refine low-res gas cells in zoom simulations
 #OPTIMIZE_MESH_MEMORY_FOR_REFINEMENT  # deletes the mesh structures not needed for refinement/derefinemet to lower the peak memory consumption
 
 #--------------------------------------- non-standard phyiscs
 COOLING                       # Simple primordial cooling
 LOW_TEMP_COOLING              # Maschenko et al. 2008
 #ENFORCE_JEANS_STABILITY_OF_CELLS  # this imposes an adaptive floor for the temperature
-#USE_SFR                       # Star formation model, turning dense gas into collisionless partices
+USE_SFR                       # Star formation model, turning dense gas into collisionless partices
 #SFR_KEEP_CELLS                # Do not distroy cell out of which a star has formed
 
 #--------------------------------------- Gravity treatment; default: no gravity

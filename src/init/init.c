@@ -42,10 +42,10 @@
 
 #include "../main/allvars.h"
 #include "../main/proto.h"
-
 #include "../domain/domain.h"
 #include "../mesh/voronoi/voronoi.h"
-#include "../celib/src/config.h"
+
+#include "../../celib/src/config.h"
 
 /*! \brief Prepares the loaded initial conditions for the run.
  *
@@ -586,21 +586,28 @@ int init(void)
 
 #ifdef STARS
   /* celib init */
-  CELibInitLifeTime();
+  if(ThisTask == 0)
+    CELibShowVersion();
 
-  CELibInitSNIIYields();
+  CELibInit();
+  srand((unsigned int)time(NULL));
+
+  if(ThisTask == 0)
+    CELibShowCurrentStatus();  
   
+#ifdef STAR_CLUSTER
   for(i=0; i<NumStars; i++)
     {
       struct CELibStructNextEventTimeStarbyStarInput Input = 
       {
-        .InitialMass_in_Msun = PPS(i).Mass,
+        .InitialMass_in_Msun = (PPS(i).Mass * All.UnitMass_in_g / SOLAR_MASS),
         .Metallicity = 0.0004
       };
       
       SP[i].SNIITime = CELibGetNextEventTimeStarbyStar(Input, CELibFeedbackType_SNII) 
         / (1.e6) / All.UnitTime_in_Megayears;  
     }
+#endif
 #endif
 
   return -1;  // return -1 means we ran to completion, i.e. not an endrun code

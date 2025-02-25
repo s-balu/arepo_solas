@@ -47,7 +47,7 @@
 #include "../main/proto.h"
 
 #include "../gravity/forcetree.h"
-#include "../celib/src/config.h"
+#include "../../celib/src/config.h"
 
 #ifdef USE_SFR
 
@@ -327,16 +327,28 @@ void convert_cell_into_star(int i, double birthtime)
   SP[NumStars].Birthtime = birthtime;
   SP[NumStars].SNIIFlag = 0;
 
+#ifdef STAR_CLUSTER
   struct CELibStructNextEventTimeStarbyStarInput Input = 
     {
-      .InitialMass_in_Msun = P[i].Mass,
+      .InitialMass_in_Msun = (P[i].Mass * All.UnitMass_in_g / SOLAR_MASS),
       .Metallicity = 0.0004
     };
 
   SP[NumStars].SNIITime = birthtime + CELibGetNextEventTimeStarbyStar(Input, CELibFeedbackType_SNII) 
     / (1.e6) / All.UnitTime_in_Megayears;
+#else 
+    struct CELibStructNextEventTimeInput Input = 
+    {
+      .R = (double)rand()/(double)RAND_MAX,
+      .InitialMass_in_Msun = (P[i].Mass * All.UnitMass_in_g / SOLAR_MASS),
+      .Metallicity = 0.0004
+    };
 
-  timebin_add_particle(&TimeBinsStar, NumStars, -1, 0, 1);  
+  SP[NumStars].SNIITime = birthtime + CELibGetNextEventTime(Input, CELibFeedbackType_SNII) 
+    / (1.e6) / All.UnitTime_in_Megayears;
+#endif
+
+  //timebin_add_particle(&TimeBinsStar, NumStars, -1, 0, 1);  
  
   NumStars++;
 #endif
@@ -419,16 +431,28 @@ void spawn_star_from_cell(int igas, double birthtime, int istar, MyDouble mass_o
   SP[NumStars].Birthtime = birthtime;
   SP[NumStars].SNIIFlag = 0;
   
+  #ifdef STAR_CLUSTER
   struct CELibStructNextEventTimeStarbyStarInput Input = 
     {
-      .InitialMass_in_Msun = P[istar].Mass,
+      .InitialMass_in_Msun = (P[istar].Mass * All.UnitMass_in_g / SOLAR_MASS),
       .Metallicity = 0.0004
     };
 
-  SP[NumStars].SNIITime = birthtime + CELibGetNextEventTimeStarbyStar(Input, CELibFeedbackType_SNII)
+  SP[NumStars].SNIITime = birthtime + CELibGetNextEventTimeStarbyStar(Input, CELibFeedbackType_SNII) 
     / (1.e6) / All.UnitTime_in_Megayears;
+#else 
+    struct CELibStructNextEventTimeInput Input = 
+    {
+      .R = (double)rand()/(double)RAND_MAX,
+      .InitialMass_in_Msun = (P[istar].Mass * All.UnitMass_in_g / SOLAR_MASS),
+      .Metallicity = 0.0004
+    };
 
-  timebin_add_particle(&TimeBinsStar, NumStars, -1, 0, 1); 
+  SP[NumStars].SNIITime = birthtime + CELibGetNextEventTime(Input, CELibFeedbackType_SNII) 
+    / (1.e6) / All.UnitTime_in_Megayears;
+#endif  
+
+  //timebin_add_particle(&TimeBinsStar, NumStars, -1, 0, 1); 
 
   NumStars++;
 #endif
