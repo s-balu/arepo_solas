@@ -31,3 +31,7 @@ run.sh
 
 #documentation build
 /documentation/build
+
+*.out
+*.a
+*.o
