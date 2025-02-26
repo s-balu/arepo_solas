@@ -162,15 +162,15 @@ void pin_to_core_set(void)
     {
       if(available_pus >= 1)
         {
-          mpi_printf("PINNING: Looks like allready before start of the code, a tight binding was imposed.\n");
+          mpi_printf("PINNING: Looks like already before start of the code, a tight binding was imposed.\n");
 #ifdef IMPOSE_PINNING_OVERRIDE_MODE
           for(id = 0; id < pus; id++)
             hwloc_bitmap_set(cpuset, id);
           available_pus = pus;
-          mpi_printf("PINNING: We are overridung this and make all %d available to us.\n", available_pus);
+          mpi_printf("PINNING: We are overriding this and make all %d available to us.\n", available_pus);
 #else  /* #ifdef IMPOSE_PINNING_OVERRIDE_MODE */
           mpi_printf(
-              "PINNING: We refrain from any pinning attempt ourselves. (This can be changed by setting USE_PINNING_OVERRIDE_MODE.)\n");
+              "PINNING: We refrain from any pinning attempt ourselves. (This can be changed by setting IMPOSE_PINNING_OVERRIDE_MODE.)\n");
           flag_pinning_error = 1;
           return;
 #endif /* #ifdef IMPOSE_PINNING_OVERRIDE_MODE #else */

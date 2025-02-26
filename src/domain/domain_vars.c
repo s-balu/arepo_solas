@@ -132,7 +132,6 @@ void domain_free_lists(void)
   myfree(toGetBhs);
   myfree(toGoBhs);
 #endif
-
   myfree(toGetSph);
   myfree(toGet);
   myfree(toGoSph);

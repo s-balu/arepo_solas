@@ -74,6 +74,7 @@ void reconstruct_timebins(void)
       TimeBinsGravity.TimeBinCount[bin]   = 0;
       TimeBinsGravity.FirstInTimeBin[bin] = -1;
       TimeBinsGravity.LastInTimeBin[bin]  = -1;
+
 #ifdef USE_SFR
       TimeBinSfr[bin] = 0;
 #endif
@@ -506,5 +507,3 @@ void make_list_of_active_particles(void)
 
   TIMER_STOP(CPU_DRIFTS);
 }
-
-

@@ -3,9 +3,8 @@
 # listed here to ensure that the check.py script does not 
 # raise an error due to these
 
-# Additions
+# SOLAS Additions
 AGORA_SF
-
 BLACKHOLES
 STARS
 STAR_CLUSTER
@@ -28,9 +27,6 @@ THREEDIMS
 WENDLAND_C2_KERNEL
 WENDLAND_C4_KERNEL
 WENDLAND_C6_KERNEL
-
-
-
 
 # headers
 ADD_BGGRID_H

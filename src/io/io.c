@@ -1421,9 +1421,6 @@ void write_file(char *fname, int writeTask, int lastTask, int subbox_flag)
                     }
                 }
 
-
-
-
               write_header_attributes_in_hdf5(hdf5_headergrp);
 
               hdf5_paramsgrp = my_H5Gcreate(hdf5_file, "/Parameters", 0);

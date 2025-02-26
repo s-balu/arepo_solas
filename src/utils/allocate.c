@@ -174,4 +174,3 @@ void reallocate_memory_maxpartstars(void)
   timebins_reallocate(&TimeBinsStar);
 }
 #endif
-

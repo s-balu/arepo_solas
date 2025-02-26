@@ -1472,7 +1472,7 @@ void read_file(const char *fname, int filenr, int readTask, int lastTask, int re
       if(type == 4)
         NumStars += n_for_this_task;
 #endif
-    }
+}
 
   if(ThisTask == readTask)
     {

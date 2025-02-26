@@ -448,7 +448,6 @@ integertime get_timestep_hydro(int p)
   return ti_step;
 }
 
-
 /*! \brief Checks if timestep is a valid one.
  *
  *  Terminates the simulation with error message otherwise.

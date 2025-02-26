@@ -42,6 +42,7 @@
 
 #include "../main/allvars.h"
 #include "../main/proto.h"
+
 #include "../domain/domain.h"
 #include "../mesh/voronoi/voronoi.h"
 
@@ -285,11 +286,11 @@ int init(void)
       if(P[i].Type == 0)
         {
           SphP[i].RefBHFlag = 0;
-#ifdef OUTPUT_REFBHCOUNTER
+        #ifdef OUTPUT_REFBHCOUNTER
           SphP[i].RefBHCounter = 0;
-#endif
+        #endif //* #ifdef OUTPUT_REFBHCOUNTER */
         }
-#endif
+#endif /* #ifdef REFINEMENT_AROUND_BH*/
     }
 
   for(i = 0; i < TIMEBINS; i++)
@@ -595,7 +596,7 @@ int init(void)
   if(ThisTask == 0)
     CELibShowCurrentStatus();  
   
-#ifdef STAR_CLUSTER
+  #ifdef STAR_CLUSTER
   for(i=0; i<NumStars; i++)
     {
       struct CELibStructNextEventTimeStarbyStarInput Input = 
@@ -607,9 +608,8 @@ int init(void)
       SP[i].SNIITime = CELibGetNextEventTimeStarbyStar(Input, CELibFeedbackType_SNII) 
         / (1.e6) / All.UnitTime_in_Megayears;  
     }
-#endif
-#endif
-
+  #endif //* #ifdef STAR_CLUSTER */
+#endif /* #ifdef STARS*/
   return -1;  // return -1 means we ran to completion, i.e. not an endrun code
 }
 

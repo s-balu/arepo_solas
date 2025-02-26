@@ -115,11 +115,6 @@ struct TimeBinData TimeBinsStar;
 double TimeBinSfr[TIMEBINS];
 #endif
 
-#ifdef SUBFIND
-extern int GrNr;
-extern int NumPartGroup;
-#endif /* #ifdef SUBFIND */
-
 char DumpFlag         = 1;
 char DumpFlagNextSnap = 1;
 
@@ -145,7 +140,6 @@ int NumStars;
 gsl_rng *random_generator;     /*!< a random number generator  */
 gsl_rng *random_generator_aux; /*!< an auxialiary random number generator for use if one doesn't want to influence the main code's
                                   random numbers  */
-
 #ifdef USE_SFR
 int Stars_converted; /*!< current number of star particles in gas particle block */
 #endif

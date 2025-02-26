@@ -269,6 +269,7 @@ void reorder_gas(int *Id)
               P[dest]    = Psource;
               SphP[dest] = SphPsource;
               Id[dest]   = idsource;
+ 
               if(dest == i)
                 break;
 

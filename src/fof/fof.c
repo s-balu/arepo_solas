@@ -39,6 +39,8 @@
  * - 24.05.2018 Prepared file for public release -- Rainer Weinberger
  */
 
+#include "fof.h"
+
 #include <gsl/gsl_math.h>
 #include <inttypes.h>
 #include <math.h>
@@ -49,12 +51,10 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "../domain/domain.h"
 #include "../main/allvars.h"
 #include "../main/proto.h"
-
-#include "../domain/domain.h"
 #include "../subfind/subfind.h"
-#include "fof.h"
 
 #ifdef FOF
 
@@ -410,8 +410,12 @@ double fof_get_comoving_linking_length(void)
       }
   sumup_large_ints(1, &ndm, &ndmtot);
   MPI_Allreduce(&mass, &masstot, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-  rhodm = (All.Omega0 - All.OmegaBaryon) * 3 * All.Hubble * All.Hubble / (8 * M_PI * All.G);
-
+  
+  if(All.TotNumgas > 0)
+    rhodm = (All.Omega0 - All.OmegaBaryon) * 3 * All.Hubble * All.Hubble / (8 * M_PI * All.G);
+  else 
+    rhodm = All.Omega0 * 3 * All.Hubble * All.Hubble / (8 * M_PI * All.G);
+  
   return FOF_LINKLENGTH * pow(masstot / ndmtot / rhodm, 1.0 / 3);
 }
 

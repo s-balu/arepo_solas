@@ -1,4 +1,3 @@
-
 # This file processes the configurations options in Config.sh, producing 
 # two files:
 #

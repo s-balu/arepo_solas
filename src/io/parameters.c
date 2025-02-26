@@ -465,7 +465,7 @@ void read_parameter_file(char *fname)
       addr[nt] = &All.StarFormationEfficiency;
       id[nt++] = REAL;
 
-      strcpy(tag[nt], "StarFormationNumberDensityThreshold"); // nh in units of cm^-3
+      strcpy(tag[nt], "StarFormationNumberDensityThreshold"); // n_H in units of cm^-3
       addr[nt] = &All.StarFormationNumberDensityThreshold;
       id[nt++] = REAL;
 #endif
