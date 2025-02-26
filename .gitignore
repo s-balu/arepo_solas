@@ -28,6 +28,7 @@ run.sh
 #run and output directory
 /run
 /output
+uses-machines.txt
 
 #documentation build
 /documentation/build
