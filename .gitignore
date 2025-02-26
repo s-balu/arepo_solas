@@ -32,6 +32,7 @@ run.sh
 #documentation build
 /documentation/build
 
-*.out
-*.a
-*.o
+#CELIB stuff
+**/*.out
+**/*.a
+**/*.o
