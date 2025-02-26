@@ -78,7 +78,7 @@ void hello(void)
 void begrun0(void)
 {
   mpi_printf(
-      "\nThis is Arepo, version %s.\n\nRunning with %d MPI tasks.\n\nApparently we're using %d compute nodes (we have a minimum of %d "
+      "\nThis is Arepo_Solas, version %s.\n\nRunning with %d MPI tasks.\n\nApparently we're using %d compute nodes (we have a minimum of %d "
       "MPI tasks per node, and a maximum of %d)\n\nCode was compiled with settings:\n\n",
       AREPO_VERSION, NTask, NumNodes, MinTasksPerNode, MaxTasksPerNode);
 

@@ -176,8 +176,8 @@ OBJS =   debug_md5/calc_checksum.o \
          ngbtree/ngbtree_search.o \
          ngbtree/ngbtree_walk.o \
          star_formation/sfr_eEOS.o \
-				 star_formation/sfr_AGORA.o \
          star_formation/starformation.o \
+				 star_formation//sfr_AGORA.o \
          time_integration/darkenergy.o \
          time_integration/do_gravity_hydro.o \
          time_integration/driftfac.o \
@@ -354,3 +354,65 @@ build: $(EXEC)
 
 $(EXEC): $(OBJS)
 	$(LINKER) $(OPTIMIZE) $(OBJS) $(LIBS) -o $(EXEC) 
+
+lib$(LIBRARY).a: $(filter-out $(BUILD_DIR)/main/main.o,$(OBJS))
+	$(AR) -rcs lib$(LIBRARY).a $(OBJS)
+
+clean:
+	@echo Cleaning all build files...
+	@rm -f $(OBJS) $(EXEC) lib$(LIBRARY).a
+	@rm -f $(BUILD_DIR)/compile_time_info.c $(BUILD_DIR)/compile_time_info_hdf5.c $(BUILD_DIR)/arepoconfig.h
+	@rm -f $(BUILD_DIR)/version.c
+	@rm -f $(TO_CHECK) $(CONFIG_CHECK)
+	@rm -rf $(BUILD_DIR)
+
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c $(INCL) $(MAKEFILES)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/compile_time_info.o: $(BUILD_DIR)/compile_time_info.c $(MAKEFILES)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/compile_time_info_hdf5.o: $(BUILD_DIR)/compile_time_info_hdf5.c $(MAKEFILES)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cu $(INCL) $(MAKEFILES)
+	$(NVCC)  -c $< -o $@
+
+# sanity checks:
+
+check: $(CONFIG_CHECK)
+
+check_docs: $(DOCS_CHECK)
+
+$(CONFIG_CHECK): $(TO_CHECK) $(CONFIG) check.py
+	@$(PYTHON) check.py 2 $(CONFIG) $(CONFIG_CHECK) defines_extra $(TO_CHECK)
+
+$(BUILD_DIR)/%.o.check: $(SRC_DIR)/%.c Template-Config.sh defines_extra check.py
+	@$(PYTHON) check.py 1 $< $@ Template-Config.sh defines_extra
+
+$(BUILD_DIR)/%.o.check: $(SRC_DIR)/%.F
+	touch $@
+
+$(BUILD_DIR)/%.o.check: $(SRC_DIR)/%.f90
+	touch $@
+
+$(BUILD_DIR)/%.o.check: $(SRC_DIR)/%.F90
+	touch $@
+
+$(BUILD_DIR)/%.o.check: $(SRC_DIR)/%.cc
+	touch $@
+
+$(BUILD_DIR)/%.h.check: $(SRC_DIR)/%.h Template-Config.sh defines_extra check.py
+	@$(PYTHON) check.py 1 $< $@ Template-Config.sh defines_extra
+
+$(BUILD_DIR)/%.o.check: $(BUILD_DIR)/%.c Template-Config.sh defines_extra check.py
+	@$(PYTHON) check.py 1 $< $@ Template-Config.sh defines_extra
+
+$(BUILD_DIR)/%.h.check: $(BUILD_DIR)/%.h Template-Config.sh defines_extra check.py
+	@$(PYTHON) check.py 1 $< $@ Template-Config.sh defines_extra
+
+$(BUILD_DIR)/Makefile.check: Makefile Template-Config.sh defines_extra check.py
+	@$(PYTHON) check.py 3 $< $@ Template-Config.sh defines_extra
+
+$(BUILD_DIR)/Config.check: Template-Config.sh check.py
+	@$(PYTHON) check.py 4 Template-Config.sh $@
