@@ -1,3 +1,6 @@
+This is set to track the official repo at [https://gitlab.mpcdf.mpg.de/vrs/arepo/](https://gitlab.mpcdf.mpg.de/vrs/arepo/).
+
+
 Arepo public version
 ====================
 
