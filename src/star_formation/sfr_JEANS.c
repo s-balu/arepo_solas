@@ -47,7 +47,7 @@
 
 #include "../gravity/forcetree.h"
 
-#if defined(USE_SFR) && defined(AGORA_SF) && !defined(JEANS_SF)
+#if defined(USE_SFR) && defined(JEANS_SF) && !defined(AGORA_SF)
 
 /*! \brief Main driver for star formation and gas cooling.
  *
@@ -68,12 +68,12 @@ void cooling_and_starformation(void)
   double dt, dtime, ne = 1;
   double unew, du;
 
-  double dens;
+  double dens, csnd, cell_size, jeans_length;
     
   double t_freefall;  // Freefall timescale
-  double sf_dens_threshold;  // Number density of neutral atomic hydrogen, code units - converted from parameter file value
+  // double sf_dens_threshold;  // Number density of neutral atomic hydrogen, code units - converted from parameter file value
 
-  sf_dens_threshold=All.StarFormationNumberDensityThreshold*PROTONMASS/All.UnitDensity_in_cgs;
+  // sf_dens_threshold=All.StarFormationNumberDensityThreshold*PROTONMASS/All.UnitDensity_in_cgs;
     
 //  double cloudmass;
 //  double factorEVP, dens;
@@ -115,6 +115,10 @@ void cooling_and_starformation(void)
       du = unew - SphP[i].Utherm;
       SphP[i].Utherm += du;
       SphP[i].Energy += All.cf_atime * All.cf_atime * du * P[i].Mass;
+      
+      csnd = get_sound_speed(i) * All.cf_atime;
+      jeans_length = pow(3 * M_PI/ (32 * All.G * dens), 0.5);
+      cell_size = 5.0 * get_cell_radius(i); /* TODO: a factor? */
 
       cool_cell(i);
 
@@ -127,7 +131,8 @@ void cooling_and_starformation(void)
       flag = 1; /* default is normal cooling */
 
       /* enable star formation if gas is above SF density threshold */
-      if(dens * All.cf_a3inv >= sf_dens_threshold)
+      // if(dens * All.cf_a3inv >= sf_dens_threshold)
+      if(cell_size >= jeans_length)
         flag = 0;
 
       if(All.ComovingIntegrationOn)
@@ -194,6 +199,9 @@ double get_starformation_rate(int i)
   int flag;
   double tsfr;
   double factorEVP, egyeff, ne, x, cloudmass;
+  
+  double dens, csnd, jeans_length, cell_size;
+
   /* note: assuming FULL ionization */
   double u_to_temp_fac =
       (4 / (8 - 5 * (1 - HYDROGEN_MASSFRAC))) * PROTONMASS / BOLTZMANN * GAMMA_MINUS1 * All.UnitEnergy_in_cgs / All.UnitMass_in_g;
@@ -202,8 +210,13 @@ double get_starformation_rate(int i)
   double t_freefall;  // Freefall timescale
   double sf_dens_threshold;  // Number density of neutral atomic hydrogen, code units - converted from parameter file value
 
-  sf_dens_threshold=All.StarFormationNumberDensityThreshold*PROTONMASS*pow(All.UnitDensity_in_cgs,-1.);
+  // sf_dens_threshold=All.StarFormationNumberDensityThreshold*PROTONMASS*pow(All.UnitDensity_in_cgs,-3.);
 
+  dens = SphP[i].Density;
+  csnd = get_sound_speed(i) * All.cf_atime;
+  jeans_length = pow(3 * M_PI/ (32 * All.G * dens), 0.5);
+  cell_size = 2.0 * get_cell_radius(i); /* TODO: a factor? */
+  
   flag   = 1; /* default is normal cooling */
 //  egyeff = 0.0;
 //
@@ -217,10 +230,11 @@ double get_starformation_rate(int i)
 //    if(SphP[i].Utherm <= 1.01 * egyeff || u_to_temp_fac * SphP[i].Utherm <= All.TemperatureThresh)
 //      flag = 0;
 //
-  if(SphP[i].Density * All.cf_a3inv >= sf_dens_threshold)
+  // if(SphP[i].Density * All.cf_a3inv >= sf_dens_threshold)
+  if(cell_size >= jeans_length)
     flag = 0;
 
-  if(All.ComovingIntegrationOn)
+  if(All.ComovingIntegrationOn) ///* TODO: update for cosmo*/
     if(SphP[i].Density < All.OverDensThresh)
       flag = 1;
 
@@ -229,7 +243,7 @@ double get_starformation_rate(int i)
 
   t_freefall=sqrt(3.*M_PI/32/All.G/SphP[i].Density); // freefall time in code units
 
-  rateOfSF=All.StarFormationEfficiency*P[i].Mass/t_freefall;
+  rateOfSF=All.StarFormationEfficiency*SphP[i].Density/t_freefall;
 
 //  cloudmass = x * P[i].Mass;
 //

@@ -470,6 +470,11 @@ void read_parameter_file(char *fname)
       id[nt++] = REAL;
 #endif
 
+#if defined(USE_SFR) && defined(JEANS_SF)
+      strcpy(tag[nt], "StarFormationEfficiency");  // Value between 0 and 1
+      addr[nt] = &All.StarFormationEfficiency;
+      id[nt++] = REAL;
+#endif
 
 #ifdef MHD_SEEDFIELD
       strcpy(tag[nt], "MHDSeedDir");
