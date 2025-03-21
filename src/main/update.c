@@ -634,28 +634,27 @@ void perform_end_of_step_physics(void)
           if(SphP[i].MomentumFeed > 0 || SphP[i].EnergyFeed > 0)
             {
               /* add mass */
-              P[i].Mass += SphP[i].MassFeed;
+              //P[i].Mass += SphP[i].MassFeed;
                
               /* calculate kick: momentum conserving wind */
-              kick_vector[0] = SphP[i].MomentumKickVector[0];
-              kick_vector[1] = SphP[i].MomentumKickVector[1];
-              kick_vector[2] = SphP[i].MomentumKickVector[2];
+              //kick_vector[0] = SphP[i].MomentumKickVector[0];
+              //kick_vector[1] = SphP[i].MomentumKickVector[1];
+              //kick_vector[2] = SphP[i].MomentumKickVector[2];
 
-              pj = SphP[i].MomentumFeed;
+              //pj = SphP[i].MomentumFeed;
 
               /* update momentum */
               //SphP[i].Momentum[0] += kick_vector[0] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
               //SphP[i].Momentum[1] += kick_vector[1] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));
               //SphP[i].Momentum[2] += kick_vector[2] * pj / sqrt(pow(kick_vector[0], 2) + pow(kick_vector[1], 2) + pow(kick_vector[2], 2));  
 
-              All.EnergyExchange[3] += SphP[i].MomentumFeed;     
+              //All.EnergyExchange[3] += SphP[i].MomentumFeed;     
                  
               /* update velocities */
-              update_primitive_variables_single(P, SphP, i, &pvd);  
+              //update_primitive_variables_single(P, SphP, i, &pvd);  
 
               /* update total energy */
-              SphP[i].Energy = SphP[i].Utherm * P[i].Mass + SphP[i].EnergyFeed + 
-                0.5 * P[i].Mass * (pow(P[i].Vel[0], 2) + pow(P[i].Vel[1], 2) + pow(P[i].Vel[2], 2));
+              SphP[i].Energy += SphP[i].EnergyFeed * All.cf_atime*All.cf_atime;
               All.EnergyExchange[5] += SphP[i].EnergyFeed;               
               /* update internal energy */
               update_internal_energy(P, SphP, i, &pvd);
