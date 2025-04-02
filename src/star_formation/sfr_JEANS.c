@@ -68,7 +68,7 @@ void cooling_and_starformation(void)
   double dt, dtime, ne = 1;
   double unew, du;
 
-  double dens, csnd, cell_size, jeans_length;
+  double dens, sound_speed, cell_size, jeans_length;
     
   double t_freefall;  // Freefall timescale
   // double sf_dens_threshold;  // Number density of neutral atomic hydrogen, code units - converted from parameter file value
@@ -116,12 +116,11 @@ void cooling_and_starformation(void)
       SphP[i].Utherm += du;
       SphP[i].Energy += All.cf_atime * All.cf_atime * du * P[i].Mass;
       
-      csnd = get_sound_speed(i) * All.cf_atime;
-      jeans_length = pow(3 * M_PI/ (32 * All.G * dens), 0.5);
-      cell_size = 5.0 * get_cell_radius(i); /* TODO: a factor? */
-
       cool_cell(i);
-
+      
+      sound_speed  = sqrt(GAMMA * SphP[i].Pressure / SphP[i].Density);
+      jeans_length = sqrt(M_PI / All.G / SphP[i].Density) * sound_speed;
+      cell_size = 2.0 * get_cell_radius(i); /* TODO: a factor? */
 
       /* check whether conditions for star formation are fulfilled.
        * f=1  normal cooling
@@ -200,7 +199,7 @@ double get_starformation_rate(int i)
   double tsfr;
   double factorEVP, egyeff, ne, x, cloudmass;
   
-  double dens, csnd, jeans_length, cell_size;
+  double dens, sound_speed, jeans_length, cell_size;
 
   /* note: assuming FULL ionization */
   double u_to_temp_fac =
@@ -213,8 +212,9 @@ double get_starformation_rate(int i)
   // sf_dens_threshold=All.StarFormationNumberDensityThreshold*PROTONMASS*pow(All.UnitDensity_in_cgs,-3.);
 
   dens = SphP[i].Density;
-  csnd = get_sound_speed(i) * All.cf_atime;
-  jeans_length = pow(3 * M_PI/ (32 * All.G * dens), 0.5);
+  
+  sound_speed  = sqrt(GAMMA * SphP[i].Pressure / SphP[i].Density);
+  jeans_length = sqrt(M_PI / All.G / SphP[i].Density) * sound_speed;
   cell_size = 2.0 * get_cell_radius(i); /* TODO: a factor? */
   
   flag   = 1; /* default is normal cooling */
