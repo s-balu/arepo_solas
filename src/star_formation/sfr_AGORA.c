@@ -202,7 +202,7 @@ double get_starformation_rate(int i)
   double t_freefall;  // Freefall timescale
   double sf_dens_threshold;  // Number density of neutral atomic hydrogen, code units - converted from parameter file value
 
-  sf_dens_threshold=All.StarFormationNumberDensityThreshold*PROTONMASS*pow(All.UnitDensity_in_cgs,-3.);
+  sf_dens_threshold=All.StarFormationNumberDensityThreshold*PROTONMASS*pow(All.UnitDensity_in_cgs,-1.);
 
   flag   = 1; /* default is normal cooling */
 //  egyeff = 0.0;
