@@ -320,13 +320,15 @@ ifeq (STARS,$(findstring STARS,$(CONFIGVARS)))
 CELIB_LIB = -L./celib/src -lCELib
 endif
 
-ifeq (USE_GRACKLE,$(findstring STARS,$(CONFIGVARS)))
+ifeq (USE_GRACKLE,$(findstring USE_GRACKLE,$(CONFIGVARS)))
 OPTIONS += -DCONFIG_BFLOAT_8
 GRACKLEINCL = -I$(HOME)/models/grackle/include
 GRACKLELIBS = -L$(HOME)/models/grackle/lib -lgrackle
+LDFLAGS = -lgfortran
 else
 GRACKLEINCL =
 GRACKLELIBS =
+LDFLAGS = 
 endif
 ##########################
 #combine compiler options#
@@ -334,7 +336,7 @@ endif
 
 CFLAGS = $(OPTIMIZE) $(MPICH_INCL) $(HDF5_INCL) $(GSL_INCL) $(FFTW_INCL) $(HWLOC_INCL) $(GRACKLEINCL) -I$(BUILD_DIR) 
 
-LIBS = $(GMP_LIB) $(MPICH_LIB) $(HDF5_LIB) $(GSL_LIB) $(FFTW_LIB) $(HWLOC_LIB) $(CELIB_LIB) $(MATH_LIB) $(GRACKLELIBS)
+LIBS = $(GMP_LIB) $(MPICH_LIB) $(HDF5_LIB) $(GSL_LIB) $(FFTW_LIB) $(HWLOC_LIB) $(CELIB_LIB) $(MATH_LIB) $(GRACKLELIBS) $(LDFLAGS)
 
 FOPTIONS = $(OPTIMIZE)
 FFLAGS = $(FOPTIONS)
