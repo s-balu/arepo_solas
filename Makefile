@@ -234,6 +234,10 @@ INCL    += cooling/cooling_vars.h \
 SUBDIRS += cooling
 endif
 
+ifeq (USE_GRACKLE,$(findstring COOLING,$(CONFIGVARS)))
+OBJS    += cooling/grackle.o
+endif
+
 ifeq (FOF,$(findstring FOF,$(CONFIGVARS)))
 OBJS    += fof/fof.o \
            fof/fof_distribute.o \
@@ -318,10 +322,8 @@ endif
 
 ifeq (USE_GRACKLE,$(findstring STARS,$(CONFIGVARS)))
 OPTIONS += -DCONFIG_BFLOAT_8
-GRACKLEINCL = -I$(HOME)/grackle/include
-GRACKLELIBS = -L$(HOME)/grackle/lib -lgrackle
-#GRACKLEINCL =
-#GRACKLELIBS = -lgrackle
+GRACKLEINCL = -I$(HOME)/models/grackle/include
+GRACKLELIBS = -L$(HOME)/models/grackle/lib -lgrackle
 else
 GRACKLEINCL =
 GRACKLELIBS =
@@ -332,7 +334,7 @@ endif
 
 CFLAGS = $(OPTIMIZE) $(MPICH_INCL) $(HDF5_INCL) $(GSL_INCL) $(FFTW_INCL) $(HWLOC_INCL) $(GRACKLEINCL) -I$(BUILD_DIR) 
 
-LIBS = $(GMP_LIB) $(MPICH_LIB) $(HDF5_LIB) $(GSL_LIB) $(FFTW_LIB) $(HWLOC_LIB) $(CELIB_LIB) $(MATH_LIB) -lm $(GRACKLELIBS)
+LIBS = $(GMP_LIB) $(MPICH_LIB) $(HDF5_LIB) $(GSL_LIB) $(FFTW_LIB) $(HWLOC_LIB) $(CELIB_LIB) $(MATH_LIB) $(GRACKLELIBS)
 
 FOPTIONS = $(OPTIMIZE)
 FFLAGS = $(FOPTIONS)
