@@ -1200,6 +1200,9 @@ extern struct global_data_all_processes
   double StarFormationNumberDensityThreshold;  // Neutral atomic hydrogen density in cubic cm
 #endif
 
+#if defined(USE_SFR) && defined(JEANS_SF)
+  double StarFormationEfficiency;   // Corresponds to a percentage - lies between 0 and 1
+#endif
 
 #ifdef MHD_POWELL
   double Powell_Momentum[3];
