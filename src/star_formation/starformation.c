@@ -73,7 +73,9 @@ void sfr_init()
 
   sfr_init_called = 1;
 
+#if !defined(AGORA_SF) && !defined(JEANS_SF)
   init_clouds();
+#endif
 }
 
 /*! \brief This routine creates star particles according to their
