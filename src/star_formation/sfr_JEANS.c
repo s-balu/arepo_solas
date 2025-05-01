@@ -49,6 +49,40 @@
 
 #if defined(USE_SFR) && defined(JEANS_SF) && !defined(AGORA_SF)
 
+/*! \brief Return the Jeans Masss of the cell.
+ *
+ *  \param[in] i the index of the gas cell.
+ *
+ *  \return Jeans mass in code units.
+ */
+double get_jeans_length(int i)
+{
+  double sound_speed, jeans_length;
+
+  sound_speed  = sqrt(GAMMA * SphP[i].Pressure / SphP[i].Density);
+  
+  jeans_length = sqrt(M_PI / All.G / SphP[i].Density) * sound_speed;
+
+  return jeans_length;
+}
+
+/*! \brief Return the Jeans Masss of the cell.
+ *
+ *  \param[in] i the index of the gas cell.
+ *
+ *  \return Jeans mass in code units.
+ */
+double get_jeans_mass(int i)
+{
+  double sound_speed, jeans_mass;
+
+  sound_speed  = sqrt(GAMMA * SphP[i].Pressure / SphP[i].Density);
+  
+  jeans_mass = pow(M_PI, 2.5) * pow(sound_speed, 3.) / 6. / pow(All.G, 1.5) / sqrt(SphP[i].Density);
+
+  return jeans_mass;
+}
+
 /*! \brief Main driver for star formation and gas cooling.
  *
  *  This function loops over all the active gas cells. If a given cell
@@ -68,8 +102,13 @@ void cooling_and_starformation(void)
   double dt, dtime, ne = 1;
   double unew, du;
 
-  double sound_speed, cell_size, jeans_length, t_freefall;
-    
+  double t_freefall;
+#ifdef JEANS_MASS_BASED
+  double jeans_mass, jeans_mass_thresh;
+#else 
+  double cell_size, jeans_length;
+#endif
+
   /* note: assuming FULL ionization */
   double u_to_temp_fac =
       (4 / (8 - 5 * (1 - HYDROGEN_MASSFRAC))) * PROTONMASS / BOLTZMANN * GAMMA_MINUS1 * All.UnitEnergy_in_cgs / All.UnitMass_in_g;
@@ -103,10 +142,6 @@ void cooling_and_starformation(void)
       SphP[i].Energy += All.cf_atime * All.cf_atime * du * P[i].Mass;
       
       cool_cell(i);
-      
-      sound_speed  = sqrt(GAMMA * SphP[i].Pressure / SphP[i].Density);
-      jeans_length = sqrt(M_PI / All.G / SphP[i].Density) * sound_speed;
-      cell_size = 2.0 * get_cell_radius(i);
 
       /* check whether conditions for star formation are fulfilled.
        * f=1  normal cooling
@@ -115,9 +150,19 @@ void cooling_and_starformation(void)
 
       flag = 1; /* default is normal cooling */
 
+#ifdef JEANS_MASS_BASED
+    {
+      jeans_mass = get_jeans_mass(i);
+      if(jeans_mass < All.JeansMassThreshold * P[i].Mass)
+        flag=0;
+    }
+#else 
+      cell_size = 2.0 * get_cell_radius(i);
+      
       /* enable star formation if gas cell is smaller than the Jeans length */
       if(cell_size >= jeans_length)
         flag = 0;
+#endif
 
       if(P[i].Mass == 0) /* tracer particles don't form stars */
         flag = 1;

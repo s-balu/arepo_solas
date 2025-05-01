@@ -67,6 +67,14 @@ void kernel(double u, double hinv3, double hinv4, double *wk, double *dwk);
 void perform_end_of_step_physics(void);
 #endif
 
+#ifdef JEANS_SF
+double get_jeans_length(int i);
+#endif
+
+#ifdef JEANS_MASS_BASED
+double get_jeans_mass(int i);
+#endif
+
 void sfr_init();
 void sfr_create_star_particles(void);
 void ngb_finish_rangebounds_update(int nchanged, int *nodelist);
