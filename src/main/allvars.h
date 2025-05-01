@@ -1202,6 +1202,11 @@ extern struct global_data_all_processes
 
 #if defined(USE_SFR) && defined(JEANS_SF)
   double StarFormationEfficiency;   // Corresponds to a percentage - lies between 0 and 1
+
+#ifdef JEANS_MASS_BASED
+  double JeansMassThreshold;
+#endif
+
 #endif
 
 #ifdef MHD_POWELL
