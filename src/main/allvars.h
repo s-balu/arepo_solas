@@ -51,6 +51,10 @@
 #include "../utils/dtypes.h"
 #include "../utils/tags.h"
 
+#ifdef USE_GRACKLE
+#include <grackle.h>
+#endif // USE_GRACKLE //
+       //
 #define AREPO_VERSION "Arepo public 1.0" /* code version string */
 
 /* default values for unspecified config options */
@@ -1285,6 +1289,12 @@ extern struct global_data_all_processes
 #ifdef STARS
   /* for parameter file */
   double Lambda;
+#endif
+
+#ifdef USE_GRACKLE
+  code_units GrackleUnits;
+  grackle_field_data GrackleFieldData;
+  char GrackleDataFile[100];
 #endif
 
 } All;

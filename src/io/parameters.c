@@ -481,6 +481,12 @@ void read_parameter_file(char *fname)
 #endif
 #endif
 
+#ifdef USE_GRACKLE
+      strcpy(tag[nt], "GrackleDataFile");
+      addr[nt] = All.GrackleDataFile;
+      id[nt++] = STRING;
+#endif
+
 #ifdef MHD_SEEDFIELD
       strcpy(tag[nt], "MHDSeedDir");
       addr[nt] = &All.B_dir;

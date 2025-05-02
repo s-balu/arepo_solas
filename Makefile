@@ -234,7 +234,7 @@ INCL    += cooling/cooling_vars.h \
 SUBDIRS += cooling
 endif
 
-ifeq (USE_GRACKLE,$(findstring COOLING,$(CONFIGVARS)))
+ifeq (USE_GRACKLE,$(findstring USE_GRACKLE,$(CONFIGVARS)))
 OBJS    += cooling/grackle.o
 endif
 

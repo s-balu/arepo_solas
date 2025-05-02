@@ -33,6 +33,10 @@
 #define INLINE_FUNC
 #endif /* #ifndef INLINE_FUNC */
 
+#ifdef USE_GRACKLE
+#include <grackle.h>
+#endif // USE_GRACKLE
+
 void SetOutputGasState(int i, double *ne_guess, double *nH0, double *coolrate);
 
 double convert_u_to_temp(double u, double rho, double *ne_guess);
@@ -47,3 +51,7 @@ void IonizeParamsUVB(void);
 void IonizeParams(void);
 void ReadIonizeParams(char *fname, int which);
 void SetZeroIonization(void);
+
+#ifdef USE_GRACKLE
+void InitGrackle(void);
+#endif // USE_GRACKLE

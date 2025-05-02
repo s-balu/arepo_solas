@@ -787,6 +787,10 @@ void IonizeParams(void) { IonizeParamsUVB(); }
  */
 void InitCool(void)
 {
+  #ifdef USE_GRACKLE
+  InitGrackle();
+  #endif /* ifdef  */
+
   /* set default hydrogen mass fraction */
   gs.XH = HYDROGEN_MASSFRAC;
 
