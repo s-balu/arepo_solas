@@ -474,6 +474,7 @@ void read_parameter_file(char *fname)
       strcpy(tag[nt], "StarFormationEfficiency");  // Value between 0 and 1
       addr[nt] = &All.StarFormationEfficiency;
       id[nt++] = REAL;
+
 #ifdef JEANS_MASS_BASED
       strcpy(tag[nt], "JeansMassThreshold");
       addr[nt] = &All.JeansMassThreshold;

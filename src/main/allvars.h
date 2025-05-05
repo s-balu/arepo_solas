@@ -1209,7 +1209,6 @@ extern struct global_data_all_processes
 #ifdef JEANS_MASS_BASED
   double JeansMassThreshold;
 #endif
-#endif
 
 #ifdef MHD_POWELL
   double Powell_Momentum[3];
