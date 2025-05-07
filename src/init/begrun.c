@@ -223,6 +223,18 @@ void begrun2(void)
   if(RestartFlag > 2)
     open_logfiles();
 
+  #ifdef STARS
+    /* celib init */
+    if(ThisTask == 0)
+      CELibShowVersion();
+  
+    CELibInit();
+    srand((unsigned int)time(NULL));
+  
+    if(ThisTask == 0)
+      CELibShowCurrentStatus();
+  #endif     
+
 #if defined(USE_SFR)
   sfr_init();
 #endif /* #if defined(USE_SFR) */
