@@ -88,9 +88,17 @@ static DoCoolData DoCool;     /*!< cooling data */
  *
  *  \return The new internal energy per unit mass of the gas cell.
  */
-double DoCooling(double u_old, double rho, double dt, double *ne_guess)
+double DoCooling(double u_old, double rho, double dt, double *ne_guess, int i)
 {
   double u, du;
+
+#ifdef USE_GRACKLE
+  double *ne = &SphP[i].Ne;
+  u = CallGrackle(u_old, rho, dt, ne, i, 0);
+  return u;
+#endif /* ifdef USE_GRACKLE */
+
+#ifndef USE_GRACKLE
   double u_lower, u_upper;
   double ratefact;
   double LambdaNet;
@@ -177,6 +185,7 @@ double DoCooling(double u_old, double rho, double dt, double *ne_guess)
   u *= All.UnitDensity_in_cgs / All.UnitPressure_in_cgs; /* to internal units */
 
   return u;
+#endif /* ifndef USE_GRACKLE */
 }
 
 /*! \brief Returns the cooling time.
@@ -861,7 +870,7 @@ void cool_cell(int i)
   dtcool = dtime;
 
   ne         = SphP[i].Ne; /* electron abundance (gives ionization state and mean molecular weight) */
-  unew       = DoCooling(dmax(All.MinEgySpec, SphP[i].Utherm), dens * All.cf_a3inv, dtcool, &ne);
+  unew       = DoCooling(dmax(All.MinEgySpec, SphP[i].Utherm), dens * All.cf_a3inv, dtcool, &ne, i);
   SphP[i].Ne = ne;
 
   if(unew < 0)
