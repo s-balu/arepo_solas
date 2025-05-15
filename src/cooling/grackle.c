@@ -57,11 +57,11 @@ double CallGrackle(double u_old, double rho, double dt, double *ne_guess, int ta
     *All.GrackleFieldData.density                       = rho;
     *All.GrackleFieldData.internal_energy               = u_old;
 
-// #ifdef METALS
-//     *All.GrackleFieldData.metal_density                 = *All.GrackleFieldData.density * P[target].Metallicity[0];
-// #else
-//     *All.GrackleFieldData.metal_density                 = *All.GrackleFieldData.density * 0.02;
-// #endif
+#ifdef METALS //TODO:
+    *All.GrackleFieldData.metal_density                 = *All.GrackleFieldData.density * P[target].Metallicity[0];
+#else
+    *All.GrackleFieldData.metal_density                 = *All.GrackleFieldData.density * 0.02;
+#endif
 
     /* UNDEFINED MEMBERS OF THE STRUCT (USEFUL ONLY FOR UNUSED FLAGS)
      * beware! they should be created with malloc(sizeof(..))
@@ -260,7 +260,7 @@ void InitGrackle(void)
       terminate("GRACKLE: Error in gr_check_consistency.\n");
     }
     
-    int grackle_verbose = 0;
+    int grackle_verbose = 1;
     // Enable output
     if(ThisTask == 0) grackle_verbose = 1;
     
@@ -329,7 +329,7 @@ void InitGrackle(void)
     my_grackle_data->photoelectric_heating             = 0;  /* read above but DO NOT USE */
     my_grackle_data->photoelectric_heating_rate        = 8.5e-26;
 #else
-    my_grackle_data->metal_cooling                     = 0;
+    my_grackle_data->metal_cooling                     = 1;
     my_grackle_data->h2_on_dust                        = 0;
     my_grackle_data->photoelectric_heating             = 0;
     my_grackle_data->photoelectric_heating_rate        = 8.5e-26;
@@ -344,7 +344,7 @@ void InitGrackle(void)
      * This is implemented by subtracting the value of the cooling rate at TCMB from the total METAL cooling rate. Default: 1.
      * Beware! You could still have Tgas<TCBM because it imposes a temperature floor only for the metal cooling.
      */
-    my_grackle_data->cmb_temperature_floor             = 0;
+    my_grackle_data->cmb_temperature_floor             = 1;
 
     /* Flag to enable a UV background.
      * If enabled, the cooling table to be used must be specified with the grackle_data_file parameter. Default: 0.
@@ -426,7 +426,7 @@ void InitGrackle(void)
     }
     
     if(ThisTask == 0)
-        printf("Grackle Initialized\n");
+        printf("GRACKLE: Grackle Initialized\n");
 }
 
 #endif  /* closes the initial ifdef COOL_GRACKLE */
