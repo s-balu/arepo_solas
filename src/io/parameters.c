@@ -480,9 +480,13 @@ void read_parameter_file(char *fname)
       addr[nt] = &All.JeansMassThreshold;
       id[nt++] = REAL;
 #endif
-
 #endif
 
+#ifdef USE_GRACKLE
+      strcpy(tag[nt], "GrackleDataFile");
+      addr[nt] = All.GrackleDataFile;
+      id[nt++] = STRING;
+#endif
 
 #ifdef MHD_SEEDFIELD
       strcpy(tag[nt], "MHDSeedDir");

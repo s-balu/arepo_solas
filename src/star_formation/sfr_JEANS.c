@@ -223,8 +223,6 @@ double get_starformation_rate(int i)
 
   double rateOfSF;
   int flag;
-  double tsfr;
-  double factorEVP, egyeff, ne, x, cloudmass;
   
   double t_freefall;
 #ifdef JEANS_MASS_BASED

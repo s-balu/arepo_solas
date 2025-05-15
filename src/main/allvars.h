@@ -51,6 +51,10 @@
 #include "../utils/dtypes.h"
 #include "../utils/tags.h"
 
+#ifdef USE_GRACKLE
+#include <grackle.h>
+#endif // USE_GRACKLE //
+       //
 #define AREPO_VERSION "Arepo public 1.0" /* code version string */
 
 /* default values for unspecified config options */
@@ -1202,11 +1206,9 @@ extern struct global_data_all_processes
 
 #if defined(USE_SFR) && defined(JEANS_SF)
   double StarFormationEfficiency;   // Corresponds to a percentage - lies between 0 and 1
-
 #ifdef JEANS_MASS_BASED
   double JeansMassThreshold;
 #endif
-
 #endif
 
 #ifdef MHD_POWELL
@@ -1287,6 +1289,12 @@ extern struct global_data_all_processes
 #ifdef STARS
   /* for parameter file */
   double Lambda;
+#endif
+
+#ifdef USE_GRACKLE
+  code_units GrackleUnits;
+  grackle_field_data GrackleFieldData;
+  char GrackleDataFile[100];
 #endif
 
 } All;
