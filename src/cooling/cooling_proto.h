@@ -33,12 +33,16 @@
 #define INLINE_FUNC
 #endif /* #ifndef INLINE_FUNC */
 
+#ifdef USE_GRACKLE
+#include <grackle.h>
+#endif // USE_GRACKLE
+
 void SetOutputGasState(int i, double *ne_guess, double *nH0, double *coolrate);
 
 double convert_u_to_temp(double u, double rho, double *ne_guess);
 double CoolingRate(double logT, double rho, double *nelec);
 double CoolingRateFromU(double u, double rho, double *ne_guess);
-double DoCooling(double u_old, double rho, double dt, double *ne_guess);
+double DoCooling(double u_old, double rho, double dt, double *ne_guess, int i);
 double GetCoolingTime(double u_old, double rho, double *ne_guess);
 
 void find_abundances_and_rates(double logT, double rho, double *ne_guess);
@@ -47,3 +51,8 @@ void IonizeParamsUVB(void);
 void IonizeParams(void);
 void ReadIonizeParams(char *fname, int which);
 void SetZeroIonization(void);
+
+#ifdef USE_GRACKLE
+void InitGrackle(void);
+double CallGrackle(double u_old, double rho, double dt, double *ne_guess, int cell, int mode);
+#endif // USE_GRACKLE
