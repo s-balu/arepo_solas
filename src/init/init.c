@@ -291,7 +291,7 @@ int init(void)
         #endif //* #ifdef OUTPUT_REFBHCOUNTER */
         }
 #endif /* #ifdef REFINEMENT_AROUND_BH*/
-    }
+  }
 
   for(i = 0; i < TIMEBINS; i++)
     TimeBinSynchronized[i] = 1;
@@ -585,7 +585,7 @@ int init(void)
   exch = malloc(6 * sizeof(double));
 #endif 
 
-#ifdef STARS /*need to fix*/
+#ifdef STARS /*need to fix*/ /*TODO: ?? */
   #ifdef STAR_CLUSTER
   for(i=0; i<NumStars; i++)
     {
@@ -600,6 +600,15 @@ int init(void)
     }
   #endif //* #ifdef STAR_CLUSTER */
 #endif /* #ifdef STARS*/
+
+#ifdef METALS
+if (RestartFlag == 0){
+  for(i=0; i<NumGas; i++){
+    SphP[i].Metallicity = All.InitMetallicityinSolar * SOLAR_ABUNDANCE;
+    }
+  }
+#endif /* ifdef METALS */
+
   return -1;  // return -1 means we ran to completion, i.e. not an endrun code
 }
 

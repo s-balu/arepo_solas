@@ -436,7 +436,7 @@ void read_ic(const char *fname, int readTypes)
           All.MassTable[4] = 0;
         }
     }
-#endif
+#endif /* USE_SFR */
 
   u_init = (1.0 / GAMMA_MINUS1) * (BOLTZMANN / PROTONMASS) * All.InitGasTemp;
   u_init *= All.UnitMass_in_g / All.UnitEnergy_in_cgs; /* unit conversion */
@@ -496,7 +496,7 @@ void read_ic(const char *fname, int readTypes)
           jb++;
         }
     }
-#endif
+#endif /* BLACKHOLES */
 
 #ifdef STARS
   int js=0;
@@ -509,7 +509,7 @@ void read_ic(const char *fname, int readTypes)
           js++;
         }
     }
-#endif
+#endif /* STARS */
 
   MPI_Barrier(MPI_COMM_WORLD);
 

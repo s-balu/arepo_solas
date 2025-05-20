@@ -56,6 +56,10 @@ extern struct scalar_index
 #ifdef REFINEMENT_HIGH_RES_GAS
   int HighResMass;
 #endif /* #ifdef REFINEMENT_HIGH_RES_GAS */
+
+#ifdef METALS
+  int MetallicityMass;
+#endif // METALS
 } ScalarIndex;
 
 extern int N_Scalar; /*!< number of registered scalars */
