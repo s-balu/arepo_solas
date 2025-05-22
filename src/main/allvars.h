@@ -328,16 +328,10 @@ extern hwloc_cpuset_t cpuset_thread[NUM_THREADS];
 #endif /* #ifdef TOLERATE_WRITE_ERROR */
 
 #ifdef METALS
-  #define METALLICITY_INDEX 0 /* Where metals sit in the scalars array */
-  #ifndef PASSIVE_SCALARS
-    #define PASSIVE_SCALARS 1 /* METALS need PASSIVE_SCALARS */
-  #else
-    /* Save the current value before redefining; 
-     * Some comppiler complain about redefining */
-    #define _OLD_PASSIVE_SCALARS PASSIVE_SCALARS
-    #undef PASSIVE_SCALARS
-    #define PASSIVE_SCALARS (_OLD_PASSIVE_SCALARS + 1)
-  #endif
+#define METALLICITY_INDEX 0 /* Where metals sit in the scalars array */
+#ifndef PASSIVE_SCALARS
+#error "METALS need PASSIVE_SCALARS!"
+#endif /* ifndef PASSIVE_SCALARS*/
 #endif /* METALS */
 
 /* calculate appropriate value of MAXSCALARS */
