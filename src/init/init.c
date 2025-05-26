@@ -76,9 +76,12 @@ int init(void)
           mpi_printf("INIT: Skipping Omega check since we are not doing a dynamical evolution (not all particles may be loaded)\n");
       }
 
-#if defined(COOLING)
-  IonizeParams();
-#endif /* #if defined(COOLING) */
+/* IonizeParams initalises the Treecool file and such, 
+* which we don't need when using grackle
+*/
+#if defined(COOLING) // TODO: && !defined(USE_GRACKLE)
+    IonizeParams();
+#endif /* defined(COOLING) && !defined(USE_GRACKLE) */
 
   if(All.ComovingIntegrationOn)
     {
@@ -291,7 +294,7 @@ int init(void)
         #endif //* #ifdef OUTPUT_REFBHCOUNTER */
         }
 #endif /* #ifdef REFINEMENT_AROUND_BH*/
-    }
+  }
 
   for(i = 0; i < TIMEBINS; i++)
     TimeBinSynchronized[i] = 1;
@@ -523,6 +526,16 @@ int init(void)
       mass += P[i].Mass;
     }
 
+/* NOTE: The metals have to be initialised before the PASSIVE_SCALARS.
+ * The value in the PScalars are set to zero during reading ICs. If PConservedScalars are set to zero,
+ * this the same as no advection!
+ * */
+#ifdef METALS
+  for(i=0; i<NumGas; i++){
+    SphP[i].Metals = All.InitMetallicityinSolar * SOLAR_ABUNDANCE;
+}
+#endif /* ifdef METALS */
+
 #ifdef PASSIVE_SCALARS
   for(i = 0; i < NumGas; i++)
     {
@@ -585,7 +598,7 @@ int init(void)
   exch = malloc(6 * sizeof(double));
 #endif 
 
-#ifdef STARS /*need to fix*/
+#ifdef STARS /*need to fix*/ /*TODO: ?? */
   #ifdef STAR_CLUSTER
   for(i=0; i<NumStars; i++)
     {
@@ -600,6 +613,8 @@ int init(void)
     }
   #endif //* #ifdef STAR_CLUSTER */
 #endif /* #ifdef STARS*/
+
+
   return -1;  // return -1 means we ran to completion, i.e. not an endrun code
 }
 

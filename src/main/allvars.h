@@ -327,6 +327,13 @@ extern hwloc_cpuset_t cpuset_thread[NUM_THREADS];
 #define IO_SLEEP_TIME 10
 #endif /* #ifdef TOLERATE_WRITE_ERROR */
 
+#ifdef METALS
+#define METALLICITY_INDEX 0 /* Where metals sit in the scalars array */
+#ifndef PASSIVE_SCALARS
+#error "METALS need PASSIVE_SCALARS!"
+#endif /* ifndef PASSIVE_SCALARS*/
+#endif /* METALS */
+
 /* calculate appropriate value of MAXSCALARS */
 
 #if defined(REFINEMENT_HIGH_RES_GAS) || defined(PASSIVE_SCALARS)
@@ -449,6 +456,14 @@ typedef unsigned long long peano1D;
 #define SEC_PER_GIGAYEAR 3.15576e16
 #define SEC_PER_MEGAYEAR 3.15576e13
 #define SEC_PER_YEAR 3.15576e7
+
+#if defined(METALS) || defined(USE_GRACKLE)
+/*! All metals (by mass). 
+* present photospheric abundances from Asplund et al. 2009 (Z=0.0134, proto-solar=0.0142)
+* Anders+Grevesse 1989 (Z=0.0201, proto-solar=0.0213)
+*/
+#define SOLAR_ABUNDANCE 0.0134
+#endif // defined(METALS) || defined(USE_GRACKLE)
 
 #ifndef FOF_PRIMARY_LINK_TYPES
 #define FOF_PRIMARY_LINK_TYPES 2
@@ -1297,6 +1312,10 @@ extern struct global_data_all_processes
   char GrackleDataFile[100];
 #endif
 
+#ifdef METALS
+double InitMetallicityinSolar;
+#endif // METALS
+       
 } All;
 
 /*****************************************************************************
@@ -1540,6 +1559,13 @@ extern struct sph_particle_data
   MyDouble MomentumKickVector[3];
 #endif
 
+/* NOTE: This is like an alias so that I can access this field without
+ * calling it PScalars
+ * */
+#ifdef METALS
+#define Metals PScalars[METALLICITY_INDEX]
+#endif /* METALS */
+       
 } * SphP,          /*!< holds SPH particle data on local processor */
     *DomainSphBuf; /*!< buffer for SPH particle data in domain decomposition */
 

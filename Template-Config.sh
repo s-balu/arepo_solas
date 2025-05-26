@@ -31,9 +31,9 @@
 #JEANS_MASS_BASED #Jeans mass based SF
 
 #USE_GRACKLE
-#GRACKLE_CHEMISTRY=0 #Curretly only grackle mode=0 (lookup tables) with no chemistry network is supported
+#GRACKLE_CHEMISTRY=0 # Curretly only grackle mode=0 (lookup tables) with no chemistry network is supported
 
-#METALS #TODO: Currently gas cells have constant metallicity
+#METALS # Advect all metals, ie metal mass fraction, as a PASSIVE_SCALARS.
 
 #--------------------------------------- Basic operation mode of code; default: 3d with 6 particle types; type 0: gas >0: only gravitationally interacting
 #NTYPES=6                      # number of particle types

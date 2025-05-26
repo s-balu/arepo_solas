@@ -479,13 +479,19 @@ void read_parameter_file(char *fname)
       strcpy(tag[nt], "JeansMassThreshold");
       addr[nt] = &All.JeansMassThreshold;
       id[nt++] = REAL;
-#endif
-#endif
+#endif // JEANS_MASS_BASED
+#endif // defined(USE_SFR) && defined(JEANS_SF)
 
 #ifdef USE_GRACKLE
       strcpy(tag[nt], "GrackleDataFile");
-      addr[nt] = All.GrackleDataFile;
+      addr[nt] = &All.GrackleDataFile;
       id[nt++] = STRING;
+#endif
+
+#ifdef METALS
+      strcpy(tag[nt], "InitMetallicityinSolar");
+      addr[nt] = &All.InitMetallicityinSolar;
+      id[nt++] = REAL;
 #endif
 
 #ifdef MHD_SEEDFIELD

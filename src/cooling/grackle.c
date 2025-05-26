@@ -58,9 +58,9 @@ double CallGrackle(double u_old, double rho, double dt, double *ne_guess, int ta
     *All.GrackleFieldData.internal_energy               = u_old;
 
 #ifdef METALS //TODO:
-    *All.GrackleFieldData.metal_density                 = *All.GrackleFieldData.density * P[target].Metallicity[0];
+    *All.GrackleFieldData.metal_density                 = *All.GrackleFieldData.density * SphP[target].Metals;
 #else
-    *All.GrackleFieldData.metal_density                 = *All.GrackleFieldData.density * 0.02;
+    *All.GrackleFieldData.metal_density                 = *All.GrackleFieldData.density * SOLAR_ABUNDANCE;
 #endif
 
     /* UNDEFINED MEMBERS OF THE STRUCT (USEFUL ONLY FOR UNUSED FLAGS)
@@ -314,7 +314,7 @@ void InitGrackle(void)
      *    These are discussed in Turk et. al. (2011). Default: 0.
      */
     my_grackle_data->three_body_rate        = 0;
-    
+   
 #ifdef METALS // TODO: 
     /* Flag to enable metal cooling using the Cloudy tables. If enabled, the cooling table to be used must be specified with the grackle_data_file parameter. Default: 0. */
     my_grackle_data->metal_cooling                     = 1;
@@ -429,4 +429,4 @@ void InitGrackle(void)
         printf("GRACKLE: Grackle Initialized\n");
 }
 
-#endif  /* closes the initial ifdef COOL_GRACKLE */
+#endif  /* USE_GRACKLE */

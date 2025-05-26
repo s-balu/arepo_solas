@@ -66,6 +66,10 @@ void init_scalars()
 #ifdef PASSIVE_SCALARS
   for(int i = 0; i < PASSIVE_SCALARS; i++)
     {
+#ifdef METALS
+      if(i == METALLICITY_INDEX)
+        mpi_printf("Initializing passive scalar: Total Metallicity\n");
+#endif /* METALS */
       scalar_init(&SphP[0].PScalars[i], &SphP[0].PConservedScalars[i], SCALAR_TYPE_PASSIVE);
     }
 #endif /* #ifdef PASSIVE_SCALARS */
