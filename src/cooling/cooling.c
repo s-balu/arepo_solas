@@ -241,7 +241,6 @@ double GetCoolingTime(double u_old, double rho, double *ne_guess, int i)
   coolingtime = u_old / (-ratefact * LambdaNet);
 
   coolingtime *= All.HubbleParam / All.UnitTime_in_s;
-}
 #endif /* ifndef USE_GRACKLE */
   return coolingtime;
 }
