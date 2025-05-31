@@ -96,16 +96,13 @@ double DoCooling(double u_old, double rho, double dt, double *ne_guess, int i)
 #ifdef USE_GRACKLE
   
   /* NOTE: This protects against the call at the very first time-step of the run. dt = 0 and grackle will complain */
-  if (dt == 0.){
+  if (dt == 0.)
     return u_old;
-  }
-  else {
-  // double *ne = &SphP[i].Ne;
+  
   u = CallGrackle(u_old, rho, dt, ne_guess, i, 0);
   return u;
-  }
 
-#else /* ifndef USE_GRACKLE */
+#endif /* ifdef USE_GRACKLE */
 
   double u_lower, u_upper;
   double ratefact;
@@ -193,7 +190,6 @@ double DoCooling(double u_old, double rho, double dt, double *ne_guess, int i)
   u *= All.UnitDensity_in_cgs / All.UnitPressure_in_cgs; /* to internal units */
 
   return u;
-#endif /* ifndef USE_GRACKLE */
 }
 
 /*! \brief Returns the cooling time.
@@ -214,10 +210,16 @@ double GetCoolingTime(double u_old, double rho, double *ne_guess, int i)
   double LambdaNet, coolingtime;
   
 #ifdef USE_GRACKLE
-    LambdaNet = CallGrackle(u_old, rho, 0.0, ne_guess, i, 1);
-    if(LambdaNet >= 0) LambdaNet = 0.0;
-    coolingtime =  LambdaNet / All.UnitTime_in_s;
-#else  /* ifndef USE_GRACKLE */
+
+  LambdaNet = CallGrackle(u_old, rho, 0.0, ne_guess, i, 1);
+  if(LambdaNet >= 0) 
+      LambdaNet = 0.0;
+    
+  coolingtime =  LambdaNet / All.UnitTime_in_s;
+  return coolingtime;
+
+#endif /* ifdef USE_GRACKLE */
+
   double u;
   double ratefact;
 
@@ -241,7 +243,6 @@ double GetCoolingTime(double u_old, double rho, double *ne_guess, int i)
   coolingtime = u_old / (-ratefact * LambdaNet);
 
   coolingtime *= All.HubbleParam / All.UnitTime_in_s;
-#endif /* ifndef USE_GRACKLE */
   return coolingtime;
 }
 
